@@ -1,0 +1,210 @@
+﻿@model List<DoAn_CauLong.Models.SanPham>
+
+@{
+    // Title sẽ là tên loại sản phẩm (ví dụ: Vợt Cầu Lông)
+    ViewBag.Title = ViewBag.TenLoai ?? "Tất Cả Sản Phẩm";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    .product-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        transition: box-shadow 0.3s, transform 0.3s;
+        cursor: pointer; /* Cho biết thẻ có thể click */
+        padding: 10px;
+        position: relative;
+    }
+
+        .product-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+    .card-img-top {
+        width: 100%;
+        max-height: 200px; /* Giới hạn chiều cao hình ảnh */
+        object-fit: contain; /* Đảm bảo hình ảnh không bị méo */
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .card-title a {
+        font-size: 1em;
+        font-weight: 600;
+        color: #333;
+        text-decoration: none;
+        display: block;
+        min-height: 40px; /* Đảm bảo tên sản phẩm không bị xô lệch */
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2; /* Giới hạn 2 dòng tên */
+        -webkit-box-orient: vertical;
+    }
+
+    .price-block {
+        margin-top: auto; /* Đẩy giá xuống cuối card-body */
+        padding-top: 10px;
+        border-top: 1px solid #eee;
+    }
+
+    .original-price {
+        font-size: 0.9em;
+        color: #888;
+        margin-right: 8px;
+        display: block;
+        text-decoration: line-through;
+    }
+
+    .current-price {
+        font-size: 1.25em;
+        color: #D32F2F; /* Màu đỏ nổi bật */
+        font-weight: 700;
+    }
+
+    .promo-badge-small {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: #d32f2f;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 10px;
+<<<<<<< HEAD
+        font-weight:700;
+        font-size:12px;
+=======
+        font-weight: 700;
+        font-size: 12px;
+>>>>>>> f56eb37b1e04d8f15733b4cd2df7b91befa0cd54
+    }
+</style>
+
+<div class="container">
+    <h2 class="mt-4 mb-4 text-center text-primary">Danh Sách Sản Phẩm: @ViewBag.TenLoai</h2>
+    <hr class="mb-5" />
+
+    @if (Model != null && Model.Any())
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                // =========================================================
+                // LOGIC TÍNH GIÁ KHUYẾN MÃI (Đã Fix)
+                // =========================================================
+                decimal giaGoc = item.GiaGoc ?? 0m;
+                decimal giaBanHienTai = giaGoc;
+                bool coKhuyenMai = false;
+                string badgeText = "";
+                string noteGiamGia = "";
+
+                if (item.KhuyenMai != null)
+                {
+                    var km = item.KhuyenMai;
+                    DateTime now = DateTime.Now;
+                    DateTime? start = km.NgayBatDau;
+                    DateTime? end = km.NgayKetThuc;
+
+                    // Fix lỗi 00:00:00 ngày kết thúc
+                    if (end.HasValue && end.Value.TimeOfDay == TimeSpan.Zero) { end = end.Value.Date.AddDays(1).AddTicks(-1); }
+
+                    // 1. Kiểm tra hạn sử dụng
+                    if ((start == null || start <= now) && (end == null || end >= now))
+                    {
+                        coKhuyenMai = true;
+                        decimal phanTram = km.PhanTramGiam ?? 0;
+                        decimal tienGiam = giaGoc * (phanTram / 100);
+                        decimal? giamToiDa = km.GiamToiDa;
+
+                        // 2. Kiểm tra giảm tối đa
+                        if (giamToiDa.HasValue && giamToiDa > 0 && tienGiam > giamToiDa.Value)
+                        {
+                            tienGiam = giamToiDa.Value;
+                            badgeText = "-" + tienGiam.ToString("N0") + "đ";
+                            noteGiamGia = "(Tối đa " + giamToiDa.Value.ToString("N0") + "đ)";
+                        }
+                        else
+                        {
+                            badgeText = "-" + phanTram + "%";
+                        }
+
+                        giaBanHienTai = giaGoc - tienGiam;
+                    }
+                }
+                // =========================================================
+
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card h-100 product-card" data-url="@Url.Action("ChiTietSanPham", "Home", new { id = item.MaSanPham })">
+
+                        @if (coKhuyenMai)
+                        {
+                            <div class="promo-badge-small">@badgeText</div>
+                        }
+
+                        <a href="@Url.Action("ChiTietSanPham", "Home", new { id = item.MaSanPham })">
+                            <img class="card-img-top"
+                                 src="@Url.Content($"~/Content/images/{(string.IsNullOrEmpty(item.HinhAnhDaiDien) ? "default-product.jpg" : item.HinhAnhDaiDien)}")"
+                                 alt="@item.TenSanPham"
+                                 onerror="this.src='@Url.Content("~/Content/images/default-product.jpg")'" />
+                        </a>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">
+                                <a href="@Url.Action("ChiTietSanPham", "Home", new { id = item.MaSanPham })">
+                                    @item.TenSanPham
+                                </a>
+                            </h5>
+
+                            <div class="price-block mt-auto">
+                                @if (coKhuyenMai)
+                                {
+                                    <span class="current-price">@giaBanHienTai.ToString("N0") đ</span>
+                                    <span class="original-price">@giaGoc.ToString("N0") đ</span>
+                                    if (!string.IsNullOrEmpty(noteGiamGia))
+                                    {
+                                        <span class="note-discount">@noteGiamGia</span>
+                                    }
+                                }
+                                else
+                                {
+                                    <span class="current-price">@giaGoc.ToString("N0") đ</span>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            <i class="fa fa-info-circle"></i> Hiện tại không có sản phẩm nào thuộc loại **@ViewBag.TenLoai** này.
+        </div>
+    }
+</div>
+
+@section scripts {
+    <script>
+        // SCRIPT ĐỂ TOÀN BỘ CARD CÓ THỂ CLICK ĐƯỢC
+        $(document).ready(function () {
+            // Lắng nghe sự kiện click trên tất cả các card sản phẩm
+            $('.product-card').on('click', function () {
+                // Lấy URL từ thuộc tính data-url
+                var detailUrl = $(this).data('url');
+
+                if (detailUrl) {
+                    // Chuyển hướng trình duyệt đến URL đó
+                    window.location.href = detailUrl;
+                }
+            });
+
+            // Ngăn chặn sự kiện click lan truyền khi click vào link chi tiết bên trong card
+            // Đảm bảo chỉ khi click vào thẻ chính mới chuyển hướng
+            $('.product-card a').on('click', function (e) {
+                e.stopPropagation();
+            });
+        });
+    </script>
+}
