@@ -3,10 +3,10 @@
 @section('title', 'Dashboard Thống Kê Doanh Thu - Admin Shop')
 
 @section('content')
-<div class="card card-custom p-4">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="dashboard">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-4">
         <div>
-            <h2 class="h4 mb-1 fw-bold"><i class="fa-solid fa-chart-pie text-primary"></i> Dashboard Thống Kê & Báo Cáo</h2>
+            <h2 class="h4 mb-1 fw-bold d-flex align-items-center gap-2"><i class="fa-solid fa-chart-pie text-primary"></i> Dashboard Thống Kê & Báo Cáo</h2>
             <p class="text-muted mb-0">Thống kê doanh thu theo năm {{ $namHienTai }}, quý, tháng và top sản phẩm bán chạy</p>
         </div>
         <div>
@@ -23,28 +23,41 @@
 
     <!-- Summary cards -->
     <div class="row g-3 mb-4">
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 bg-primary text-white p-3 rounded-3 shadow-sm">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-white-50 small text-uppercase fw-bold">Doanh Thu Năm {{ $namHienTai }}</div>
-                        <div class="fs-4 fw-bold mt-1">{{ number_format($tongDoanhThuNam, 0, ',', '.') }} đ</div>
-                    </div>
-                    <i class="fa-solid fa-sack-dollar fs-1 text-white-50"></i>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card is-green">
+                <div class="stat-icon"><i class="fa-solid fa-sack-dollar"></i></div>
+                <div>
+                    <div class="stat-label">Doanh thu {{ $namHienTai }}</div>
+                    <div class="stat-value">{{ number_format($tongDoanhThuNam, 0, ',', '.') }} đ</div>
                 </div>
             </div>
         </div>
-
-        <div class="col-md-6 col-lg-3">
-            <div class="card border-0 bg-success text-white p-3 rounded-3 shadow-sm">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="text-white-50 small text-uppercase fw-bold">Tổng Đơn Hàng</div>
-                        <div class="fs-4 fw-bold mt-1">{{ $soLuongDonNam }} đơn</div>
-                    </div>
-                    <i class="fa-solid fa-cart-shopping fs-1 text-white-50"></i>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card is-blue">
+                <div class="stat-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                <div>
+                    <div class="stat-label">Đơn hàng</div>
+                    <div class="stat-value">{{ $soLuongDonNam }} đơn</div>
                 </div>
             </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-card is-amber">
+                <div class="stat-icon"><i class="fa-solid fa-box-archive"></i></div>
+                <div>
+                    <div class="stat-label">Sản phẩm</div>
+                    <div class="stat-value">{{ $tongSanPham }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-xl-3">
+            <a href="{{ route('quanlythongbao.thongbao') }}" class="stat-card is-red text-decoration-none text-reset">
+                <div class="stat-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <div class="stat-label">Cảnh báo đánh giá</div>
+                    <div class="stat-value">{{ $soCanhBao }}</div>
+                </div>
+            </a>
         </div>
     </div>
 
@@ -52,7 +65,7 @@
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
             <div class="card border shadow-sm p-3">
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-column text-primary"></i> Doanh thu 12 tháng (Năm {{ $namHienTai }})</h5>
+                <h5 class="mb-3"><i class="fa-solid fa-chart-column text-primary"></i> Doanh thu 12 tháng (Năm {{ $namHienTai }})</h5>
                 <canvas id="doanhThuThangChart" height="150"></canvas>
             </div>
         </div>
@@ -60,38 +73,38 @@
         <div class="col-lg-4">
             <div class="card border shadow-sm p-3">
                 <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie text-success"></i> Doanh thu 4 Quý (Năm {{ $namHienTai }})</h5>
-                <canvas id="doanhThuQuyChart" height="150"></canvas>
+                <div style="max-width: 260px; margin: 0 auto;"><canvas id="doanhThuQuyChart"></canvas></div>
             </div>
         </div>
     </div>
 
     <!-- Tables row -->
     <div class="row g-4">
-        <div class="col-lg-7">
+        <div class="col-xl-7">
             <div class="card border shadow-sm p-3">
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-fire text-danger"></i> Top 10 Sản phẩm bán chạy</h5>
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-fire text-price"></i> Top 10 Sản phẩm bán chạy</h5>
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
-                                <th>#</th>
+                                <th style="width:50px;">#</th>
                                 <th>Sản phẩm</th>
-                                <th class="text-center">Số lượng bán</th>
-                                <th class="text-end">Doanh thu mang lại</th>
+                                <th class="text-center">Đã bán</th>
+                                <th class="text-end">Doanh thu</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($sanPhamBanChay as $idx => $sp)
                                 <tr>
-                                    <td>{{ $idx + 1 }}</td>
+                                    <td><span class="rank-badge {{ $idx < 3 ? 'top' : '' }}">{{ $idx + 1 }}</span></td>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            <img src="{{ asset('images/' . ($sp->HinhAnhDaiDien ?: 'default-product.jpg')) }}" width="40" height="40" class="rounded border" style="object-fit: contain;" />
+                                            <img src="{{ asset('images/' . ($sp->HinhAnhDaiDien ?: 'default-product.jpg')) }}" width="40" height="40" class="rounded border bg-white p-1" style="object-fit: contain;" />
                                             <strong>{{ $sp->TenSanPham }}</strong>
                                         </div>
                                     </td>
                                     <td class="text-center fw-bold text-success">{{ $sp->TongSoLuongBan }}</td>
-                                    <td class="text-end fw-bold text-danger">{{ number_format($sp->TongDoanhThu, 0, ',', '.') }} đ</td>
+                                    <td class="text-end fw-bold text-price text-nowrap">{{ number_format($sp->TongDoanhThu, 0, ',', '.') }} đ</td>
                                 </tr>
                             @empty
                                 <tr>
@@ -104,11 +117,11 @@
             </div>
         </div>
 
-        <div class="col-lg-5">
+        <div class="col-xl-5">
             <div class="card border shadow-sm p-3">
-                <h5 class="fw-bold mb-3"><i class="fa-solid fa-calendar-days text-info"></i> Chi tiết theo quý</h5>
+                <h5 class="fw-bold mb-3"><i class="fa-solid fa-calendar-days text-primary"></i> Chi tiết theo quý</h5>
                 <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
+                    <table class="table table-hover align-middle">
                         <thead class="table-light">
                             <tr>
                                 <th>Quý</th>
@@ -136,6 +149,9 @@
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
+    Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+    Chart.defaults.color = '#66756e';
+
     // 1. Chart Doanh thu Tháng
     const ctxThang = document.getElementById('doanhThuThangChart').getContext('2d');
     const thangLabels = @json(collect($doanhThuThang)->pluck('Thang')->map(fn($m) => 'Tháng ' . $m));
@@ -148,17 +164,21 @@
             datasets: [{
                 label: 'Doanh thu (VNĐ)',
                 data: thangData,
-                backgroundColor: 'rgba(54, 162, 235, 0.7)',
-                borderColor: 'rgba(54, 162, 235, 1)',
-                borderWidth: 1,
-                borderRadius: 4
+                backgroundColor: '#148f5f',
+                hoverBackgroundColor: '#0f7550',
+                borderWidth: 0,
+                borderRadius: 6,
+                maxBarThickness: 36
             }]
         },
         options: {
             responsive: true,
             scales: {
+                x: { grid: { display: false } },
                 y: {
                     beginAtZero: true,
+                    grid: { color: '#eef2f0' },
+                    border: { display: false },
                     ticks: {
                         callback: function(value) {
                             return new Intl.NumberFormat('vi-VN').format(value) + ' đ';
@@ -183,19 +203,16 @@
             labels: quyLabels,
             datasets: [{
                 data: quyData,
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.8)',
-                    'rgba(54, 162, 235, 0.8)',
-                    'rgba(255, 206, 86, 0.8)',
-                    'rgba(75, 192, 192, 0.8)'
-                ],
-                borderWidth: 1
+                backgroundColor: ['#0b3b2b', '#148f5f', '#6cc7a1', '#c7e8d9'],
+                borderColor: '#ffffff',
+                borderWidth: 3
             }]
         },
         options: {
             responsive: true,
+            cutout: '62%',
             plugins: {
-                legend: { position: 'bottom' }
+                legend: { position: 'bottom', labels: { usePointStyle: true, boxWidth: 8 } }
             }
         }
     });

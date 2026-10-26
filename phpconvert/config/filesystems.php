@@ -30,6 +30,15 @@ return [
 
     'disks' => [
 
+        // Ảnh sản phẩm do Admin upload: lưu tại public/images/uploads (truy cập qua asset('images/...'))
+        'images' => [
+            'driver' => 'local',
+            'root' => public_path('images'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/images',
+            'visibility' => 'public',
+            'throw' => false,
+        ],
+
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),

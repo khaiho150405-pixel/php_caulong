@@ -7,15 +7,9 @@
     <h2>Đơn hàng của tôi</h2>
     <hr />
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     @if ($orders->isEmpty())
-        <div class="alert alert-info">Bạn chưa có đơn hàng nào. <a href="{{ route('home') }}" class="alert-link">Mua sắm ngay</a>.</div>
+        @include('partials._empty', ['message' => 'Bạn chưa có đơn hàng nào.', 'linkUrl' => route('home'), 'linkText' => 'Mua sắm ngay', 'compact' => false])
     @else
         <table class="table table-hover table-bordered">
             <thead>
@@ -34,14 +28,14 @@
                         <td style="font-weight: bold;">#{{ $order->MaDonHang }}</td>
                         <td>{{ $order->NgayDat ? \Carbon\Carbon::parse($order->NgayDat)->format('d/m/Y H:i') : '' }}</td>
                         <td>{{ $order->DiaChiGiaoHang }}</td>
-                        <td style="font-weight: bold; color: #e65100;">{{ number_format($order->TongTien, 0, ',', '.') }}đ</td>
+                        <td style="font-weight: bold; color: var(--price);">{{ number_format($order->TongTien, 0, ',', '.') }}đ</td>
                         <td>
                             @if ($order->TrangThai == 'Chờ xác nhận' || $order->TrangThai == 'Chờ thanh toán MoMo')
-                                <span class="badge" style="background-color: #f0ad4e; font-size: 13px;">{{ $order->TrangThai }}</span>
+                                <span class="badge" style="background-color: var(--warn); font-size: 13px;">{{ $order->TrangThai }}</span>
                             @elseif ($order->TrangThai == 'Đã xử lý' || $order->TrangThai == 'Đã giao hàng' || $order->TrangThai == 'Đã hoàn thành' || str_contains($order->TrangThai, 'thành công') || str_contains($order->TrangThai, 'MoMo'))
-                                <span class="badge" style="background-color: #5cb85c; font-size: 13px;">{{ $order->TrangThai }}</span>
+                                <span class="badge" style="background-color: var(--brand); font-size: 13px;">{{ $order->TrangThai }}</span>
                             @elseif (str_contains($order->TrangThai, 'hủy') || str_contains($order->TrangThai, 'Hủy'))
-                                <span class="badge" style="background-color: #d9534f; font-size: 13px;">{{ $order->TrangThai }}</span>
+                                <span class="badge" style="background-color: var(--danger); font-size: 13px;">{{ $order->TrangThai }}</span>
                             @else
                                 <span class="badge" style="background-color: #777; font-size: 13px;">{{ $order->TrangThai }}</span>
                             @endif

@@ -1,82 +1,150 @@
-# DỰ ÁN SHOP BÁN CẦU LÔNG ONLINE (PHP LARAVEL 11)
-> Dự án được chuyển đổi toàn diện từ **ASP.NET MVC 5 (C#)** sang **PHP Laravel 11**, giữ nguyên 100% cấu trúc tên bảng cơ sở dữ liệu (`QLDN_CauLong`) và bảo toàn toàn bộ nghiệp vụ gốc, tích hợp cổng thanh toán MoMo v2 và Trợ lý ảo AI Gemini.
+# WEBSITE BÁN DỤNG CỤ CẦU LÔNG ONLINE — LARAVEL
+
+Đồ án cuối môn **Lập trình mã nguồn mở** (Laravel Framework) — Đề tài gợi ý số 3: *Website Bán hàng Online*.
+Hệ thống được chuyển đổi từ dự án ASP.NET MVC 5 (C#) sang **PHP Laravel 13**, giữ nguyên tên bảng của CSDL gốc `QLDN_CauLong`.
 
 ---
 
-## 1. Yêu Cầu Môi Trường
-- **PHP**: >= 8.2 (đã kiểm thử và tối ưu trên PHP 8.3 / Laragon)
-- **MySQL / MariaDB**: Cổng 3306 (Database name: `phpconvert`)
-- **Composer**: Quản lý thư viện PHP
+## 1. Công nghệ sử dụng
+
+| Thành phần | Công nghệ |
+|---|---|
+| Backend | PHP ≥ 8.3, **Laravel 13** (Eloquent ORM, Migration, Seeder/Factory, Form Request, Middleware, Storage) |
+| Cơ sở dữ liệu | **MySQL / MariaDB** (Laragon) |
+| Giao diện | Blade Template + **Bootstrap 5**, jQuery, Font Awesome, Chart.js |
+| Tích hợp ngoài | Cổng thanh toán **MoMo v2** (sandbox), **Google Gemini API** (chatbot tư vấn) |
+| Kiểm thử | PHPUnit (Feature Test) |
 
 ---
 
-## 2. Cấu Trúc Cơ Sở Dữ Liệu (Giữ Nguyên Tên Bảng Gốc)
-Tất cả 18 bảng trong SQL Server cũ được giữ nguyên tên và kiểu dữ liệu chuẩn MySQL:
-1. `PhanQuyen`: Phân quyền người dùng (Admin, Nhân viên, Khách hàng)
-2. `TaiKhoan`: Tài khoản người dùng (mật khẩu Bcrypt + hỗ trợ tài khoản cũ)
-3. `KhachHang`: Thông tin khách hàng liên kết với `TaiKhoan`
-4. `LoaiSanPham`: Phân loại vợt, giày, áo quần, phụ kiện
-5. `Hang`: Hãng sản xuất (Yonex, Victor, Lining...)
-6. `NhaCungCap`: Nhà cung cấp thiết bị
-7. `KhuyenMai`: Chương trình giảm giá (% giảm, trần tối đa, ngày áp dụng)
-8. `MauSac`: Bảng màu biến thể
-9. `Size`: Bảng kích thước / phiên bản
-10. `SanPham`: Bảng sản phẩm chính
-11. `ChiTietSanPham`: Biến thể chi tiết (Màu, Size, Giá bán, Tồn kho)
-12. `ThongSoVot`: Thông số kỹ thuật vợt (Độ cứng, Điểm cân bằng, Sức căng, Trọng lượng)
-13. `DonHang`: Quản lý đơn hàng và trạng thái giao hàng
-14. `ChiTietDonHang`: Chi tiết từng dòng sản phẩm trong đơn
-15. `PhanHoi`: Đánh giá 1-5 sao và phản hồi của khách hàng
-16. `GioHang`: Giỏ hàng lưu trữ theo tài khoản khách hàng
-17. `LichSuThayDoiGia`: Nhật ký biến động giá
-18. `LogLoiGiaoTac`: Nhật ký lỗi giao tác hệ thống
+## 2. Vai trò người dùng & tài khoản mẫu
 
----
-
-## 3. Tài Khoản Mặc Định
-
-| Tên Đăng Nhập | Mật Khẩu | Vai Trò | Quyền Hạn |
+| Tên đăng nhập | Mật khẩu | Vai trò | Quyền hạn |
 |---|---|---|---|
-| `admin` | `admin123` | **Quản Trị Viên (Admin)** | Toàn quyền hệ thống, Quản lý sản phẩm, tài khoản, khuyến mãi, đơn hàng, thống kê dashboard |
-| `nhanvien` | `123456` | **Nhân Viên (Staff)** | Quản lý sản phẩm, đơn hàng, thông báo cảnh báo |
-| `khachhang1` | `123456` | **Khách Hàng (Customer)** | Đặt hàng, giỏ hàng, thanh toán COD / MoMo, viết đánh giá |
-| `khachhang2` | `123456` | **Khách Hàng (Customer)** | Đặt hàng, xem lịch sử đơn hàng |
+| `admin` | `admin@123` | Quản trị viên | Toàn quyền khu vực `/admin`: sản phẩm, biến thể, đơn hàng, **tài khoản**, **khuyến mãi**, thống kê |
+| `nhanvien_banhang` | `nv@123` | Nhân viên | `/admin`: sản phẩm, biến thể, đơn hàng, thống kê, cảnh báo đánh giá (không quản lý tài khoản/khuyến mãi) |
+| `nguyenvana` | `vana@123` | Khách hàng | Giỏ hàng, đặt hàng COD/MoMo, lịch sử & hủy đơn, đánh giá sản phẩm |
+| `tranthib` | `thib@123` | Khách hàng | Như trên |
 
----
+Khách vãng lai (chưa đăng nhập) được xem, tìm kiếm sản phẩm, xem khuyến mãi; có thể đăng ký tài khoản mới.
 
-## 4. Các Chức Năng Chính Đã Hoàn Thiện
+Phân quyền dùng **Laravel Auth** + Middleware tùy chỉnh `role` (`app/Http/Middleware/CheckRole.php`):
 
-### Phía Khách Hàng (Client):
-- **Trang chủ & Menu đa cấp**: Banner slider, sản phẩm mới, lọc theo danh mục, hãng và tìm kiếm từ khóa.
-- **Chi tiết sản phẩm**: Chọn Màu sắc / Size linh hoạt, cập nhật giá động theo khuyến mãi, kiểm tra tồn kho trực tiếp, hiển thị bảng thông số vợt (độ cứng, điểm cân bằng, sức căng, trọng lượng).
-- **Giỏ hàng & Đặt hàng**: Lưu giỏ hàng theo tài khoản, tính tổng tiền, tùy chọn hình thức thanh toán COD hoặc qua MoMo.
-- **Cổng thanh toán MoMo v2 API**: Tạo giao dịch MoMo trực tuyến với chữ ký HMAC-SHA256, chuyển hướng thanh toán và xử lý kết quả trả về (IPN / Return URL).
-- **Đánh giá & Phản hồi**: Khách hàng đã đăng nhập có thể chấm sao (1-5 sao) và để lại nhận xét.
-- **AI Chatbot Gemini**: Widget chat nổi góc màn hình hỗ trợ tra cứu sản phẩm thông minh, gợi ý theo tầm giá và thương hiệu.
-
-### Phía Quản Trị (Admin):
-- **Dashboard Thống kê Doanh thu**: Biểu đồ doanh thu 12 tháng, 4 quý trong năm bằng Chart.js, bảng xếp hạng Top 10 sản phẩm bán chạy nhất.
-- **Quản lý Sản phẩm**: Thêm mới kèm upload hình ảnh đại diện, chỉnh sửa, xem chi tiết các biến thể, xóa sản phẩm.
-- **Quản lý Đơn hàng**: Xem danh sách đơn hàng, chi tiết đơn, chuyển đổi trạng thái (Chờ xác nhận -> Đang xử lý -> Đang giao hàng -> Đã hoàn thành hoặc Hủy đơn), tự động trừ kho và hoàn kho an toàn chống deadlock.
-- **Quản lý Tài khoản**: Thêm tài khoản mới tự động đồng bộ sang bảng `KhachHang`, phân quyền Admin / Nhân viên / Khách hàng, đổi mật khẩu.
-- **Quản lý Khuyến mãi**: Thiết lập chương trình giảm giá (% và hạn mức giảm), tự động áp dụng khi khách mua hàng.
-- **Cảnh báo Đánh giá thấp**: Tự động lọc các phản hồi <= 2 sao để đội ngũ CSKH xử lý khiếu nại kịp thời.
-
----
-
-## 5. Hướng Dẫn Chạy Dự Án
-
-### Bước 1: Khởi động MySQL trong Laragon
-Mở ứng dụng Laragon và nhấn **Start All** (đảm bảo dịch vụ MySQL đang chạy trên cổng 3306).
-
-### Bước 2: Chạy Web Server
-Mở Terminal hoặc Command Prompt tại thư mục `d:\php_caulong\phpconvert` và thực hiện lệnh:
-```bash
-C:\laragon\bin\php\php-8.3.33-Win32-vs16-x64\php.exe artisan serve --port=8000
+```php
+Route::prefix('admin')->middleware('role:admin,nhanvien')->group(...);   // Admin + Nhân viên
+Route::middleware('role:admin')->group(...);                             // chỉ Admin
+Route::middleware('check.login')->group(...);                            // người dùng đã đăng nhập
 ```
-*(Nếu PHP đã có trong biến môi trường PATH của Windows, bạn chỉ cần gõ `php artisan serve`)*
 
-### Bước 3: Truy Cập Trình Duyệt
-- **Trang chủ khách hàng**: [http://127.0.0.1:8000](http://127.0.0.1:8000)
-- **Đăng nhập**: [http://127.0.0.1:8000/TaiKhoan/DangNhap](http://127.0.0.1:8000/TaiKhoan/DangNhap)
-- **Trang Quản trị Admin**: [http://127.0.0.1:8000/QuanLySanPham/Dashboard](http://127.0.0.1:8000/QuanLySanPham/Dashboard) (Yêu cầu đăng nhập tài khoản `admin`)
+---
+
+## 3. Hướng dẫn cài đặt & chạy trên máy khác
+
+### Yêu cầu
+- PHP ≥ 8.3 (bật các extension `pdo_mysql`, `mbstring`, `fileinfo`, `gd`; `pdo_sqlite` nếu muốn chạy test)
+- Composer 2.x
+- MySQL / MariaDB (khuyến nghị dùng **Laragon**)
+
+### Các bước
+
+```bash
+# 1. Vào thư mục dự án
+cd phpconvert
+
+# 2. Cài thư viện PHP
+composer install
+
+# 3. Tạo file cấu hình môi trường và khóa ứng dụng
+copy .env.example .env        # Windows  (Linux/macOS: cp .env.example .env)
+php artisan key:generate
+
+# 4. Tạo database rỗng tên "phpconvert" (utf8mb4_unicode_ci) trong MySQL
+#    (Laragon > Database, hoặc: mysql -u root -e "CREATE DATABASE phpconvert CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci")
+#    Sửa DB_USERNAME / DB_PASSWORD trong .env nếu MySQL có mật khẩu.
+
+# 5. Tạo bảng (Migration) + dữ liệu mẫu (Seeder)
+php artisan migrate:fresh --seed
+
+# 6. Chạy server
+php artisan serve --port=8000      # hoặc chạy file run.bat
+```
+
+> Tùy chọn: điền `GEMINI_API_KEY` trong `.env` để chatbot trả lời bằng AI. Nếu để trống, chatbot vẫn hoạt động bằng dữ liệu tra cứu trong kho.
+
+### Địa chỉ truy cập
+| Trang | URL |
+|---|---|
+| Trang chủ (landing page) | http://127.0.0.1:8000 |
+| Trang cửa hàng (danh mục + sản phẩm) | http://127.0.0.1:8000/Home/Index |
+| Đăng nhập | http://127.0.0.1:8000/TaiKhoan/DangNhap |
+| **Khu vực quản trị** | http://127.0.0.1:8000/admin |
+
+### Chạy kiểm thử tự động
+```bash
+php artisan test
+```
+Test dùng SQLite in-memory (cấu hình trong `phpunit.xml`) nên **không ảnh hưởng dữ liệu MySQL**. Nếu báo thiếu driver, bật `extension=pdo_sqlite` trong `php.ini` (Laragon > PHP > php.ini).
+
+---
+
+## 4. Đối chiếu yêu cầu đồ án
+
+| Yêu cầu | Cách đáp ứng trong dự án |
+|---|---|
+| Migration | `database/migrations/` — 18 bảng nghiệp vụ + cột `deleted_at` (Soft Delete) |
+| Seeder / Factory | `BadmintonSeeder`, `DonHangMauSeeder`; `SanPhamFactory`, `KhuyenMaiFactory`, `TaiKhoanFactory` |
+| Tách giao diện người dùng / quản trị | `layouts/app.blade.php` (khách hàng) và `layouts/admin.blade.php` (khu vực `/admin`) |
+| ≥ 2 role + Middleware | Admin, Nhân viên, Khách hàng — middleware `role:` và `check.login` |
+| CRUD ≥ 2 bảng có quan hệ | **SanPham** (belongsTo LoaiSanPham/Hang/NhaCungCap/KhuyenMai) — **ChiTietSanPham** (SanPham hasMany biến thể) — **KhuyenMai** (hasMany SanPham) — **TaiKhoan** (hasOne KhachHang) |
+| Tìm kiếm + phân trang (giữ từ khóa) | Trang `/SanPham/TimKiem`, `/SanPham/Index`; admin: sản phẩm, đơn hàng, tài khoản, khuyến mãi — dùng `paginate()->withQueryString()` |
+| Validation + thông báo lỗi rõ ràng | Form Request trong `app/Http/Requests/` + thông báo tiếng Việt `lang/vi/validation.php` |
+| Flash message sau thêm/sửa/xóa | `session('message')` / `session('error')` hiển thị ở 2 layout |
+| Mở rộng: Upload file | Ảnh sản phẩm/biến thể lưu qua Laravel Storage (disk `images` → `public/images/uploads`) |
+| Mở rộng: AJAX | Chatbot, đếm số lượng giỏ hàng |
+| Mở rộng: API bên ngoài | MoMo Payment v2 (xác thực chữ ký HMAC-SHA256), Google Gemini |
+| Mở rộng: Soft Delete, Role Middleware tùy chỉnh, Responsive | `SanPham` dùng `SoftDeletes`; `CheckRole`; Bootstrap 5 + CSS media query |
+
+---
+
+## 5. Chức năng chính
+
+**Khách hàng:** trang chủ & mega-menu theo loại/hãng; tìm kiếm có phân trang; chi tiết sản phẩm (chọn màu/size, giá khuyến mãi, tồn kho, thông số vợt); giỏ hàng; đặt hàng COD hoặc MoMo; lịch sử & hủy đơn (tự hoàn kho); đánh giá 1–5 sao; chatbot AI.
+
+**Trang chủ / Landing page (`/`):** mặc định khi vào website. Do Laravel render (route `home` → `LandingController` → view `Landing/Index.blade.php`), mọi nội dung đều lấy từ CSDL qua Eloquent: ảnh sản phẩm thật ở hero, số liệu cửa hàng, số sản phẩm theo từng mức ngân sách (dùng lại bộ lọc giá), danh mục, sản phẩm đang giảm giá nhiều nhất, đánh giá tích cực gần đây. Thiết kế nhẹ: không thư viện cuộn/3D, chỉ CSS và một IntersectionObserver; ảnh dùng WebP đã nén (`public/images/landing/`, `public/images/thumbs/`). Đường dẫn cũ `/Landing` tự chuyển về `/`.
+
+**Bảng tin cầu lông (`/BangTin`):** tin tức về môn cầu lông gồm 5 loại: sản phẩm hot, sản phẩm mới, trận đấu, tuyển thủ, giải đấu. Giao diện kiểu bảng tin: đầu trang "BẢNG TIN" kèm số liệu, dải tin nhanh chạy ngang, thanh chuyên mục có số lượng tin, dòng thời gian nhóm theo tháng (ngày đăng ở bên trái, màu theo loại tin), bảng điểm hiển thị tỉ số từng ván. Có tìm kiếm + lọc theo loại + phân trang (giữ từ khóa khi chuyển trang), tin nổi bật, tăng lượt xem (mỗi phiên một lần), tin hẹn giờ đăng, cột bên "Bảng điểm", "Sản phẩm đang hot" (xếp hạng 1-4) (bán chạy nhất theo đơn hàng, tính từ `ChiTietDonHang`) và "Hàng mới về". Mỗi bài đều có nguồn tham khảo; dữ liệu mẫu là kết quả thật của Olympic Paris 2024 và giải vô địch thế giới 2025, 2026, đã đối chiếu từ nhiều nguồn công khai. Bài có thể gắn với một sản phẩm (hiện thẻ dẫn sang trang mua hàng) hoặc một trận đấu (hiện thẻ tỉ số). Quản trị (Admin và Nhân viên): `/admin/ban-tin` (CRUD bài viết, xóa mềm, hẹn giờ) và `/admin/tran-dau` (CRUD kết quả trận đấu), có Form Request validation (tỉ số phải đúng dạng `21-11, 21-11`, hai bên phải khác nhau, có tỉ số thì phải chọn bên thắng...) và thông báo flash. Dữ liệu: bảng `TinTuc` (khóa ngoại `SanPham`, `TranDau`, `TaiKhoan`) và `TranDau`; seeder `BanTinSeeder` (chạy lại được nhiều lần). CSDL đã có từ trước thì chạy: `php artisan migrate` rồi `php artisan db:seed --class=BanTinSeeder`.
+
+**Khuyến mãi (`/KhuyenMai/Index`):** mỗi chương trình là một khối riêng (mức giảm, giảm tối đa, thời hạn, số ngày còn lại, lưới sản phẩm đã tính giá sau khuyến mãi), có thanh chuyển nhanh giữa các chương trình.
+
+**Phụ kiện cầu lông:** dữ liệu mẫu trong `database/seeders/PhuKienSeeder.php` (cầu lông, dây cuốn cán...), kèm ảnh thật. Nếu CSDL đã seed từ trước, chạy thêm: `php artisan db:seed --class=PhuKienSeeder` (chạy lại nhiều lần không bị trùng).
+
+**Quản trị (`/admin`):** dashboard doanh thu theo tháng/quý/năm + top 10 bán chạy; CRUD sản phẩm (upload ảnh, xóa mềm) và biến thể (màu/size/giá/tồn kho/SKU); quản lý đơn hàng (chuyển trạng thái hợp lệ, hủy đơn hoàn kho); CRUD tài khoản (chỉ Admin, không thể tự xóa/tự hạ quyền); CRUD khuyến mãi (chỉ Admin); cảnh báo đánh giá ≤ 2 sao.
+
+---
+
+## 6. Cấu trúc thư mục chính
+
+```
+app/Http/Controllers/     Controller khu vực khách hàng + QuanLy* (quản trị)
+app/Http/Middleware/      CheckRole (phân quyền), CheckLogin
+app/Http/Requests/        Form Request validation (Admin/, Auth/, Checkout, PhanHoi)
+app/Models/               18 Model Eloquent
+app/Services/             OrderService (đặt/hủy đơn, khóa tồn kho), MoMo, Gemini
+database/migrations/      Cấu trúc bảng
+database/seeders/         Dữ liệu mẫu
+database/factories/       Factory
+resources/views/          Blade views (layouts/, Landing/, KhuyenMai/, BangTin/, QuanLy*/ cho admin)
+public/js/landing/        landing.js (hiện dần khi cuộn, chỉ ~1 KB)
+public/images/landing/    ảnh WebP đã nén cho landing; thumbs/ = ảnh sản phẩm thu nhỏ; brands/ = logo hãng
+routes/web.php            Định tuyến (nhóm /admin)
+tests/Feature/            Kiểm thử chức năng
+```
+
+---
+
+## 7. Thư viện và nguồn ảnh bên thứ ba
+
+- **Logo hãng** (`public/images/brands/*.svg`) lấy từ Wikimedia Commons (Logo-Yonex.svg, Li-Ning logo red.svg, VICTOR Badminton logo.svg, MIZUNO logo.svg). Logo vẫn là nhãn hiệu của các hãng, chỉ dùng cho mục đích học tập.
+- **Ảnh phụ kiện** (`public/images/pk_*.jpg`) lấy từ Wikimedia Commons, ghi công đầy đủ trong `public/images/CREDITS.txt`: Stanislas Perrin (Public domain), Tim Reckmann (CC BY 2.0, 2 ảnh), 14harryl (CC BY 3.0).
+- **Nội dung bảng tin:** kết quả và số liệu trận đấu tham khảo từ các trang công khai (Wikipedia, Badminton Planet, Badminton Asia, ESPN, CGTN, Korea JoongAng Daily, Outlook India); đường dẫn cụ thể nằm trong cột `LienKetNguon` của từng bài/trận trong CSDL và hiển thị ở cuối mỗi bài. Nội dung bài do nhóm tự diễn đạt lại, không sao chép nguyên văn; bảng tin không dùng ảnh của các trang này.
+- Ảnh vợt, giày, trang phục là ảnh sản phẩm có sẵn của dự án; các bản thu nhỏ trong `public/images/thumbs/` được tạo từ chính các ảnh đó.

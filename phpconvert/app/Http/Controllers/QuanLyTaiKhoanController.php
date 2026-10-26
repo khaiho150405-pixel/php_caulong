@@ -2,23 +2,43 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\TaiKhoanRequest;
 use App\Models\TaiKhoan;
 use App\Models\KhachHang;
 use App\Models\PhanQuyen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Exception;
 
 class QuanLyTaiKhoanController extends Controller
 {
-    public function index()
+    /**
+     * Danh sách tài khoản: tìm theo tên đăng nhập / email / họ tên, lọc theo quyền, phân trang.
+     */
+    public function index(Request $request)
     {
-        $danhSach = TaiKhoan::with(['phanQuyen', 'khachHang'])
-            ->orderBy('MaQuyen')
-            ->get();
+        $keyword = trim((string) $request->query('keyword', ''));
+        $maQuyen = $request->query('maQuyen');
 
-        return view('QuanLyTaiKhoan.Index', compact('danhSach'));
+        $danhSach = TaiKhoan::with(['phanQuyen', 'khachHang'])
+            ->when($keyword !== '', function ($q) use ($keyword) {
+                $q->where(function ($q) use ($keyword) {
+                    $q->where('TenDangNhap', 'LIKE', "%{$keyword}%")
+                        ->orWhere('Email', 'LIKE', "%{$keyword}%")
+                        ->orWhereHas('khachHang', fn ($kh) => $kh->where('HoTen', 'LIKE', "%{$keyword}%"));
+                });
+            })
+            ->when($maQuyen, fn ($q) => $q->where('MaQuyen', $maQuyen))
+            ->orderBy('MaQuyen')
+            ->orderBy('MaTaiKhoan')
+            ->paginate(10)
+            ->withQueryString();
+
+        $phanQuyens = PhanQuyen::all();
+
+        return view('QuanLyTaiKhoan.Index', compact('danhSach', 'keyword', 'maQuyen', 'phanQuyens'));
     }
 
     public function create()
@@ -27,16 +47,8 @@ class QuanLyTaiKhoanController extends Controller
         return view('QuanLyTaiKhoan.Create', compact('phanQuyens'));
     }
 
-    public function createPost(Request $request)
+    public function createPost(TaiKhoanRequest $request)
     {
-        $request->validate([
-            'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap',
-            'MatKhau' => 'required|string|min:4',
-            'Email' => 'required|email|max:100|unique:TaiKhoan,Email|unique:KhachHang,Email',
-            'MaQuyen' => 'required|integer',
-            'HoTen' => 'required|string|max:100',
-        ]);
-
         try {
             DB::transaction(function () use ($request) {
                 $newTk = TaiKhoan::create([
@@ -70,15 +82,14 @@ class QuanLyTaiKhoanController extends Controller
         return view('QuanLyTaiKhoan.Edit', compact('taiKhoan', 'phanQuyens'));
     }
 
-    public function editPost(Request $request, $id)
+    public function editPost(TaiKhoanRequest $request, $id)
     {
         $taiKhoan = TaiKhoan::with('khachHang')->findOrFail($id);
 
-        $request->validate([
-            'Email' => 'required|email|max:100|unique:TaiKhoan,Email,' . $id . ',MaTaiKhoan',
-            'MaQuyen' => 'required|integer',
-            'HoTen' => 'required|string|max:100',
-        ]);
+        // Không cho Admin tự hạ quyền của chính mình (tránh mất quyền quản trị)
+        if ((int) $taiKhoan->MaTaiKhoan === (int) Auth::id() && (int) $request->input('MaQuyen') !== TaiKhoan::QUYEN_ADMIN) {
+            return back()->withInput()->with('error', 'Bạn không thể tự thay đổi quyền Quản trị của chính mình.');
+        }
 
         try {
             DB::transaction(function () use ($request, $taiKhoan) {
@@ -89,14 +100,15 @@ class QuanLyTaiKhoanController extends Controller
                 }
                 $taiKhoan->save();
 
-                if ($taiKhoan->khachHang) {
-                    $taiKhoan->khachHang->update([
+                $taiKhoan->khachHang()->updateOrCreate(
+                    ['MaTaiKhoan' => $taiKhoan->MaTaiKhoan],
+                    [
                         'HoTen' => $request->input('HoTen'),
                         'Email' => $request->input('Email'),
                         'SoDienThoai' => $request->input('SoDienThoai', ''),
                         'DiaChi' => $request->input('DiaChi', ''),
-                    ]);
-                }
+                    ]
+                );
             });
 
             return redirect()->route('quanlytaikhoan.index')->with('message', 'Cập nhật tài khoản thành công!');
@@ -114,6 +126,11 @@ class QuanLyTaiKhoanController extends Controller
     public function deleteConfirmed($id)
     {
         $taiKhoan = TaiKhoan::findOrFail($id);
+
+        if ((int) $taiKhoan->MaTaiKhoan === (int) Auth::id()) {
+            return redirect()->route('quanlytaikhoan.index')->with('error', 'Bạn không thể xóa tài khoản đang đăng nhập.');
+        }
+
         $taiKhoan->delete();
         return redirect()->route('quanlytaikhoan.index')->with('message', 'Xóa tài khoản thành công!');
     }

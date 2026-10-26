@@ -9,9 +9,10 @@
         max-width: 1200px;
         margin: 30px auto;
         gap: 40px;
-        padding: 0 15px;
-        background: #fff;
-        border-radius: 8px;
+        padding: 12px 28px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
     }
 
     .product-container h1 {
@@ -38,8 +39,8 @@
         height: 0;
         overflow: hidden;
         margin-bottom: 20px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
     }
 
     .main-image-box img {
@@ -49,7 +50,7 @@
         width: 100%;
         height: 100%;
         object-fit: contain;
-        background-color: #fcfcfc;
+        background-color: #f6f8f7;
     }
 
     .rating {
@@ -62,14 +63,14 @@
     }
 
     .rating-stars {
-        color: #ffc107;
+        color: var(--star);
         font-size: 18px;
     }
 
     .price-box {
         padding: 15px 20px;
-        background-color: #fef0e9;
-        border-radius: 4px;
+        background-color: var(--accent-50);
+        border-radius: var(--radius);
         margin: 20px 0;
         display: flex;
         align-items: center;
@@ -77,7 +78,7 @@
 
     .price {
         font-size: 32px;
-        color: #f36f21;
+        color: var(--price);
         font-weight: 700;
     }
 
@@ -90,10 +91,10 @@
     }
 
     .discount-badge {
-        background-color: #f36f21;
+        background-color: var(--accent);
         color: white;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 4px 10px;
+        border-radius: 999px;
         font-size: 14px;
         margin-left: 15px;
         font-weight: bold;
@@ -113,23 +114,23 @@
     }
 
     .option-group button {
-        border: 1px solid #ddd;
-        padding: 8px 15px;
-        border-radius: 4px;
+        border: 1px solid var(--line-strong);
+        padding: 8px 16px;
+        border-radius: var(--radius-sm);
         cursor: pointer;
         background-color: #fff;
         transition: all 0.2s;
     }
 
     .option-group button:hover {
-        border-color: #f36f21;
+        border-color: var(--brand);
     }
 
     .option-group button.selected {
-        border-color: #f36f21;
-        background-color: #fff4ed;
+        border-color: var(--brand);
+        background-color: var(--brand-50);
         font-weight: 600;
-        color: #f36f21;
+        color: var(--brand);
     }
 
     .btn-action {
@@ -137,29 +138,30 @@
         font-size: 18px;
         margin-right: 15px;
         border: none;
-        border-radius: 8px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
         cursor: pointer;
-        transition: background-color 0.2s;
+        transition: background-color 0.2s, color 0.2s;
     }
 
     .btn-add-cart {
         background-color: #fff;
-        border: 2px solid #f36f21;
-        color: #f36f21;
+        border: 2px solid var(--brand);
+        color: var(--brand);
     }
 
     .btn-add-cart:hover {
-        background-color: #f36f21;
+        background-color: var(--brand);
         color: #fff;
     }
 
     .btn-buy-now {
-        background-color: #f36f21;
+        background-color: var(--brand);
         color: #fff;
     }
 
     .btn-buy-now:hover {
-        background-color: #d15d18;
+        background-color: var(--brand-700);
     }
 
     .quantity-control {
@@ -172,9 +174,9 @@
     .quantity-control input {
         text-align: center;
         padding: 5px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        width: 60px;
+        border: 1px solid var(--line-strong);
+        border-radius: var(--radius-sm);
+        width: 64px;
     }
 
     .racket-specs-table {
@@ -182,29 +184,30 @@
         border-collapse: collapse;
         margin-top: 15px;
         font-size: 15px;
-        border: 1px solid #eee;
+        border: 1px solid var(--line);
     }
 
     .racket-specs-table th, .racket-specs-table td {
         padding: 12px;
         border: none;
-        border-bottom: 1px solid #eee;
+        border-bottom: 1px solid var(--line);
         text-align: left;
     }
 
     .racket-specs-table th {
-        background-color: #f9f9f9;
+        background-color: #f6f8f7;
         font-weight: 600;
         width: 40%;
-        color: #333;
+        color: var(--ink-soft);
     }
 
     .btn-review-action {
         display: inline-block;
-        background-color: #28a745;
+        background-color: var(--brand);
         color: #fff;
         padding: 10px 18px;
-        border-radius: 4px;
+        border-radius: var(--radius-sm);
+        font-weight: 600;
         cursor: pointer;
         font-size: 15px;
         margin-top: 15px;
@@ -213,7 +216,7 @@
     }
 
     .btn-review-action:hover {
-        background-color: #218838;
+        background-color: var(--brand-700);
         color: #fff;
     }
 
@@ -222,11 +225,11 @@
     }
 
     .review-box {
-        border: 1px solid #f0f0f0;
-        border-radius: 4px;
-        padding: 15px;
-        margin-bottom: 10px;
-        background-color: #fcfcfc;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 16px;
+        margin-bottom: 12px;
+        background-color: #fafcfb;
     }
 
     .review-box strong {
@@ -323,8 +326,8 @@
                 <i class="fa fa-pen"></i> Gửi đánh giá của bạn
             </a>
         @else
-            <p style="margin-top:15px; color:#f36f21;">
-                <a href="{{ route('taikhoan.dangnhap', ['returnUrl' => url()->current()]) }}" style="color:#f36f21; font-weight:bold; text-decoration:underline;">Đăng nhập</a> để gửi đánh giá.
+            <p style="margin-top:15px; color:var(--brand);">
+                <a href="{{ route('taikhoan.dangnhap', ['returnUrl' => url()->current()]) }}" style="color:var(--brand); font-weight:bold; text-decoration:underline;">Đăng nhập</a> để gửi đánh giá.
             </p>
         @endauth
 
@@ -548,7 +551,7 @@
 
         } else {
             stockElement.textContent = 'Tùy chọn này không khả dụng';
-            stockElement.style.color = 'orange';
+            stockElement.style.color = '#c9830f';
             btnAddCart.disabled = true;
             hiddenIdInput.value = "";
         }

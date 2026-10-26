@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Auth\DangKyRequest;
+use App\Http\Requests\Auth\DangNhapRequest;
+use App\Http\Requests\Auth\DoiMatKhauRequest;
 use App\Models\TaiKhoan;
 use App\Models\KhachHang;
 use App\Models\GioHang;
@@ -22,16 +25,8 @@ class TaiKhoanController extends Controller
         return view('TaiKhoan.DangNhap', compact('returnUrl'));
     }
 
-    public function dangNhapPost(Request $request)
+    public function dangNhapPost(DangNhapRequest $request)
     {
-        $request->validate([
-            'TenDangNhap' => 'required|string',
-            'MatKhau' => 'required|string',
-        ], [
-            'TenDangNhap.required' => 'Vui lòng nhập tên đăng nhập.',
-            'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
-        ]);
-
         $username = trim($request->input('TenDangNhap'));
         $password = $request->input('MatKhau');
         $returnUrl = $request->input('returnUrl');
@@ -55,6 +50,8 @@ class TaiKhoanController extends Controller
 
             if ($isPasswordValid) {
                 Auth::login($user);
+                // Chống tấn công Session Fixation
+                $request->session()->regenerate();
 
                 // Đồng bộ session giống C# để View tương thích 100%
                 session([
@@ -71,14 +68,18 @@ class TaiKhoanController extends Controller
                 }
                 session(['GioHangCount' => (int)$cartCount]);
 
+                // Chỉ chuyển hướng về URL nội bộ (chặn open-redirect kiểu //trang-la.com)
                 if (!empty($returnUrl)) {
-                    if (str_starts_with($returnUrl, '/') || str_starts_with($returnUrl, url('/'))) {
+                    $laUrlNoiBo = (str_starts_with($returnUrl, '/') && !str_starts_with($returnUrl, '//'))
+                        || str_starts_with($returnUrl, url('/') . '/');
+                    if ($laUrlNoiBo) {
                         return redirect($returnUrl);
                     }
                 }
 
+                // Admin / Nhân viên vào thẳng khu vực quản trị /admin
                 if ($user->hasAdminAccess()) {
-                    return redirect()->route('quanlysanpham.index');
+                    return redirect()->route('quanlysanpham.dashboard');
                 }
 
                 return redirect()->route('home');
@@ -98,27 +99,15 @@ class TaiKhoanController extends Controller
         return view('TaiKhoan.DangKy');
     }
 
-    public function dangKyPost(Request $request)
+    public function dangKyPost(DangKyRequest $request)
     {
-        $request->validate([
-            'HoTen' => 'required|string|max:100',
-            'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap',
-            'Email' => 'required|email|max:100|unique:TaiKhoan,Email|unique:KhachHang,Email',
-            'MatKhau' => 'required|string|min:4',
-            'XacNhanMatKhau' => 'required|same:MatKhau',
-        ], [
-            'TenDangNhap.unique' => 'Tên đăng nhập đã tồn tại.',
-            'Email.unique' => 'Email đã được sử dụng.',
-            'XacNhanMatKhau.same' => 'Xác nhận mật khẩu không khớp.',
-        ]);
-
         try {
             DB::transaction(function () use ($request, &$newUser, &$newKhachHang) {
                 $newUser = TaiKhoan::create([
                     'TenDangNhap' => $request->input('TenDangNhap'),
                     'MatKhau' => Hash::make($request->input('MatKhau')),
                     'Email' => $request->input('Email'),
-                    'MaQuyen' => 3, // Khách hàng
+                    'MaQuyen' => TaiKhoan::QUYEN_KHACHHANG,
                     'NgayTao' => now(),
                 ]);
 
@@ -133,11 +122,12 @@ class TaiKhoanController extends Controller
             });
 
             Auth::login($newUser);
+            $request->session()->regenerate();
 
             session([
                 'MaTaiKhoan' => $newUser->MaTaiKhoan,
                 'TenDangNhap' => $newUser->TenDangNhap,
-                'MaQuyen' => 3,
+                'MaQuyen' => TaiKhoan::QUYEN_KHACHHANG,
                 'HoTen' => $newKhachHang->HoTen,
                 'GioHangCount' => 0,
             ]);
@@ -150,11 +140,13 @@ class TaiKhoanController extends Controller
         }
     }
 
-    public function dangXuat()
+    public function dangXuat(Request $request)
     {
         Auth::logout();
-        session()->flush();
-        return redirect()->route('home');
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('home')->with('message', 'Bạn đã đăng xuất.');
     }
 
     public function doiMatKhau()
@@ -162,16 +154,8 @@ class TaiKhoanController extends Controller
         return view('TaiKhoan.DoiMatKhau');
     }
 
-    public function doiMatKhauPost(Request $request)
+    public function doiMatKhauPost(DoiMatKhauRequest $request)
     {
-        $request->validate([
-            'matKhauCu' => 'required|string',
-            'matKhauMoi' => 'required|string|min:4',
-            'xacNhanMoi' => 'required|same:matKhauMoi',
-        ], [
-            'xacNhanMoi.same' => 'Mật khẩu mới không khớp.',
-        ]);
-
         $user = Auth::user();
 
         // Kiểm tra mật khẩu cũ

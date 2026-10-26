@@ -6,15 +6,29 @@
 <div class="card card-custom p-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h4 mb-0 fw-bold"><i class="fa-solid fa-file-invoice-dollar text-primary"></i> Quản Lý Đơn Hàng</h2>
-        <span class="badge bg-secondary fs-6">{{ $orders->count() }} đơn</span>
+        <span class="badge bg-secondary fs-6">{{ $orders->total() }} đơn</span>
     </div>
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+    <form action="{{ route('quanlydonhang.index') }}" method="GET" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input type="text" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Tìm theo mã đơn, tên khách, số điện thoại..." />
+        </div>
+        <div class="col-md-3">
+            <select name="trangThai" class="form-select">
+                <option value="">-- Tất cả trạng thái --</option>
+                @foreach ($dsTrangThai as $tt)
+                    <option value="{{ $tt }}" @selected($trangThai === $tt)>{{ $tt }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+            @if ($keyword !== '' || $trangThai)
+                <a href="{{ route('quanlydonhang.index') }}" class="btn btn-outline-secondary">Xóa lọc</a>
+            @endif
+        </div>
+    </form>
+
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
@@ -30,7 +44,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($orders as $order)
+                @forelse ($orders as $order)
                     <tr>
                         <td class="fw-bold">#{{ $order->MaDonHang }}</td>
                         <td>
@@ -41,7 +55,7 @@
                         </td>
                         <td>{{ $order->NgayDat ? \Carbon\Carbon::parse($order->NgayDat)->format('d/m/Y H:i') : '' }}</td>
                         <td>{{ $order->DiaChiGiaoHang }}</td>
-                        <td class="fw-bold text-danger">{{ number_format($order->TongTien, 0, ',', '.') }} VNĐ</td>
+                        <td class="fw-bold text-price">{{ number_format($order->TongTien, 0, ',', '.') }} VNĐ</td>
                         <td>
                             @if ($order->TrangThai == 'Chờ xác nhận' || $order->TrangThai == 'Chờ thanh toán MoMo')
                                 <span class="badge bg-warning text-dark">{{ $order->TrangThai }}</span>
@@ -63,9 +77,13 @@
                             </a>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="7" class="p-0">@include('partials._empty', ['message' => 'Không tìm thấy đơn hàng nào.'])</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+
+    @include('partials._pagination', ['items' => $orders])
 </div>
 @endsection

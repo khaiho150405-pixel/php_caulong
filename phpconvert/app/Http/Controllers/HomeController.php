@@ -9,6 +9,7 @@ use App\Models\KhachHang;
 use App\Models\PhanHoi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class HomeController extends Controller
 {
@@ -74,8 +75,22 @@ class HomeController extends Controller
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => url()->previous()]);
         }
 
-        $chiTietId = (int)$request->input('chiTietId');
-        $quantity = max(1, (int)$request->input('quantity', 1));
+        // Trang chi tiết sản phẩm hiển thị lỗi qua flash message 'error'
+        $validator = Validator::make($request->all(), [
+            'chiTietId' => ['required', 'integer', 'exists:ChiTietSanPham,MaChiTiet'],
+            'quantity' => ['nullable', 'integer', 'min:1', 'max:100'],
+        ], [
+            'chiTietId.required' => 'Vui lòng chọn phiên bản (màu/size) sản phẩm.',
+            'chiTietId.exists' => 'Sản phẩm biến thể không tồn tại.',
+            'quantity.min' => 'Số lượng phải lớn hơn 0.',
+            'quantity.max' => 'Mỗi lần chỉ được thêm tối đa 100 sản phẩm.',
+        ]);
+        if ($validator->fails()) {
+            return back()->with('error', $validator->errors()->first());
+        }
+
+        $chiTietId = (int) $request->input('chiTietId');
+        $quantity = (int) $request->input('quantity', 1);
 
         $user = Auth::user();
         $khachHang = $user->khachHang;
@@ -85,8 +100,8 @@ class HomeController extends Controller
         }
 
         $productVariant = ChiTietSanPham::with('sanPham')->find($chiTietId);
-        if (!$productVariant) {
-            return back()->with('error', 'Sản phẩm biến thể không tồn tại.');
+        if (!$productVariant || !$productVariant->sanPham || $productVariant->sanPham->trashed()) {
+            return back()->with('error', 'Sản phẩm không còn kinh doanh.');
         }
 
         $existingCartItem = GioHang::where('MaKhachHang', $khachHang->MaKhachHang)

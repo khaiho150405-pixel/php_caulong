@@ -58,16 +58,20 @@ class SanPhamController extends Controller
 
         // Lọc theo Tên
         if (!empty($ten)) {
-            $tenKey = mb_strtolower(trim($ten), 'UTF-8');
+            $tenKey = trim($ten);
             $query->where('TenSanPham', 'LIKE', "%{$tenKey}%");
         }
 
-        $result = $query->orderByDesc('NgayTao')->get();
+        // Bộ lọc nâng cao (giá, hãng, giảm giá, còn hàng) + sắp xếp
+        $this->apDungBoLoc($query, $request);
+
+        // Phân trang 12 sản phẩm/trang, giữ nguyên bộ lọc khi chuyển trang
+        $result = $query->paginate(12)->withQueryString();
 
         return view('SanPham.Index', [
             'sanPhams' => $result,
             'title' => 'Danh sách sản phẩm',
-        ]);
+        ] + $this->duLieuBoLoc($request));
     }
 
     public function timKiem(Request $request)
@@ -77,26 +81,101 @@ class SanPhamController extends Controller
             return redirect()->route('sanpham.index');
         }
 
-        $key = mb_strtolower($keyword, 'UTF-8');
-
-        $results = SanPham::with(['loaiSanPham', 'hang', 'khuyenMai'])
-            ->where(function ($q) use ($key) {
-                $q->where('TenSanPham', 'LIKE', "%{$key}%")
-                  ->orWhereHas('hang', function ($hq) use ($key) {
-                      $hq->where('TenHang', 'LIKE', "%{$key}%");
-                  })
-                  ->orWhereHas('loaiSanPham', function ($lq) use ($key) {
-                      $lq->where('TenLoai', 'LIKE', "%{$key}%");
-                  });
-            })
-            ->orderByDesc('NgayTao')
-            ->get();
+        // Tìm theo tên sản phẩm / hãng / loại + phân trang, giữ từ khóa khi chuyển trang
+        $query = SanPham::with(['loaiSanPham', 'hang', 'khuyenMai'])->timKiem($keyword);
+        $this->apDungBoLoc($query, $request);
+        $results = $query->paginate(12)->withQueryString();
 
         return view('SanPham.Index', [
             'sanPhams' => $results,
             'title' => "Kết quả tìm kiếm cho '{$keyword}'",
             'keyword' => $keyword,
-        ]);
+        ] + $this->duLieuBoLoc($request));
+    }
+
+    /** Các khoảng giá gợi ý: khóa => [từ, đến]. */
+    private const KHOANG_GIA = [
+        '0-1000000' => [0, 1000000],
+        '1000000-2000000' => [1000000, 2000000],
+        '2000000-3000000' => [2000000, 3000000],
+        '3000000-5000000' => [3000000, 5000000],
+        '5000000-' => [5000000, null],
+    ];
+
+    /**
+     * Đọc khoảng giá từ request: ô nhập tay ưu tiên hơn khoảng gợi ý.
+     *
+     * @return array{0: ?float, 1: ?float}
+     */
+    private function khoangGia(Request $request): array
+    {
+        $tu = $request->query('gia_tu');
+        $den = $request->query('gia_den');
+        $tu = is_numeric($tu) && $tu >= 0 ? (float) $tu : null;
+        $den = is_numeric($den) && $den > 0 ? (float) $den : null;
+
+        if ($tu === null && $den === null) {
+            $preset = self::KHOANG_GIA[$request->query('khoang')] ?? null;
+            if ($preset) {
+                [$tu, $den] = [(float) $preset[0], $preset[1] !== null ? (float) $preset[1] : null];
+            }
+        }
+
+        // Người dùng nhập ngược (từ > đến) thì đổi chỗ cho hợp lý
+        if ($tu !== null && $den !== null && $tu > $den) {
+            [$tu, $den] = [$den, $tu];
+        }
+
+        return [$tu, $den];
+    }
+
+    private function apDungBoLoc($query, Request $request): void
+    {
+        [$tu, $den] = $this->khoangGia($request);
+        $query->locTheoGia($tu, $den);
+
+        $hangIds = array_filter(array_map('intval', (array) $request->query('hangs', [])));
+        if ($hangIds) {
+            $query->whereIn('MaHang', $hangIds);
+        }
+
+        if ($request->boolean('giam_gia')) {
+            $query->dangGiamGia();
+        }
+        if ($request->boolean('con_hang')) {
+            $query->conHang();
+        }
+
+        $query->sapXep($request->query('sap_xep'));
+    }
+
+    /** Dữ liệu hiển thị khung bộ lọc. */
+    private function duLieuBoLoc(Request $request): array
+    {
+        [$tu, $den] = $this->khoangGia($request);
+        $hangDangChon = array_map('intval', (array) $request->query('hangs', []));
+        $hangTheoTen = trim((string) $request->query('hang', ''));
+
+        $dsHang = Hang::orderBy('TenHang')->get();
+        // Liên kết cũ dạng ?hang=Yonex: tự tick sẵn ô hãng tương ứng
+        if (!$hangDangChon && $hangTheoTen !== '') {
+            $hangDangChon = $dsHang->filter(fn ($h) => stripos($h->TenHang, $hangTheoTen) !== false)->pluck('MaHang')->all();
+        }
+
+        $dangLoc = $tu !== null || $den !== null || $hangDangChon
+            || $request->boolean('giam_gia') || $request->boolean('con_hang');
+
+        return [
+            'dsHang' => $dsHang,
+            'dsLoai' => LoaiSanPham::orderBy('MaLoai')->get(),
+            'khoangGiaGoiY' => array_keys(self::KHOANG_GIA),
+            'locGiaTu' => $tu,
+            'locGiaDen' => $den,
+            'locHang' => $hangDangChon,
+            'locKhoang' => $request->query('khoang'),
+            'sapXep' => $request->query('sap_xep', 'moi'),
+            'dangLoc' => $dangLoc,
+        ];
     }
 
     public function khuyenMai()

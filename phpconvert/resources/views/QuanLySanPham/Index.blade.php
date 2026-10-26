@@ -11,12 +11,34 @@
         </a>
     </div>
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+    {{-- Tìm kiếm + lọc, kết hợp phân trang (giữ từ khóa khi chuyển trang) --}}
+    <form action="{{ route('quanlysanpham.index') }}" method="GET" class="row g-2 mb-3">
+        <div class="col-md-4">
+            <input type="text" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Tìm theo tên sản phẩm, hãng, loại..." />
+        </div>
+        <div class="col-md-3">
+            <select name="maLoai" class="form-select">
+                <option value="">-- Tất cả loại --</option>
+                @foreach ($loaiSanPhams as $loai)
+                    <option value="{{ $loai->MaLoai }}" @selected((string) $maLoai === (string) $loai->MaLoai)>{{ $loai->TenLoai }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-md-2">
+            <select name="maHang" class="form-select">
+                <option value="">-- Tất cả hãng --</option>
+                @foreach ($hangs as $h)
+                    <option value="{{ $h->MaHang }}" @selected((string) $maHang === (string) $h->MaHang)>{{ $h->TenHang }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+            @if ($keyword !== '' || $maLoai || $maHang)
+                <a href="{{ route('quanlysanpham.index') }}" class="btn btn-outline-secondary">Xóa lọc</a>
+            @endif
+        </div>
+    </form>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
@@ -27,12 +49,13 @@
                     <th>Giá Gốc</th>
                     <th>Loại SP</th>
                     <th>Hãng</th>
+                    <th>Tồn Kho</th>
                     <th>Ngày Tạo</th>
                     <th style="width: 190px;">Chức Năng</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach ($sanPhams as $item)
+                @forelse ($sanPhams as $item)
                     <tr>
                         <td class="text-center">
                             <img src="{{ asset('images/' . ($item->HinhAnhDaiDien ?: 'default-product.jpg')) }}"
@@ -45,7 +68,7 @@
                         <td>
                             <strong>{{ $item->TenSanPham }}</strong>
                         </td>
-                        <td class="fw-bold text-danger">
+                        <td class="fw-bold text-price">
                             {{ number_format($item->GiaGoc, 0, ',', '.') }} VNĐ
                         </td>
                         <td>
@@ -53,6 +76,13 @@
                         </td>
                         <td>
                             {{ $item->hang->TenHang ?? 'N/A' }}
+                        </td>
+                        <td>
+                            @if ((int) $item->tong_ton_kho > 0)
+                                <span class="badge bg-success">{{ (int) $item->tong_ton_kho }}</span>
+                            @else
+                                <span class="badge bg-danger">Hết hàng</span>
+                            @endif
                         </td>
                         <td>
                             {{ $item->NgayTao ? \Carbon\Carbon::parse($item->NgayTao)->format('d/m/Y') : '' }}
@@ -69,9 +99,13 @@
                             </a>
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="8" class="p-0">@include('partials._empty', ['message' => 'Không tìm thấy sản phẩm nào.'])</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+
+    @include('partials._pagination', ['items' => $sanPhams])
 </div>
 @endsection

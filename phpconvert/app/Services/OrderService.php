@@ -14,9 +14,9 @@ class OrderService
     /**
      * Tạo đơn hàng mới từ giỏ hàng (chống Deadlock và tranh chấp kho bằng Pessimistic Lock)
      */
-    public function createOrder(int $maKhachHang, array $orderData, $cartItems, string $initialStatus = 'Đang xử lý'): DonHang
+    public function createOrder(int $maKhachHang, array $orderData, $cartItems, string $initialStatus = 'Đang xử lý', bool $xoaGioHang = true): DonHang
     {
-        return DB::transaction(function () use ($maKhachHang, $orderData, $cartItems, $initialStatus) {
+        return DB::transaction(function () use ($maKhachHang, $orderData, $cartItems, $initialStatus, $xoaGioHang) {
             $tongTien = 0;
             $orderDetails = [];
 
@@ -71,20 +71,37 @@ class OrderService
                 ChiTietDonHang::create($detail);
             }
 
-            // 4. Xóa giỏ hàng
-            GioHang::where('MaKhachHang', $maKhachHang)->delete();
+            // 4. Xóa giỏ hàng (với MoMo: chỉ xóa sau khi thanh toán thành công)
+            if ($xoaGioHang) {
+                GioHang::where('MaKhachHang', $maKhachHang)->delete();
+            }
 
             return $donHang;
         }, 3); // Tự động retry tối đa 3 lần nếu gặp deadlock (mã lỗi 1205)
     }
 
     /**
-     * Hủy đơn hàng và hoàn trả số lượng vào kho
+     * Các bước chuyển trạng thái hợp lệ của đơn hàng.
+     * Lưu ý: tồn kho đã được trừ ngay khi tạo đơn, nên chỉ cần hoàn kho khi hủy.
+     */
+    public const CHUYEN_TRANG_THAI = [
+        'Chờ xác nhận' => ['Đang xử lý', 'Đã hủy'],
+        'Chờ thanh toán MoMo' => ['Đang xử lý', 'Đã hủy'],
+        'Đã thanh toán bằng MoMo' => ['Đang giao hàng', 'Đã hủy'],
+        'Đang xử lý' => ['Đang giao hàng', 'Đã hủy'],
+        'Đang giao hàng' => ['Đã hoàn thành', 'Đã hủy'],
+    ];
+
+    /** Trạng thái khách hàng còn được phép tự hủy đơn */
+    public const KHACH_DUOC_HUY = ['Chờ xác nhận', 'Chờ thanh toán MoMo', 'Đang xử lý'];
+
+    /**
+     * Hủy đơn hàng (khách hàng tự hủy) và hoàn trả số lượng vào kho
      */
     public function cancelOrder(int $maDonHang, ?int $maKhachHang = null, bool $isAdmin = false): bool
     {
         return DB::transaction(function () use ($maDonHang, $maKhachHang, $isAdmin) {
-            $query = DonHang::with('chiTietDonHangs')->where('MaDonHang', $maDonHang);
+            $query = DonHang::with('chiTietDonHangs')->where('MaDonHang', $maDonHang)->lockForUpdate();
             if (!$isAdmin && $maKhachHang !== null) {
                 $query->where('MaKhachHang', $maKhachHang);
             }
@@ -94,18 +111,12 @@ class OrderService
                 throw new Exception("Không tìm thấy đơn hàng.");
             }
 
-            if (!$isAdmin && !in_array($order->TrangThai, ['Chờ xác nhận', 'Chờ thanh toán MoMo', 'Đang xử lý'])) {
-                throw new Exception("Đơn hàng đang giao hoặc đã hoàn tất, không thể hủy.");
+            $choPhep = $isAdmin ? array_keys(self::CHUYEN_TRANG_THAI) : self::KHACH_DUOC_HUY;
+            if (!in_array($order->TrangThai, $choPhep, true)) {
+                throw new Exception("Đơn hàng đang giao, đã hoàn tất hoặc đã hủy, không thể hủy.");
             }
 
-            // Hoàn lại số lượng tồn kho
-            foreach ($order->chiTietDonHangs as $item) {
-                $ctsp = ChiTietSanPham::find($item->MaChiTietSanPham);
-                if ($ctsp) {
-                    $ctsp->increment('SoLuongTon', $item->SoLuong);
-                }
-            }
-
+            $this->hoanKho($order);
             $order->TrangThai = 'Đã hủy';
             $order->save();
 
@@ -114,42 +125,43 @@ class OrderService
     }
 
     /**
-     * Cập nhật trạng thái đơn hàng từ trang Quản trị Admin
+     * Thanh toán MoMo thất bại/bị hủy: hủy đơn đang chờ thanh toán và hoàn kho.
+     */
+    public function huyDoThanhToanThatBai(int $maDonHang): void
+    {
+        DB::transaction(function () use ($maDonHang) {
+            $order = DonHang::with('chiTietDonHangs')->lockForUpdate()->find($maDonHang);
+            if (!$order || $order->TrangThai !== 'Chờ thanh toán MoMo') {
+                return;
+            }
+
+            $this->hoanKho($order);
+            $order->TrangThai = 'Đã hủy (Thanh toán thất bại)';
+            $order->save();
+        });
+    }
+
+    /**
+     * Cập nhật trạng thái đơn hàng từ trang Quản trị (kiểm tra bước chuyển hợp lệ)
      */
     public function setTrangThai(int $maDonHang, string $trangThaiMoi): bool
     {
         return DB::transaction(function () use ($maDonHang, $trangThaiMoi) {
-            $order = DonHang::with('chiTietDonHangs')->find($maDonHang);
+            $order = DonHang::with('chiTietDonHangs')->lockForUpdate()->find($maDonHang);
             if (!$order) {
                 throw new Exception("Không tìm thấy đơn hàng.");
             }
 
             $trangThaiCu = $order->TrangThai;
+            $hopLe = self::CHUYEN_TRANG_THAI[$trangThaiCu] ?? [];
 
-            // CASE 1: Chờ xác nhận -> Đang xử lý (Trừ kho)
-            if ($trangThaiCu == "Chờ xác nhận" && $trangThaiMoi == "Đang xử lý") {
-                foreach ($order->chiTietDonHangs as $item) {
-                    $ctsp = ChiTietSanPham::find($item->MaChiTietSanPham);
-                    if (!$ctsp || ($ctsp->SoLuongTon ?? 0) < ($item->SoLuong ?? 0)) {
-                        throw new Exception("Không đủ tồn kho cho biến thể ID: {$item->MaChiTietSanPham}.");
-                    }
-                }
-                foreach ($order->chiTietDonHangs as $item) {
-                    $ctsp = ChiTietSanPham::find($item->MaChiTietSanPham);
-                    if ($ctsp) {
-                        $ctsp->SoLuongTon = max(0, ($ctsp->SoLuongTon ?? 0) - ($item->SoLuong ?? 0));
-                        $ctsp->save();
-                    }
-                }
+            if (!in_array($trangThaiMoi, $hopLe, true)) {
+                throw new Exception("Không thể chuyển đơn hàng từ '{$trangThaiCu}' sang '{$trangThaiMoi}'.");
             }
-            // CASE 2: Đang xử lý / Đang giao hàng -> Đã hủy (Hoàn trả kho)
-            else if (in_array($trangThaiCu, ["Đang xử lý", "Đang giao hàng"]) && $trangThaiMoi == "Đã hủy") {
-                foreach ($order->chiTietDonHangs as $item) {
-                    $ctsp = ChiTietSanPham::find($item->MaChiTietSanPham);
-                    if ($ctsp) {
-                        $ctsp->increment('SoLuongTon', $item->SoLuong ?? 0);
-                    }
-                }
+
+            // Hủy đơn -> hoàn trả tồn kho đã trừ lúc đặt hàng
+            if ($trangThaiMoi === 'Đã hủy') {
+                $this->hoanKho($order);
             }
 
             $order->TrangThai = $trangThaiMoi;
@@ -157,5 +169,18 @@ class OrderService
 
             return true;
         });
+    }
+
+    /**
+     * Cộng lại số lượng tồn kho cho các sản phẩm trong đơn
+     */
+    private function hoanKho(DonHang $order): void
+    {
+        foreach ($order->chiTietDonHangs as $item) {
+            if ($item->MaChiTietSanPham) {
+                ChiTietSanPham::where('MaChiTiet', $item->MaChiTietSanPham)
+                    ->increment('SoLuongTon', (int) ($item->SoLuong ?? 0));
+            }
+        }
     }
 }

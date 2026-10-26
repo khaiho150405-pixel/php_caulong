@@ -12,12 +12,6 @@
     </div>
     <hr />
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     <div class="row g-4">
         <div class="col-lg-8">
@@ -57,7 +51,7 @@
                 @endif
                 <tr>
                     <th style="background: #f9f9f9;">Tổng tiền đơn hàng:</th>
-                    <td class="fw-bold text-danger fs-5">{{ number_format($order->TongTien, 0, ',', '.') }} VNĐ</td>
+                    <td class="fw-bold text-price fs-5">{{ number_format($order->TongTien, 0, ',', '.') }} VNĐ</td>
                 </tr>
             </table>
 
@@ -102,7 +96,7 @@
                                 </td>
                                 <td>{{ number_format($item->DonGia, 0, ',', '.') }} VNĐ</td>
                                 <td class="text-center fw-bold">{{ $item->SoLuong }}</td>
-                                <td class="fw-bold text-danger">{{ number_format($item->ThanhTien, 0, ',', '.') }} VNĐ</td>
+                                <td class="fw-bold text-price">{{ number_format($item->ThanhTien, 0, ',', '.') }} VNĐ</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -120,7 +114,6 @@
                 @if ($order->TrangThai == 'Chờ xác nhận' || $order->TrangThai == 'Chờ thanh toán MoMo')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
-                        <input type="hidden" name="id" value="{{ $order->MaDonHang }}">
                         <input type="hidden" name="trangThaiMoi" value="Đang xử lý">
                         <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
                             <i class="fa-solid fa-check"></i> Xác nhận (Chuyển sang Đang xử lý)
@@ -129,10 +122,9 @@
                 @endif
 
                 {{-- Nút chuyển sang "Đang giao hàng" --}}
-                @if ($order->TrangThai == 'Đang xử lý')
+                @if ($order->TrangThai == 'Đang xử lý' || $order->TrangThai == 'Đã thanh toán bằng MoMo')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
-                        <input type="hidden" name="id" value="{{ $order->MaDonHang }}">
                         <input type="hidden" name="trangThaiMoi" value="Đang giao hàng">
                         <button type="submit" class="btn btn-info w-100 py-2 fw-semibold text-white">
                             <i class="fa-solid fa-truck-fast"></i> Chuyển sang Đang giao hàng
@@ -144,7 +136,6 @@
                 @if ($order->TrangThai == 'Đang giao hàng')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
-                        <input type="hidden" name="id" value="{{ $order->MaDonHang }}">
                         <input type="hidden" name="trangThaiMoi" value="Đã hoàn thành">
                         <button type="submit" class="btn btn-success w-100 py-2 fw-semibold">
                             <i class="fa-solid fa-circle-check"></i> Đã hoàn thành (Giao thành công)
@@ -156,7 +147,6 @@
                 @if ($order->TrangThai != 'Đã hoàn thành' && !str_contains($order->TrangThai, 'hủy') && !str_contains($order->TrangThai, 'Hủy'))
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mt-3">
                         @csrf
-                        <input type="hidden" name="id" value="{{ $order->MaDonHang }}">
                         <input type="hidden" name="trangThaiMoi" value="Đã hủy">
                         <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-semibold" onclick="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này? Số lượng tồn kho sẽ được hoàn lại tự động!');">
                             <i class="fa-solid fa-ban"></i> HỦY ĐƠN HÀNG

@@ -12,7 +12,7 @@
             <p style="color: #666;">Cảm ơn quý khách đã mua sắm và thanh toán thành công qua MoMo.</p>
 
             <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
-                <a href="{{ route('home') }}" class="btn btn-primary" style="background-color: #f36f21; border-color: #f36f21; font-weight: bold; padding: 10px 20px;">
+                <a href="{{ route('home') }}" class="btn btn-primary" style="background-color: var(--brand); border-color: var(--brand); font-weight: bold; padding: 10px 20px;">
                     Tiếp tục mua sắm
                 </a>
                 <a href="{{ route('donhang.index') }}" class="btn btn-default" style="font-weight: bold; padding: 10px 20px;">
@@ -28,7 +28,7 @@
             <p>Đơn hàng đã được lưu với trạng thái chưa thanh toán hoặc đã hủy.</p>
 
             <div style="margin-top: 25px; display: flex; gap: 15px; justify-content: center;">
-                <a href="{{ route('home') }}" class="btn btn-primary" style="background-color: #f36f21; border-color: #f36f21; font-weight: bold; padding: 10px 20px;">
+                <a href="{{ route('home') }}" class="btn btn-primary" style="background-color: var(--brand); border-color: var(--brand); font-weight: bold; padding: 10px 20px;">
                     Về trang chủ
                 </a>
                 <a href="{{ route('donhang.checkout') }}" class="btn btn-warning" style="font-weight: bold; padding: 10px 20px;">

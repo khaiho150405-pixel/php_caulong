@@ -13,9 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'check.admin' => \App\Http\Middleware\CheckAdmin::class,
+            // Phân quyền theo vai trò: role:admin | role:admin,nhanvien | role:khachhang
+            'role' => \App\Http\Middleware\CheckRole::class,
             'check.login' => \App\Http\Middleware\CheckLogin::class,
         ]);
+
+        // IPN của MoMo gọi server-to-server nên không có CSRF token (đã xác thực bằng chữ ký HMAC)
+        $middleware->validateCsrfTokens(except: ['DonHang/SavePayment']);
+
+        // Middleware 'auth' mặc định của Laravel chuyển khách về trang đăng nhập của dự án
+        $middleware->redirectGuestsTo(fn () => route('taikhoan.dangnhap'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

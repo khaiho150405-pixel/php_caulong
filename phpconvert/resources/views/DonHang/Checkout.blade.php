@@ -17,9 +17,6 @@
         </div>
     @endif
 
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     <div class="row">
         <div class="col-md-7">
@@ -51,7 +48,7 @@
                 <hr />
 
                 <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <button type="submit" class="btn btn-primary btn-lg" style="background-color: #f36f21; border-color: #f36f21; font-weight: bold; border-radius: 6px; padding: 12px 25px;">
+                    <button type="submit" class="btn btn-primary btn-lg" style="background-color: var(--brand); border-color: var(--brand); font-weight: bold; border-radius: 6px; padding: 12px 25px;">
                         <i class="fa fa-truck"></i> Thanh toán khi nhận hàng (COD)
                     </button>
 
@@ -89,7 +86,7 @@
                             Màu: {{ $variant->mauSac->TenMau ?? 'N/A' }} | Size: {{ $variant->size->TenSize ?? 'N/A' }} | SL: {{ $item->SoLuong }}
                         </span>
                     </div>
-                    <div style="font-weight: bold; color: #e65100;">
+                    <div style="font-weight: bold; color: var(--price);">
                         {{ number_format($thanhTien, 0, ',', '.') }}đ
                     </div>
                 </div>
@@ -97,7 +94,7 @@
 
             <hr />
             <h3 style="text-align: right; margin: 15px 0;">
-                Tổng cộng: <span style="color: #f36f21; font-weight: bold;">{{ number_format($total, 0, ',', '.') }}đ</span>
+                Tổng cộng: <span style="color: var(--brand); font-weight: bold;">{{ number_format($total, 0, ',', '.') }}đ</span>
             </h3>
         </div>
     </div>

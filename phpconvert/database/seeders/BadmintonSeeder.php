@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class BadmintonSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class BadmintonSeeder extends Seeder
     public function run(): void
     {
         // Tắt kiểm tra khóa ngoại để seed dữ liệu ban đầu
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        Schema::disableForeignKeyConstraints();
 
         DB::table('PhanHoi')->truncate();
         DB::table('ChiTietDonHang')->truncate();
@@ -253,6 +254,6 @@ class BadmintonSeeder extends Seeder
             ['NoiDung' => 'Cước căng chuẩn số kg, đóng gói cẩn thận.', 'NgayPhanHoi' => now(), 'DanhGia' => 4, 'MaKhachHang' => 3, 'MaSanPham' => 8],
         ]);
 
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        Schema::enableForeignKeyConstraints();
     }
 }

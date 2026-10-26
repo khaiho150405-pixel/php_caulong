@@ -55,7 +55,7 @@
 
         <div class="col-md-5" style="text-align: right;">
             <h4>Tổng thanh toán</h4>
-            <h2 style="color: #f36f21; font-weight: bold; margin-top: 10px;">{{ number_format($order->TongTien, 0, ',', '.') }}đ</h2>
+            <h2 style="color: var(--brand); font-weight: bold; margin-top: 10px;">{{ number_format($order->TongTien, 0, ',', '.') }}đ</h2>
         </div>
     </div>
 
@@ -105,7 +105,7 @@
                     </td>
                     <td>{{ number_format($item->DonGia, 0, ',', '.') }}đ</td>
                     <td>{{ $item->SoLuong }}</td>
-                    <td style="font-weight: bold; color: #e65100;">{{ number_format($item->ThanhTien, 0, ',', '.') }}đ</td>
+                    <td style="font-weight: bold; color: var(--price);">{{ number_format($item->ThanhTien, 0, ',', '.') }}đ</td>
                 </tr>
             @endforeach
         </tbody>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\KhuyenMaiRequest;
 use App\Models\KhuyenMai;
 use App\Models\SanPham;
 use Illuminate\Http\Request;
@@ -9,10 +10,20 @@ use Illuminate\Support\Facades\DB;
 
 class QuanLyKhuyenMaiController extends Controller
 {
-    public function index()
+    /**
+     * Danh sách khuyến mãi: tìm theo tên chương trình + phân trang (giữ từ khóa khi chuyển trang).
+     */
+    public function index(Request $request)
     {
-        $list = KhuyenMai::orderByDesc('NgayBatDau')->get();
-        return view('QuanLyKhuyenMai.Index', compact('list'));
+        $keyword = trim((string) $request->query('keyword', ''));
+
+        $list = KhuyenMai::withCount('sanPhams')
+            ->when($keyword !== '', fn ($q) => $q->where('TenChuongTrinh', 'LIKE', "%{$keyword}%"))
+            ->orderByDesc('NgayBatDau')
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('QuanLyKhuyenMai.Index', compact('list', 'keyword'));
     }
 
     public function create()
@@ -20,16 +31,9 @@ class QuanLyKhuyenMaiController extends Controller
         return view('QuanLyKhuyenMai.Create');
     }
 
-    public function createPost(Request $request)
+    public function createPost(KhuyenMaiRequest $request)
     {
-        $request->validate([
-            'TenChuongTrinh' => 'required|string|max:100',
-            'PhanTramGiam' => 'required|numeric|min:0|max:100',
-            'NgayBatDau' => 'required|date',
-            'NgayKetThuc' => 'required|date|after_or_equal:NgayBatDau',
-        ]);
-
-        KhuyenMai::create($request->all());
+        KhuyenMai::create($request->validated());
 
         return redirect()->route('quanlykhuyenmai.index')->with('message', 'Tạo khuyến mãi thành công!');
     }
@@ -40,18 +44,10 @@ class QuanLyKhuyenMaiController extends Controller
         return view('QuanLyKhuyenMai.Edit', compact('km'));
     }
 
-    public function editPost(Request $request, $id)
+    public function editPost(KhuyenMaiRequest $request, $id)
     {
         $km = KhuyenMai::findOrFail($id);
-
-        $request->validate([
-            'TenChuongTrinh' => 'required|string|max:100',
-            'PhanTramGiam' => 'required|numeric|min:0|max:100',
-            'NgayBatDau' => 'required|date',
-            'NgayKetThuc' => 'required|date|after_or_equal:NgayBatDau',
-        ]);
-
-        $km->update($request->all());
+        $km->update($request->validated());
 
         return redirect()->route('quanlykhuyenmai.index')->with('message', 'Cập nhật khuyến mãi thành công!');
     }

@@ -35,8 +35,8 @@
         line-height: 42px;
         text-align: center;
         margin-right: 15px;
-        color: #f36f21;
-        background-color: #fff4ed;
+        color: var(--brand);
+        background-color: var(--brand-50);
         border-radius: 50%;
         flex-shrink: 0;
     }
@@ -70,16 +70,16 @@
     }
 
     .btn-submit {
-        background-color: #f36f21;
-        border-color: #f36f21;
+        background-color: var(--brand);
+        border-color: var(--brand);
         font-weight: 600;
         padding: 12px 30px;
         border-radius: 6px;
     }
 
     .btn-submit:hover {
-        background-color: #d15d18;
-        border-color: #d15d18;
+        background-color: var(--brand-700);
+        border-color: var(--brand-700);
     }
 </style>
 @endsection
@@ -124,9 +124,6 @@
             <div class="col-md-6">
                 <h2 class="contact-heading">Gửi Tin Nhắn Cho Chúng Tôi</h2>
 
-                @if(session('message'))
-                    <div class="alert alert-success">{{ session('message') }}</div>
-                @endif
 
                 <form action="#" method="POST" onsubmit="event.preventDefault(); alert('Cảm ơn quý khách đã gửi tin nhắn liên hệ! Chúng tôi sẽ phản hồi sớm nhất.'); this.reset();">
                     @csrf

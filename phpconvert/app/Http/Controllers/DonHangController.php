@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CheckoutRequest;
 use App\Models\DonHang;
 use App\Models\GioHang;
 use App\Services\OrderService;
@@ -9,6 +10,7 @@ use App\Services\Payment\MomoPaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class DonHangController extends Controller
 {
@@ -37,13 +39,8 @@ class DonHangController extends Controller
         return view('DonHang.Checkout', compact('khachHang', 'cartItems', 'total'));
     }
 
-    public function checkoutPost(Request $request, OrderService $orderService)
+    public function checkoutPost(CheckoutRequest $request, OrderService $orderService)
     {
-        $request->validate([
-            'HoTenNhan' => 'required|string|max:100',
-            'SoDienThoaiNhan' => 'required|string|max:15',
-            'DiaChiGiao' => 'required|string|max:255',
-        ]);
 
         $user = Auth::user();
         $khachHang = $user->khachHang;
@@ -76,13 +73,8 @@ class DonHangController extends Controller
         }
     }
 
-    public function paymentMoMo(Request $request, OrderService $orderService, MomoPaymentService $momoService)
+    public function paymentMoMo(CheckoutRequest $request, OrderService $orderService, MomoPaymentService $momoService)
     {
-        $request->validate([
-            'HoTenNhan' => 'required|string|max:100',
-            'SoDienThoaiNhan' => 'required|string|max:15',
-            'DiaChiGiao' => 'required|string|max:255',
-        ]);
 
         $user = Auth::user();
         $khachHang = $user->khachHang;
@@ -107,66 +99,102 @@ class DonHangController extends Controller
             ];
 
             // Tạo đơn hàng tạm thời ở trạng thái Chờ thanh toán MoMo
-            $order = $orderService->createOrder($khachHang->MaKhachHang, $orderData, $cartItems, 'Chờ thanh toán MoMo');
+            // Giỏ hàng chỉ bị xóa khi MoMo báo thanh toán thành công
+            $order = $orderService->createOrder($khachHang->MaKhachHang, $orderData, $cartItems, 'Chờ thanh toán MoMo', false);
 
             // Tạo link thanh toán MoMo
             $payUrl = $momoService->createPayment($order->MaDonHang, (float)$order->TongTien, "Thanh toan don hang #{$order->MaDonHang}");
 
-            return redirect($payUrl);
+            return redirect()->away($payUrl);
         } catch (Exception $e) {
+            if (isset($order)) {
+                // Không tạo được link thanh toán -> hủy đơn tạm và hoàn kho
+                $orderService->huyDoThanhToanThatBai($order->MaDonHang);
+            }
             return redirect()->route('donhang.checkout')->with('error', 'Lỗi cổng MoMo: ' . $e->getMessage());
         }
     }
 
-    public function thanhToanMomoSuccess(Request $request)
+    /**
+     * MoMo chuyển hướng người dùng về (redirectUrl). Chuẩn MoMo v2 trả về "resultCode" và "signature".
+     * Chỉ cập nhật đơn khi chữ ký hợp lệ để tránh giả mạo URL.
+     */
+    public function thanhToanMomoSuccess(Request $request, MomoPaymentService $momoService, OrderService $orderService)
     {
-        $errorCode = $request->query('errorCode');
-        $orderId = (int)$request->query('orderId');
-        $message = $request->query('message', '');
-
+        $data = $request->query();
+        $orderId = (int) $request->query('orderId');
+        $resultCode = (string) $request->query('resultCode', $request->query('errorCode', '-1'));
         $order = DonHang::find($orderId);
-        $isSuccess = false;
 
-        if ($errorCode === '0' || $errorCode === 0) {
-            if ($order) {
-                $order->TrangThai = 'Đã thanh toán bằng MoMo';
-                $order->save();
-                if ($order->MaKhachHang) {
-                    GioHang::where('MaKhachHang', $order->MaKhachHang)->delete();
-                }
-                session(['GioHangCount' => 0]);
-                $isSuccess = true;
-            }
-        } else {
-            if ($order) {
-                $order->TrangThai = 'Đã hủy (Thanh toán thất bại)';
-                $order->save();
-            }
+        if (!$order || !$this->chuKyMomoHopLe($momoService, $data)) {
+            return view('DonHang.ThanhToanMomoSuccess', [
+                'isSuccess' => false,
+                'maDonHang' => $orderId,
+                'message' => 'Không xác thực được kết quả thanh toán từ MoMo.',
+                'description' => 'Chữ ký giao dịch không hợp lệ hoặc đơn hàng không tồn tại.',
+            ]);
         }
+
+        $isSuccess = $resultCode === '0';
+        $this->capNhatKetQuaMomo($order, $isSuccess, $orderService);
 
         return view('DonHang.ThanhToanMomoSuccess', [
             'isSuccess' => $isSuccess,
             'maDonHang' => $orderId,
             'message' => $isSuccess ? 'Giao dịch MoMo thành công!' : 'Giao dịch MoMo thất bại hoặc đã bị hủy.',
-            'description' => $message,
+            'description' => (string) $request->query('message', ''),
         ]);
     }
 
-    public function savePayment(Request $request)
+    /**
+     * IPN (MoMo gọi server-to-server). Phản hồi HTTP 204 theo tài liệu MoMo.
+     */
+    public function savePayment(Request $request, MomoPaymentService $momoService, OrderService $orderService)
     {
-        // IPN Webhook callback từ MoMo
-        $orderId = (int)$request->input('orderId');
-        $resultCode = $request->input('resultCode');
+        $data = $request->all();
+        $order = DonHang::find((int) $request->input('orderId'));
 
-        if ($orderId && ($resultCode == 0 || $resultCode == '0')) {
-            $order = DonHang::find($orderId);
-            if ($order) {
-                $order->TrangThai = 'Đã thanh toán bằng MoMo';
-                $order->save();
+        if ($order && $this->chuKyMomoHopLe($momoService, $data)) {
+            $this->capNhatKetQuaMomo($order, (string) $request->input('resultCode') === '0', $orderService);
+        } else {
+            Log::warning('MoMo IPN không hợp lệ', ['orderId' => $request->input('orderId')]);
+        }
+
+        return response()->noContent();
+    }
+
+    private function chuKyMomoHopLe(MomoPaymentService $momoService, array $data): bool
+    {
+        $batBuoc = ['amount', 'extraData', 'message', 'orderId', 'orderInfo', 'orderType', 'partnerCode',
+            'payType', 'requestId', 'responseTime', 'resultCode', 'transId', 'signature'];
+        foreach ($batBuoc as $key) {
+            if (!array_key_exists($key, $data)) {
+                return false;
             }
         }
 
-        return response()->json(['status' => 'success'], 204);
+        return $momoService->verifySignature($data);
+    }
+
+    private function capNhatKetQuaMomo(DonHang $order, bool $isSuccess, OrderService $orderService): void
+    {
+        // Chỉ xử lý đơn đang chờ thanh toán (tránh cập nhật lặp khi cả Return URL và IPN cùng gọi)
+        if ($order->TrangThai !== 'Chờ thanh toán MoMo') {
+            return;
+        }
+
+        if ($isSuccess) {
+            $order->TrangThai = 'Đã thanh toán bằng MoMo';
+            $order->save();
+            if ($order->MaKhachHang) {
+                GioHang::where('MaKhachHang', $order->MaKhachHang)->delete();
+                if (Auth::check()) {
+                    session(['GioHangCount' => 0]);
+                }
+            }
+        } else {
+            $orderService->huyDoThanhToanThatBai($order->MaDonHang);
+        }
     }
 
     public function index()

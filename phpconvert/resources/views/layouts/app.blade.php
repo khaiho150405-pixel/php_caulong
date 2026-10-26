@@ -4,14 +4,18 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Cửa Hàng Cầu Lông Online')</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap&subset=vietnamese" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" />
     <link href="{{ asset('css/bootstrap.min.css') }}" rel="stylesheet" />
+    <link href="{{ asset('css/theme.css') }}" rel="stylesheet" />
     <link href="{{ asset('css/Site.css') }}" rel="stylesheet" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
     @yield('styles')
 </head>
 
-<body>
+<body class="@yield('body_class')">
     <header class="main-header">
         <div class="header-top">
             <div class="logo">
@@ -54,39 +58,39 @@
                             </button>
                             <div class="user-menu">
                                 @if ($maQuyen == 1)
-                                    <a href="{{ route('quanlysanpham.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlysanpham.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-boxes-stacked"></i> Quản lý Sản phẩm
                                     </a>
-                                    <a href="{{ route('quanlytaikhoan.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlytaikhoan.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-users"></i> Quản lý tài khoản
                                     </a>
-                                    <a href="{{ route('quanlydonhang.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlydonhang.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-file-invoice"></i> Quản lý Đơn hàng
                                     </a>
-                                    <a href="{{ route('quanlykhuyenmai.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlykhuyenmai.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-tags"></i> Quản lý Khuyến mãi
                                     </a>
-                                    <hr style="margin: 5px 0;" />
-                                    <a href="{{ route('quanlysanpham.dashboard') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <hr />
+                                    <a href="{{ route('quanlysanpham.dashboard') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-chart-line"></i> Dashboard
                                     </a>
-                                    <a href="{{ route('quanlythongbao.thongbao') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlythongbao.thongbao') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-bell"></i> Thông Báo Đánh Giá Thấp
                                     </a>
-                                    <hr style="margin: 5px 0;" />
+                                    <hr />
                                 @endif
 
                                 @if ($maQuyen == 2)
-                                    <a href="{{ route('quanlysanpham.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlysanpham.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-boxes-stacked"></i> Quản lý Sản phẩm
                                     </a>
-                                    <a href="{{ route('quanlydonhang.index') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlydonhang.index') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-file-invoice"></i> Quản lý Đơn hàng
                                     </a>
-                                    <a href="{{ route('quanlythongbao.thongbao') }}" class="user-menu-item" style="font-weight: bold; background: #eee;">
+                                    <a href="{{ route('quanlythongbao.thongbao') }}" class="user-menu-item is-admin">
                                         <i class="fa-solid fa-bell"></i> Thông Báo Đánh Giá Thấp
                                     </a>
-                                    <hr style="margin: 5px 0;" />
+                                    <hr />
                                 @endif
 
                                 <a href="{{ route('taikhoan.thongtin') }}" class="user-menu-item">
@@ -98,9 +102,12 @@
                                 <a href="{{ route('donhang.index') }}" class="user-menu-item">
                                     <i class="fa-solid fa-clipboard-list"></i> Đơn hàng của tôi
                                 </a>
-                                <a href="{{ route('taikhoan.dangxuat') }}" class="user-menu-item">
-                                    <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
-                                </a>
+                                <form action="{{ route('taikhoan.dangxuat') }}" method="POST" class="m-0">
+                                    @csrf
+                                    <button type="submit" class="user-menu-item w-100 text-start border-0 bg-transparent">
+                                        <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                                    </button>
+                                </form>
                             </div>
                         </div>
                     @endguest
@@ -227,6 +234,7 @@
                 </li>
 
                 <li><a href="{{ route('khuyenmai.index') }}">KHUYẾN MÃI</a></li>
+                <li><a href="{{ route('bangtin.index') }}">BẢNG TIN</a></li>
                 <li><a href="{{ route('home.viewcart') }}">GIỎ HÀNG</a></li>
                 <li><a href="{{ route('donhang.index') }}">ĐƠN HÀNG</a></li>
                 <li><a href="{{ route('home.contact') }}">LIÊN HỆ</a></li>
@@ -234,25 +242,21 @@
         </nav>
     </header>
 
-    <div class="container my-4">
-        <main>
-            @if (session('message'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-circle-check"></i> {{ session('message') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+    @hasSection('full')
+        <main class="full-main">
+            @if (session('message') || session('error'))
+                <div class="container pt-4">@include('partials._flash')</div>
             @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <i class="fa-solid fa-triangle-exclamation"></i> {{ session('error') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
-
-            @yield('content')
+            @yield('full')
         </main>
-    </div>
+    @else
+        <div class="container my-4 my-lg-5">
+            <main>
+                @include('partials._flash')
+                @yield('content')
+            </main>
+        </div>
+    @endif
 
     <footer>
         <div class="footer-content">
@@ -278,7 +282,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} - HỆ THỐNG QUẢN LÝ BÁN HÀNG CẦU LÔNG (Laravel Edition)</p>
+            <p>&copy; {{ date('Y') }} Cửa hàng Cầu Lông HUIT. Bảo lưu mọi quyền.</p>
         </div>
     </footer>
 
@@ -344,7 +348,7 @@
 
                 $("#chat-history").append(`
                     <div class="d-flex justify-content-end mb-2">
-                        <div class="bg-primary text-white p-2 rounded" style="max-width: 80%; word-wrap: break-word;">
+                        <div class="bg-primary text-white px-3 py-2" style="max-width: 80%; word-wrap: break-word; border-radius: 14px 14px 4px 14px;">
                             ${escapeHtml(message)}
                         </div>
                     </div>
@@ -363,15 +367,15 @@
                         $("#loading").remove();
                         var botHtml = '';
                         if (response.success) {
-                            var botText = response.reply.replace(/\n/g, "<br>");
+                            var botText = escapeHtml(response.reply).replace(/\n/g, "<br>");
                             botHtml = `
                                 <div class="d-flex justify-content-start mb-2">
-                                    <div class="bg-light text-dark border p-2 rounded" style="max-width: 85%; word-wrap: break-word;">
+                                    <div class="bg-white text-dark border px-3 py-2" style="max-width: 85%; word-wrap: break-word; border-radius: 14px 14px 14px 4px;">
                                         ${botText}
                                     </div>
                                 </div>`;
                         } else {
-                            botHtml = `<div class="text-danger small my-2">Lỗi: ${response.reply}</div>`;
+                            botHtml = `<div class="text-danger small my-2">Lỗi: ${escapeHtml(response.reply)}</div>`;
                         }
                         $("#chat-history").append(botHtml);
                         scrollToBottom();

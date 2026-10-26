@@ -45,7 +45,9 @@ return [
     ],
 
     'gemini' => [
-        'api_key' => env('GEMINI_API_KEY', 'AIzaSyAMxKz6nijigPzmjdv5sBBYzjGZuvhq66s'),
+        // KHÔNG ghi API key trực tiếp vào mã nguồn - khai báo GEMINI_API_KEY trong file .env
+        'api_key' => env('GEMINI_API_KEY'),
+        'model' => env('GEMINI_MODEL', 'gemini-2.5-flash'),
     ],
 
 ];

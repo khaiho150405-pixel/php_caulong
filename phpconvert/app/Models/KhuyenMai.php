@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use Database\Factories\KhuyenMaiFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 class KhuyenMai extends Model
 {
+    /** @use HasFactory<KhuyenMaiFactory> */
+    use HasFactory;
+
     protected $table = 'KhuyenMai';
     protected $primaryKey = 'MaKhuyenMai';
     public $timestamps = false;
@@ -27,6 +32,11 @@ class KhuyenMai extends Model
         'PhanTramGiam' => 'decimal:2',
         'GiamToiDa' => 'decimal:2',
     ];
+
+    protected static function newFactory(): KhuyenMaiFactory
+    {
+        return KhuyenMaiFactory::new();
+    }
 
     public function sanPhams()
     {

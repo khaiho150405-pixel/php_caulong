@@ -11,12 +11,25 @@
         </a>
     </div>
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
+    <form action="{{ route('quanlytaikhoan.index') }}" method="GET" class="row g-2 mb-3">
+        <div class="col-md-5">
+            <input type="text" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Tìm theo tên đăng nhập, email, họ tên..." />
+        </div>
+        <div class="col-md-3">
+            <select name="maQuyen" class="form-select">
+                <option value="">-- Tất cả quyền --</option>
+                @foreach ($phanQuyens as $pq)
+                    <option value="{{ $pq->MaQuyen }}" @selected((string) $maQuyen === (string) $pq->MaQuyen)>{{ $pq->TenQuyen }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-primary"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
+            @if ($keyword !== '' || $maQuyen)
+                <a href="{{ route('quanlytaikhoan.index') }}" class="btn btn-outline-secondary">Xóa lọc</a>
+            @endif
+        </div>
+    </form>
 
     <div class="table-responsive">
         <table class="table table-bordered table-hover align-middle">
@@ -32,7 +45,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach ($danhSach as $item)
+                @forelse ($danhSach as $item)
                     <tr>
                         <td class="fw-bold">#{{ $item->MaTaiKhoan }}</td>
                         <td>{{ $item->TenDangNhap }}</td>
@@ -52,14 +65,20 @@
                             <a href="{{ route('quanlytaikhoan.edit', ['id' => $item->MaTaiKhoan]) }}" class="btn btn-sm btn-outline-warning">
                                 <i class="fa-solid fa-pen"></i> Sửa
                             </a>
-                            <a href="{{ route('quanlytaikhoan.delete', ['id' => $item->MaTaiKhoan]) }}" class="btn btn-sm btn-outline-danger">
-                                <i class="fa-solid fa-trash"></i> Xóa
-                            </a>
+                            @if ($item->MaTaiKhoan !== Auth::id())
+                                <a href="{{ route('quanlytaikhoan.delete', ['id' => $item->MaTaiKhoan]) }}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fa-solid fa-trash"></i> Xóa
+                                </a>
+                            @endif
                         </td>
                     </tr>
-                @endforeach
+                @empty
+                    <tr><td colspan="7" class="p-0">@include('partials._empty', ['message' => 'Không tìm thấy tài khoản nào.'])</td></tr>
+                @endforelse
             </tbody>
         </table>
     </div>
+
+    @include('partials._pagination', ['items' => $danhSach])
 </div>
 @endsection

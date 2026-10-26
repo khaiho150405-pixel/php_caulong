@@ -7,17 +7,9 @@
     <h2>🛍️ Giỏ hàng của bạn</h2>
     <hr />
 
-    @if (session('message'))
-        <div class="alert alert-success">{{ session('message') }}</div>
-    @endif
-    @if (session('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
     @if ($cartItems->isEmpty())
-        <div class="alert alert-info">
-            Giỏ hàng của bạn hiện đang trống. <a href="{{ route('home') }}" class="alert-link">Tiếp tục mua sắm</a>.
-        </div>
+        @include('partials._empty', ['message' => 'Giỏ hàng của bạn hiện đang trống.', 'linkUrl' => route('home'), 'linkText' => 'Tiếp tục mua sắm', 'compact' => false])
     @else
         @php
             $total = 0;
@@ -71,7 +63,7 @@
                         <td>
                             <input type="number" value="{{ $item->SoLuong }}" min="1" readonly style="width: 60px; text-align: center; border: 1px solid #ccc; border-radius: 4px; padding: 4px;" />
                         </td>
-                        <td style="font-weight: bold; color: #e65100;">{{ number_format($thanhTien, 0, ',', '.') }} đ</td>
+                        <td style="font-weight: bold; color: var(--price);">{{ number_format($thanhTien, 0, ',', '.') }} đ</td>
                         <td>
                             <form action="{{ route('home.removefromcart', ['maGioHang' => $item->MaGioHang]) }}" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?');">
                                 @csrf
@@ -84,8 +76,8 @@
         </table>
 
         <div class="cart-summary" style="text-align: right; margin-top: 20px;">
-            <h3>Tổng tiền giỏ hàng: <span style="color: #f36f21; font-weight: bold;">{{ number_format($total, 0, ',', '.') }} đ</span></h3>
-            <a href="{{ route('donhang.checkout') }}" class="btn btn-primary btn-checkout" style="background-color: #f36f21; border-color: #f36f21; padding: 12px 28px; font-size: 16px; font-weight: bold; border-radius: 6px;">
+            <h3>Tổng tiền giỏ hàng: <span style="color: var(--brand); font-weight: bold;">{{ number_format($total, 0, ',', '.') }} đ</span></h3>
+            <a href="{{ route('donhang.checkout') }}" class="btn btn-primary btn-checkout" style="background-color: var(--brand); border-color: var(--brand); padding: 12px 28px; font-size: 16px; font-weight: bold; border-radius: 6px;">
                 Tiến hành Thanh toán &rarr;
             </a>
         </div>

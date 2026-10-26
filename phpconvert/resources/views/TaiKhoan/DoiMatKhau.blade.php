@@ -18,12 +18,6 @@
             </div>
         @endif
 
-        @if (session('message'))
-            <div class="alert alert-success">{{ session('message') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
 
         <form action="{{ route('taikhoan.doimatkhau') }}" method="POST">
             @csrf
@@ -44,7 +38,7 @@
             </div>
 
             <div class="form-group">
-                <button type="submit" class="btn btn-primary" style="background-color: #f36f21; border-color: #f36f21; width: 100%; height: 44px; font-size: 16px; font-weight: bold; border-radius: 6px;">
+                <button type="submit" class="btn btn-primary" style="background-color: var(--brand); border-color: var(--brand); width: 100%; height: 44px; font-size: 16px; font-weight: bold; border-radius: 6px;">
                     Xác nhận đổi mật khẩu
                 </button>
             </div>

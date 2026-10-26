@@ -10,10 +10,12 @@ use Exception;
 class GeminiChatbotService
 {
     protected string $apiKey;
+    protected string $model;
 
     public function __construct()
     {
-        $this->apiKey = config('services.gemini.api_key', env('GEMINI_API_KEY', ''));
+        $this->apiKey = (string) config('services.gemini.api_key', '');
+        $this->model = (string) config('services.gemini.model', 'gemini-2.5-flash');
     }
 
     /**
@@ -85,7 +87,15 @@ class GeminiChatbotService
             }
 
             // BƯỚC 4: GỌI GOOGLE GEMINI API
-            $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={$this->apiKey}";
+            // Chưa cấu hình API key -> trả lời bằng dữ liệu tra cứu trong kho
+            if ($this->apiKey === '') {
+                return [
+                    'success' => true,
+                    'reply' => "Dưới đây là một số gợi ý cho bạn:\n" . $contextData,
+                ];
+            }
+
+            $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$this->model}:generateContent?key={$this->apiKey}";
 
             $prompt = "Bạn là trợ lý ảo tư vấn bán thiết bị cầu lông thông minh, lịch sự, chuyên nghiệp của Shop Cầu Lông.\n" .
                 "Dưới đây là dữ liệu thực tế từ hệ thống kho hàng:\n{$contextData}\n\n" .

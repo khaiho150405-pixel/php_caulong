@@ -2,30 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\PhanHoiRequest;
 use App\Models\PhanHoi;
-use Illuminate\Http\Request;
+use App\Models\SanPham;
 use Illuminate\Support\Facades\Auth;
 
 class ThemPhanHoiSPController extends Controller
 {
     public function reviewForm($maSP)
     {
-        if (!Auth::check()) {
-            return redirect()->route('home.chitietsanpham', ['id' => $maSP])
-                ->with('error', 'Bạn cần đăng nhập để gửi phản hồi!');
-        }
+        SanPham::findOrFail($maSP);
 
         return view('ThemPhanHoiSP.ReviewForm', ['maSP' => $maSP]);
     }
 
-    public function submitReview(Request $request)
+    public function submitReview(PhanHoiRequest $request)
     {
-        if (!Auth::check()) {
-            $maSP = $request->input('maSP');
-            return redirect()->route('home.chitietsanpham', ['id' => $maSP])
-                ->with('error', 'Bạn cần đăng nhập để gửi phản hồi!');
-        }
-
         $user = Auth::user();
         $khachHang = $user->khachHang;
         $maSP = (int)$request->input('maSP');
@@ -35,8 +27,8 @@ class ThemPhanHoiSPController extends Controller
                 ->with('error', 'Tài khoản của bạn không phải là khách hàng và không thể gửi đánh giá.');
         }
 
-        $danhGia = min(5, max(1, (int)$request->input('danhGia', 5)));
-        $noiDung = $request->input('noiDung');
+        $danhGia = (int) $request->validated('danhGia');
+        $noiDung = $request->validated('noiDung');
 
         PhanHoi::create([
             'MaKhachHang' => $khachHang->MaKhachHang,

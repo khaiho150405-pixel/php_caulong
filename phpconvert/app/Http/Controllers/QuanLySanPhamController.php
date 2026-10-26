@@ -2,27 +2,57 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SanPham;
+use App\Http\Requests\Admin\ChiTietSanPhamRequest;
+use App\Http\Requests\Admin\SanPhamRequest;
+use App\Models\ChiTietDonHang;
 use App\Models\ChiTietSanPham;
-use App\Models\LoaiSanPham;
-use App\Models\NhaCungCap;
+use App\Models\DonHang;
+use App\Models\GioHang;
 use App\Models\Hang;
 use App\Models\KhuyenMai;
-use App\Models\DonHang;
-use App\Models\ChiTietDonHang;
+use App\Models\LoaiSanPham;
+use App\Models\MauSac;
+use App\Models\NhaCungCap;
+use App\Models\PhanHoi;
+use App\Models\SanPham;
+use App\Models\Size;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\File;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class QuanLySanPhamController extends Controller
 {
-    public function index()
-    {
-        $sanPhams = SanPham::with(['loaiSanPham', 'hang'])
-            ->orderByDesc('NgayTao')
-            ->get();
+    /** Ảnh mặc định khi sản phẩm chưa có hình */
+    private const ANH_MAC_DINH = 'default-product.jpg';
 
-        return view('QuanLySanPham.Index', compact('sanPhams'));
+    /** Thư mục con (trong disk "images") chứa ảnh upload */
+    private const THU_MUC_UPLOAD = 'uploads';
+
+    /**
+     * Danh sách sản phẩm: tìm kiếm theo từ khóa + lọc theo loại/hãng + phân trang (giữ query string).
+     */
+    public function index(Request $request)
+    {
+        $keyword = trim((string) $request->query('keyword', ''));
+        $maLoai = $request->query('maLoai');
+        $maHang = $request->query('maHang');
+
+        $sanPhams = SanPham::with(['loaiSanPham', 'hang'])
+            ->withSum('chiTietSanPhams as tong_ton_kho', 'SoLuongTon')
+            ->timKiem($keyword)
+            ->when($maLoai, fn ($q) => $q->where('MaLoai', $maLoai))
+            ->when($maHang, fn ($q) => $q->where('MaHang', $maHang))
+            ->orderByDesc('NgayTao')
+            ->orderByDesc('MaSanPham')
+            ->paginate(10)
+            ->withQueryString();
+
+        $loaiSanPhams = LoaiSanPham::orderBy('TenLoai')->get();
+        $hangs = Hang::orderBy('TenHang')->get();
+
+        return view('QuanLySanPham.Index', compact('sanPhams', 'keyword', 'maLoai', 'maHang', 'loaiSanPhams', 'hangs'));
     }
 
     public function details($id)
@@ -34,99 +64,52 @@ class QuanLySanPhamController extends Controller
             'khuyenMai',
             'chiTietSanPhams.mauSac',
             'chiTietSanPhams.size',
-        ])->where('MaSanPham', $id)->firstOrFail();
+        ])->findOrFail($id);
 
-        return view('QuanLySanPham.Details', compact('sanPham'));
+        $mauSacs = MauSac::orderBy('TenMau')->get();
+        $sizes = Size::orderBy('LoaiSize')->orderBy('MaSize')->get();
+
+        return view('QuanLySanPham.Details', compact('sanPham', 'mauSacs', 'sizes'));
     }
 
     public function create()
     {
-        $loaiSanPhams = LoaiSanPham::all();
-        $nhaCungCaps = NhaCungCap::all();
-        $hangs = Hang::all();
-        $khuyenMais = KhuyenMai::all();
-
-        return view('QuanLySanPham.Create', compact('loaiSanPhams', 'nhaCungCaps', 'hangs', 'khuyenMais'));
+        return view('QuanLySanPham.Create', $this->duLieuForm());
     }
 
-    public function createPost(Request $request)
+    public function createPost(SanPhamRequest $request)
     {
-        $request->validate([
-            'TenSanPham' => 'required|string|max:100',
-            'GiaGoc' => 'required|numeric|min:0',
-            'HinhAnhUpload' => 'nullable|image|max:5120',
-        ]);
+        $data = $this->duLieuSanPham($request);
+        $data['HinhAnhDaiDien'] = $request->hasFile('HinhAnhUpload')
+            ? $this->luuAnh($request->file('HinhAnhUpload'))
+            : self::ANH_MAC_DINH;
+        $data['NgayTao'] = now();
 
-        $fileName = 'default-product.jpg';
-        if ($request->hasFile('HinhAnhUpload')) {
-            $file = $request->file('HinhAnhUpload');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $fileName);
-        }
+        $sanPham = SanPham::create($data);
 
-        $sanPham = SanPham::create([
-            'TenSanPham' => $request->input('TenSanPham'),
-            'MoTa' => $request->input('MoTa'),
-            'GiaGoc' => $request->input('GiaGoc'),
-            'HinhAnhDaiDien' => $fileName,
-            'MaLoai' => $request->input('MaLoai'),
-            'MaNhaCungCap' => $request->input('MaNhaCungCap'),
-            'MaHang' => $request->input('MaHang'),
-            'MaKhuyenMai' => $request->input('MaKhuyenMai') ?: null,
-            'CoSize' => $request->has('CoSize') ? 1 : 0,
-            'CoMau' => $request->has('CoMau') ? 1 : 0,
-            'NgayTao' => now(),
-        ]);
-
-        return redirect()->route('quanlysanpham.index')->with('message', 'Thêm sản phẩm thành công!');
+        return redirect()->route('quanlysanpham.details', ['id' => $sanPham->MaSanPham])
+            ->with('message', "Thêm sản phẩm \"{$sanPham->TenSanPham}\" thành công! Hãy thêm biến thể (màu/size, tồn kho) để khách có thể đặt mua.");
     }
 
     public function edit($id)
     {
         $sanPham = SanPham::findOrFail($id);
-        $loaiSanPhams = LoaiSanPham::all();
-        $nhaCungCaps = NhaCungCap::all();
-        $hangs = Hang::all();
-        $khuyenMais = KhuyenMai::all();
 
-        return view('QuanLySanPham.Edit', compact('sanPham', 'loaiSanPhams', 'nhaCungCaps', 'hangs', 'khuyenMais'));
+        return view('QuanLySanPham.Edit', array_merge(['sanPham' => $sanPham], $this->duLieuForm()));
     }
 
-    public function editPost(Request $request, $id)
+    public function editPost(SanPhamRequest $request, $id)
     {
         $sanPham = SanPham::findOrFail($id);
-
-        $request->validate([
-            'TenSanPham' => 'required|string|max:100',
-            'GiaGoc' => 'required|numeric|min:0',
-            'HinhAnhUpload' => 'nullable|image|max:5120',
-        ]);
+        $data = $this->duLieuSanPham($request);
 
         if ($request->hasFile('HinhAnhUpload')) {
-            $file = $request->file('HinhAnhUpload');
-            $fileName = time() . '_' . $file->getClientOriginalName();
-            $file->move(public_path('images'), $fileName);
-
-            // Xóa ảnh cũ nếu có
-            if ($sanPham->HinhAnhDaiDien && $sanPham->HinhAnhDaiDien !== 'default-product.jpg') {
-                $oldPath = public_path('images/' . $sanPham->HinhAnhDaiDien);
-                if (File::exists($oldPath)) {
-                    File::delete($oldPath);
-                }
-            }
-            $sanPham->HinhAnhDaiDien = $fileName;
+            $anhCu = $sanPham->HinhAnhDaiDien;
+            $data['HinhAnhDaiDien'] = $this->luuAnh($request->file('HinhAnhUpload'));
+            $this->xoaAnhUpload($anhCu);
         }
 
-        $sanPham->TenSanPham = $request->input('TenSanPham');
-        $sanPham->MoTa = $request->input('MoTa');
-        $sanPham->GiaGoc = $request->input('GiaGoc');
-        $sanPham->MaLoai = $request->input('MaLoai');
-        $sanPham->MaNhaCungCap = $request->input('MaNhaCungCap');
-        $sanPham->MaHang = $request->input('MaHang');
-        $sanPham->MaKhuyenMai = $request->input('MaKhuyenMai') ?: null;
-        $sanPham->CoSize = $request->has('CoSize') ? 1 : 0;
-        $sanPham->CoMau = $request->has('CoMau') ? 1 : 0;
-        $sanPham->save();
+        $sanPham->update($data);
 
         return redirect()->route('quanlysanpham.index')->with('message', 'Cập nhật sản phẩm thành công!');
     }
@@ -134,80 +117,146 @@ class QuanLySanPhamController extends Controller
     public function delete($id)
     {
         $sanPham = SanPham::with(['loaiSanPham', 'hang', 'nhaCungCap'])->findOrFail($id);
+
         return view('QuanLySanPham.Delete', compact('sanPham'));
     }
 
+    /**
+     * Xóa mềm (Soft Delete): sản phẩm ẩn khỏi cửa hàng nhưng đơn hàng cũ vẫn giữ nguyên thông tin.
+     */
     public function deleteConfirmed($id)
     {
         $sanPham = SanPham::findOrFail($id);
 
-        if ($sanPham->HinhAnhDaiDien && $sanPham->HinhAnhDaiDien !== 'default-product.jpg') {
-            $path = public_path('images/' . $sanPham->HinhAnhDaiDien);
-            if (File::exists($path)) {
-                File::delete($path);
-            }
+        DB::transaction(function () use ($sanPham) {
+            // Bỏ sản phẩm khỏi giỏ hàng của khách
+            GioHang::whereIn('MaChiTietSanPham', $sanPham->chiTietSanPhams()->pluck('MaChiTiet'))->delete();
+            $sanPham->delete();
+        });
+
+        return redirect()->route('quanlysanpham.index')
+            ->with('message', "Đã xóa sản phẩm \"{$sanPham->TenSanPham}\" thành công!");
+    }
+
+    /* ==================== BIẾN THỂ SẢN PHẨM (ChiTietSanPham) ==================== */
+
+    public function bienTheStore(ChiTietSanPhamRequest $request, $id)
+    {
+        $sanPham = SanPham::findOrFail($id);
+
+        $data = $request->safe()->only(['MaMau', 'MaSize', 'GiaBan', 'SoLuongTon', 'SKU']);
+        if ($request->hasFile('HinhAnhUpload')) {
+            $data['HinhAnh'] = $this->luuAnh($request->file('HinhAnhUpload'));
         }
 
-        $sanPham->delete();
-        return redirect()->route('quanlysanpham.index')->with('message', 'Đã xóa sản phẩm thành công!');
+        $sanPham->chiTietSanPhams()->create($data);
+
+        return redirect()->route('quanlysanpham.details', ['id' => $sanPham->MaSanPham])
+            ->with('message', "Đã thêm biến thể SKU \"{$data['SKU']}\".");
     }
+
+    public function bienTheEdit($maChiTiet)
+    {
+        $bienThe = ChiTietSanPham::with('sanPham')->findOrFail($maChiTiet);
+        $mauSacs = MauSac::orderBy('TenMau')->get();
+        $sizes = Size::orderBy('LoaiSize')->orderBy('MaSize')->get();
+
+        return view('QuanLySanPham.EditBienThe', compact('bienThe', 'mauSacs', 'sizes'));
+    }
+
+    public function bienTheUpdate(ChiTietSanPhamRequest $request, $maChiTiet)
+    {
+        $bienThe = ChiTietSanPham::findOrFail($maChiTiet);
+
+        $data = $request->safe()->only(['MaMau', 'MaSize', 'GiaBan', 'SoLuongTon', 'SKU']);
+        if ($request->hasFile('HinhAnhUpload')) {
+            $anhCu = $bienThe->HinhAnh;
+            $data['HinhAnh'] = $this->luuAnh($request->file('HinhAnhUpload'));
+            $this->xoaAnhUpload($anhCu);
+        }
+
+        $bienThe->update($data);
+
+        return redirect()->route('quanlysanpham.details', ['id' => $bienThe->MaSanPham])
+            ->with('message', "Cập nhật biến thể SKU \"{$bienThe->SKU}\" thành công!");
+    }
+
+    public function bienTheDestroy($maChiTiet)
+    {
+        $bienThe = ChiTietSanPham::findOrFail($maChiTiet);
+
+        // Biến thể đã có trong đơn hàng thì không xóa để giữ lịch sử, chỉ cho phép đặt tồn kho = 0
+        if (ChiTietDonHang::where('MaChiTietSanPham', $bienThe->MaChiTiet)->exists()) {
+            return redirect()->route('quanlysanpham.details', ['id' => $bienThe->MaSanPham])
+                ->with('error', "Biến thể SKU \"{$bienThe->SKU}\" đã phát sinh đơn hàng nên không thể xóa. Hãy sửa tồn kho về 0 để ngừng bán.");
+        }
+
+        $maSanPham = $bienThe->MaSanPham;
+        $sku = $bienThe->SKU;
+        $anh = $bienThe->HinhAnh;
+        $bienThe->delete();
+        $this->xoaAnhUpload($anh);
+
+        return redirect()->route('quanlysanpham.details', ['id' => $maSanPham])
+            ->with('message', "Đã xóa biến thể SKU \"{$sku}\".");
+    }
+
+    /* ==================== DASHBOARD THỐNG KÊ ==================== */
 
     public function dashboard(Request $request)
     {
-        $namHienTai = (int)$request->query('nam', date('Y'));
+        $namHienTai = (int) $request->query('nam', date('Y'));
+        if ($namHienTai < 2000 || $namHienTai > 2100) {
+            $namHienTai = (int) date('Y');
+        }
+
+        $trangThaiLoaiTru = ['Đã hủy', 'Đã hủy (Thanh toán thất bại)'];
+
+        $thongKe = function (Carbon $tu, Carbon $den) use ($trangThaiLoaiTru) {
+            return DonHang::whereBetween('NgayDat', [$tu, $den])
+                ->whereNotIn('TrangThai', $trangThaiLoaiTru)
+                ->selectRaw('COUNT(*) as SoLuongDon, COALESCE(SUM(TongTienSauGiam), 0) as TongDoanhThu')
+                ->first();
+        };
 
         // 1. Doanh thu theo năm
-        $doanhThuNamData = DonHang::whereYear('NgayDat', $namHienTai)
-            ->whereNotIn('TrangThai', ['Đã hủy', 'Đã hủy (Thanh toán thất bại)'])
-            ->selectRaw('COUNT(*) as SoLuongDon, COALESCE(SUM(TongTienSauGiam), 0) as TongDoanhThu')
-            ->first();
-
-        $tongDoanhThuNam = (float)($doanhThuNamData->TongDoanhThu ?? 0);
-        $soLuongDonNam = (int)($doanhThuNamData->SoLuongDon ?? 0);
+        $dauNam = Carbon::create($namHienTai, 1, 1)->startOfDay();
+        $doanhThuNamData = $thongKe($dauNam, $dauNam->copy()->endOfYear());
+        $tongDoanhThuNam = (float) ($doanhThuNamData->TongDoanhThu ?? 0);
+        $soLuongDonNam = (int) ($doanhThuNamData->SoLuongDon ?? 0);
 
         // 2. Doanh thu theo quý
         $doanhThuQuy = [];
         for ($q = 1; $q <= 4; $q++) {
-            $quarterMonths = match ($q) {
-                1 => [1, 2, 3],
-                2 => [4, 5, 6],
-                3 => [7, 8, 9],
-                4 => [10, 11, 12],
-            };
-            $res = DonHang::whereYear('NgayDat', $namHienTai)
-                ->whereIn(DB::raw('MONTH(NgayDat)'), $quarterMonths)
-                ->whereNotIn('TrangThai', ['Đã hủy', 'Đã hủy (Thanh toán thất bại)'])
-                ->selectRaw('COUNT(*) as SoLuongDon, COALESCE(SUM(TongTienSauGiam), 0) as TongDoanhThu')
-                ->first();
-
-            $doanhThuQuy[] = (object)[
+            $tu = Carbon::create($namHienTai, ($q - 1) * 3 + 1, 1)->startOfDay();
+            $res = $thongKe($tu, $tu->copy()->addMonths(2)->endOfMonth());
+            $doanhThuQuy[] = (object) [
                 'Quy' => $q,
                 'Nam' => $namHienTai,
-                'SoLuongDon' => (int)($res->SoLuongDon ?? 0),
-                'TongDoanhThu' => (float)($res->TongDoanhThu ?? 0),
+                'SoLuongDon' => (int) ($res->SoLuongDon ?? 0),
+                'TongDoanhThu' => (float) ($res->TongDoanhThu ?? 0),
             ];
         }
 
         // 3. Doanh thu theo tháng
         $doanhThuThang = [];
         for ($m = 1; $m <= 12; $m++) {
-            $res = DonHang::whereYear('NgayDat', $namHienTai)
-                ->whereMonth('NgayDat', $m)
-                ->whereNotIn('TrangThai', ['Đã hủy', 'Đã hủy (Thanh toán thất bại)'])
-                ->selectRaw('COUNT(*) as SoLuongDon, COALESCE(SUM(TongTienSauGiam), 0) as TongDoanhThu')
-                ->first();
-
-            $doanhThuThang[] = (object)[
+            $tu = Carbon::create($namHienTai, $m, 1)->startOfDay();
+            $res = $thongKe($tu, $tu->copy()->endOfMonth());
+            $doanhThuThang[] = (object) [
                 'Thang' => $m,
                 'Nam' => $namHienTai,
-                'SoLuongDon' => (int)($res->SoLuongDon ?? 0),
-                'TongDoanhThu' => (float)($res->TongDoanhThu ?? 0),
+                'SoLuongDon' => (int) ($res->SoLuongDon ?? 0),
+                'TongDoanhThu' => (float) ($res->TongDoanhThu ?? 0),
             ];
         }
 
-        // 4. Sản phẩm bán chạy (Top 10)
-        $sanPhamBanChay = ChiTietDonHang::join('ChiTietSanPham', 'ChiTietDonHang.MaChiTietSanPham', '=', 'ChiTietSanPham.MaChiTiet')
+        // 4. Sản phẩm bán chạy (Top 10) trong năm, không tính đơn đã hủy
+        $sanPhamBanChay = ChiTietDonHang::join('DonHang', 'ChiTietDonHang.MaDonHang', '=', 'DonHang.MaDonHang')
+            ->join('ChiTietSanPham', 'ChiTietDonHang.MaChiTietSanPham', '=', 'ChiTietSanPham.MaChiTiet')
             ->join('SanPham', 'ChiTietSanPham.MaSanPham', '=', 'SanPham.MaSanPham')
+            ->whereBetween('DonHang.NgayDat', [$dauNam, $dauNam->copy()->endOfYear()])
+            ->whereNotIn('DonHang.TrangThai', $trangThaiLoaiTru)
             ->select(
                 'SanPham.MaSanPham',
                 'SanPham.TenSanPham',
@@ -220,7 +269,12 @@ class QuanLySanPhamController extends Controller
             ->take(10)
             ->get();
 
+        $tongSanPham = SanPham::count();
+        $soCanhBao = PhanHoi::where('DanhGia', '<=', 2)->count();
+
         return view('QuanLySanPham.Dashboard', compact(
+            'tongSanPham',
+            'soCanhBao',
             'namHienTai',
             'tongDoanhThuNam',
             'soLuongDonNam',
@@ -228,5 +282,47 @@ class QuanLySanPhamController extends Controller
             'doanhThuThang',
             'sanPhamBanChay'
         ));
+    }
+
+    /* ==================== HÀM HỖ TRỢ ==================== */
+
+    private function duLieuForm(): array
+    {
+        return [
+            'loaiSanPhams' => LoaiSanPham::orderBy('TenLoai')->get(),
+            'nhaCungCaps' => NhaCungCap::orderBy('TenNhaCungCap')->get(),
+            'hangs' => Hang::orderBy('TenHang')->get(),
+            'khuyenMais' => KhuyenMai::orderByDesc('NgayBatDau')->get(),
+        ];
+    }
+
+    private function duLieuSanPham(SanPhamRequest $request): array
+    {
+        $data = $request->safe()->only([
+            'TenSanPham', 'MoTa', 'GiaGoc', 'MaLoai', 'MaNhaCungCap', 'MaHang', 'MaKhuyenMai',
+        ]);
+        $data['MaKhuyenMai'] = $data['MaKhuyenMai'] ?? null;
+        $data['CoSize'] = $request->boolean('CoSize');
+        $data['CoMau'] = $request->boolean('CoMau');
+
+        return $data;
+    }
+
+    /**
+     * Lưu ảnh qua Laravel Storage (disk "images" = public/images), trả về đường dẫn tương đối.
+     */
+    private function luuAnh(UploadedFile $file): string
+    {
+        return $file->store(self::THU_MUC_UPLOAD, 'images');
+    }
+
+    /**
+     * Chỉ xóa ảnh do Admin upload (thư mục uploads/), không xóa ảnh mẫu của dự án.
+     */
+    private function xoaAnhUpload(?string $duongDan): void
+    {
+        if ($duongDan && str_starts_with($duongDan, self::THU_MUC_UPLOAD . '/')) {
+            Storage::disk('images')->delete($duongDan);
+        }
     }
 }

@@ -33,14 +33,14 @@
 
     .review-form-container textarea:focus {
         outline: none;
-        border-color: #f36f21;
+        border-color: var(--brand);
         box-shadow: 0 0 5px rgba(243, 111, 33, 0.4);
     }
 
     .btn-submit-review {
         margin-top: 25px;
         padding: 12px 30px;
-        background: #f36f21;
+        background: var(--brand);
         color: #fff;
         font-weight: 600;
         font-size: 16px;
@@ -52,7 +52,7 @@
     }
 
     .btn-submit-review:hover {
-        background: #d15d18;
+        background: var(--brand-700);
     }
 
     .star-rating {
@@ -78,7 +78,7 @@
     .star-rating label:hover,
     .star-rating label:hover ~ label,
     .star-rating input[type="radio"]:checked ~ label {
-        color: #ffc107;
+        color: var(--star);
     }
 </style>
 @endsection
@@ -89,30 +89,40 @@
         <h2 style="margin-top: 0; font-size: 22px; font-weight: 700;">Gửi đánh giá sản phẩm</h2>
         <hr />
 
+        @if ($errors->any())
+            <div class="alert alert-danger">
+                <ul class="mb-0">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <form action="{{ route('themphanhoisp.submitreview') }}" method="POST">
             @csrf
             <input type="hidden" name="maSP" value="{{ $maSP }}" />
 
             <label>Đánh giá chất lượng:</label>
             <div class="star-rating">
-                <input type="radio" id="star5" name="danhGia" value="5" checked required />
+                <input type="radio" id="star5" name="danhGia" value="5" @checked(old('danhGia', 5) == 5) required />
                 <label for="star5" title="5 sao"><i class="fa fa-star"></i></label>
 
-                <input type="radio" id="star4" name="danhGia" value="4" />
+                <input type="radio" id="star4" name="danhGia" value="4" @checked(old('danhGia', 5) == 4) />
                 <label for="star4" title="4 sao"><i class="fa fa-star"></i></label>
 
-                <input type="radio" id="star3" name="danhGia" value="3" />
+                <input type="radio" id="star3" name="danhGia" value="3" @checked(old('danhGia', 5) == 3) />
                 <label for="star3" title="3 sao"><i class="fa fa-star"></i></label>
 
-                <input type="radio" id="star2" name="danhGia" value="2" />
+                <input type="radio" id="star2" name="danhGia" value="2" @checked(old('danhGia', 5) == 2) />
                 <label for="star2" title="2 sao"><i class="fa fa-star"></i></label>
 
-                <input type="radio" id="star1" name="danhGia" value="1" />
+                <input type="radio" id="star1" name="danhGia" value="1" @checked(old('danhGia', 5) == 1) />
                 <label for="star1" title="1 sao"><i class="fa fa-star"></i></label>
             </div>
 
             <label for="noiDung">Nội dung nhận xét:</label>
-            <textarea id="noiDung" name="noiDung" placeholder="Hãy chia sẻ trải nghiệm sử dụng sản phẩm này với những người mua khác..." required></textarea>
+            <textarea id="noiDung" name="noiDung" placeholder="Hãy chia sẻ trải nghiệm sử dụng sản phẩm này với những người mua khác..." required minlength="5" maxlength="255">{{ old('noiDung') }}</textarea>
 
             <button type="submit" class="btn-submit-review">
                 <i class="fa fa-paper-plane"></i> Gửi nhận xét

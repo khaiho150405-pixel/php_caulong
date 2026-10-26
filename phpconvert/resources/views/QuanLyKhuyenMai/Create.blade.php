@@ -41,6 +41,11 @@
                 <input type="number" class="form-control" id="GiamToiDa" name="GiamToiDa" value="{{ old('GiamToiDa') }}" min="0" step="1000" placeholder="Để trống nếu không giới hạn" />
             </div>
 
+            <div class="col-12">
+                <label for="MoTa" class="form-label fw-semibold">Mô Tả</label>
+                <input type="text" class="form-control" id="MoTa" name="MoTa" value="{{ old('MoTa') }}" maxlength="255" placeholder="Mô tả ngắn về chương trình" />
+            </div>
+
             <div class="col-md-6">
                 <label for="NgayBatDau" class="form-label fw-semibold">Ngày Bắt Đầu *</label>
                 <input type="date" class="form-control" id="NgayBatDau" name="NgayBatDau" value="{{ old('NgayBatDau', date('Y-m-d')) }}" required />
