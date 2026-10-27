@@ -27,8 +27,17 @@ class TinTuc extends Model
     ];
 
     protected $fillable = [
-        'TieuDe', 'TomTat', 'NoiDung', 'LoaiTin', 'MaSanPham', 'MaTranDau', 'MaTaiKhoan',
-        'NguonTin', 'LienKetNguon', 'NoiBat', 'NgayDang',
+        'TieuDe',
+        'TomTat',
+        'NoiDung',
+        'LoaiTin',
+        'MaSanPham',
+        'MaTranDau',
+        'MaTaiKhoan',
+        'NguonTin',
+        'LienKetNguon',
+        'NoiBat',
+        'NgayDang',
     ];
 
     protected $casts = [
@@ -88,7 +97,7 @@ class TinTuc extends Model
         return self::LOAI[$this->LoaiTin][1] ?? 'fa-newspaper';
     }
 
-    /** Ảnh minh họa: ảnh sản phẩm thật gắn kèm (nếu có), không dùng ảnh không rõ bản quyền. */
+
     public function getAnhAttribute(): ?string
     {
         return $this->sanPham ? 'images/' . $this->sanPham->anh_thumb : null;
