@@ -1,30 +1,14 @@
-{{-- Một dòng tin trên dòng thời gian. Tham số: $t (TinTuc), $nho (tùy chọn: bản gọn không có ngày bên trái) --}}
+{{-- Một bài viết trong danh sách tin tức. --}}
 @php $nho = $nho ?? false; @endphp
 <article class="bt-item loai-{{ $t->LoaiTin }} {{ $nho ? 'is-small' : '' }}">
-    @unless ($nho)
-        <div class="bt-when" aria-hidden="true">
-            <b>{{ $t->NgayDang->format('d') }}</b>
-            <span>Th{{ $t->NgayDang->format('m') }}</span>
-        </div>
-    @endunless
+    @unless ($nho)<div class="bt-when" aria-hidden="true"><b>{{ $t->NgayDang->format('d') }}</b><span>Tháng {{ $t->NgayDang->format('m') }}</span></div>@endunless
     <div class="bt-item-main">
-        <a href="{{ route('bangtin.show', ['id' => $t->MaTin]) }}" class="bt-thumb" tabindex="-1" aria-hidden="true">
-            @if ($t->sanPham)
-                <img src="{{ asset($t->anh) }}" alt="" loading="lazy" decoding="async" width="160" height="120">
-            @elseif ($t->tranDau)
-                <span class="bt-thumb-score"><b>{{ $t->tranDau->TiSo ? explode(',', $t->tranDau->TiSo)[0] : 'VS' }}</b><small>{{ $t->tranDau->NoiDung }}</small></span>
-            @else
-                <i class="fa-solid {{ $t->iconLoai }}"></i>
-            @endif
-        </a>
+        <a href="{{ route('bangtin.show', ['id' => $t->MaTin]) }}" class="bt-thumb {{ $t->sanPham ? 'is-product' : 'is-editorial' }}" tabindex="-1" aria-hidden="true"><img src="{{ asset($t->anh ?: 'images/news/court-journal-thumb.webp') }}" alt="" loading="lazy" decoding="async" width="160" height="110" onerror="this.onerror=null;this.src='{{ asset('images/news/court-journal-thumb.webp') }}'"></a>
         <div class="bt-item-body">
-            <div class="bt-item-top">
-                <span class="bt-pill"><i class="fa-solid {{ $t->iconLoai }}"></i> {{ $t->nhanLoai }}</span>
-                <time datetime="{{ $t->NgayDang->format('Y-m-d') }}" title="{{ $t->NgayDang->format('d/m/Y H:i') }}">{{ $t->NgayDang->diffForHumans() }}</time>
-            </div>
+            <div class="bt-item-top"><span class="bt-pill">{{ $t->nhanLoai }}</span><time datetime="{{ $t->NgayDang->toIso8601String() }}">{{ $t->NgayDang->format('d/m/Y') }}</time></div>
             <h3><a href="{{ route('bangtin.show', ['id' => $t->MaTin]) }}">{{ $t->TieuDe }}</a></h3>
             @if ($t->TomTat)<p>{{ $t->TomTat }}</p>@endif
-            <div class="bt-item-foot"><span><i class="fa-regular fa-eye"></i> {{ number_format($t->LuotXem) }}</span>@if ($t->NguonTin)<span><i class="fa-solid fa-link"></i> {{ $t->NguonTin }}</span>@endif</div>
+            @if ($t->NguonTin)<div class="bt-item-foot"><span>Nguồn: {{ $t->NguonTin }}</span></div>@endif
         </div>
     </div>
 </article>

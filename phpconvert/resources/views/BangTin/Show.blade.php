@@ -25,6 +25,10 @@
                 @if ($tin->tacGia)<span><i class="fa-regular fa-user"></i> {{ $tin->tacGia->TenDangNhap }}</span>@endif
             </div>
 
+            @unless ($tin->sanPham)
+                <figure class="bt-article-cover"><img src="{{ asset('images/news/court-journal-1600.webp') }}" alt="Ảnh minh họa sân cầu lông" width="1600" height="667" decoding="async"><figcaption>Ảnh minh họa chuyên mục cầu lông.</figcaption></figure>
+            @endunless
+
             @if ($tin->TomTat)<p class="bt-lead-text">{{ $tin->TomTat }}</p>@endif
 
             @if ($tin->tranDau)

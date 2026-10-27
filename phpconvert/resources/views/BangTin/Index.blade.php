@@ -8,21 +8,7 @@
 
 @section('content')
 <div class="bt-page">
-    {{-- Đầu trang kiểu bảng tin: tên chuyên mục, trạng thái cập nhật, số liệu nhanh --}}
-    <header class="bt-masthead bg-court">
-        <div class="bt-mast-main">
-            <span class="bt-live"><i></i> Cập nhật {{ now()->format('d/m/Y') }}</span>
-            <h1><span>BẢNG TIN</span> Cầu lông</h1>
-            <p>Kết quả trận đấu, tuyển thủ, các giải lớn và sản phẩm đang được quan tâm, sắp xếp từ mới đến cũ. Mỗi tin đều có nguồn tham khảo.</p>
-        </div>
-        <dl class="bt-mast-stats">
-            <div><dt>{{ $tong['tin'] }}</dt><dd>Tin đã đăng</dd></div>
-            <div><dt>{{ $tong['tran'] }}</dt><dd>Trận đấu</dd></div>
-            <div><dt>{{ $tong['luotXem'] }}</dt><dd>Lượt xem</dd></div>
-        </dl>
-    </header>
-
-    @include('BangTin._ticker', ['ds' => $tickerTran])
+    @include('BangTin._banner', ['trangTin' => true])
 
     {{-- Thanh chuyên mục + tìm kiếm --}}
     <div class="bt-toolbar">

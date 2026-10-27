@@ -62,11 +62,10 @@ class BangTinTest extends TestCase
 
     public function test_news_index_lists_filters_and_searches(): void
     {
-        // Giao diện kiểu bảng tin: đầu trang, dải tin nhanh, bảng điểm, dòng thời gian theo tháng
+        // Banner, bài viết và kết quả trận đấu dùng chung trên bảng tin.
         $this->get('/BangTin')->assertStatus(200)
-            ->assertSee('class="bt-masthead', false)
-            ->assertSee('Tin nhanh')
-            ->assertSee('Bảng điểm')
+            ->assertSee('Tin tức & sự kiện')
+            ->assertSee('Kết quả thi đấu')
             ->assertSee('Tin nổi bật')
             ->assertSee('class="bt-timeline"', false)
             ->assertSee('Sản phẩm đang hot')
@@ -101,7 +100,7 @@ class BangTinTest extends TestCase
         // Bài gắn sản phẩm có thẻ dẫn sang trang chi tiết sản phẩm
         $spTin = TinTuc::whereNotNull('MaSanPham')->firstOrFail();
         $this->get("/BangTin/{$spTin->MaTin}")->assertStatus(200)
-            ->assertSee('/Home/ChiTietSanPham/' . $spTin->MaSanPham, false);
+            ->assertSee('/Home/ChiTietSanPham/'.$spTin->MaSanPham, false);
     }
 
     public function test_scheduled_and_deleted_posts_are_hidden_from_public(): void
@@ -117,7 +116,47 @@ class BangTinTest extends TestCase
 
     public function test_landing_page_shows_news_teaser(): void
     {
-        $this->get('/')->assertStatus(200)->assertSee('Tin nóng làng cầu lông')->assertSee('/BangTin', false);
+        $this->get('/')->assertStatus(200)->assertSee('Tin tức & sự kiện')->assertSee('/BangTin', false);
+    }
+
+    public function test_landing_keeps_results_visible_without_published_articles(): void
+    {
+        TinTuc::query()->delete();
+
+        $this->get('/')->assertOk()->assertSee('Kết quả thi đấu')->assertSee('Bài viết đang được cập nhật.');
+    }
+
+    public function test_scoreboard_shows_each_teams_set_scores_in_the_correct_order(): void
+    {
+        $tran = new TranDau($this->tranHopLe(['TiSo' => '22-20, 19-21, 21-15']));
+        $tran->setRelation('tinTucs', collect());
+
+        $this->view('BangTin._bangdiem', ['ds' => collect([$tran])])
+            ->assertSeeTextInOrder(['Người chơi A', '22', '19', '21', 'Người chơi B', '20', '21', '15'])
+            ->assertSeeText('Thắng trận');
+    }
+
+    public function test_scoreboard_does_not_guess_scores_or_a_winner_for_an_unplayed_match(): void
+    {
+        $tran = new TranDau($this->tranHopLe(['TiSo' => null, 'DoiThang' => null]));
+        $tran->setRelation('tinTucs', collect());
+
+        $this->view('BangTin._bangdiem', ['ds' => collect([$tran])])
+            ->assertSeeText('Chưa có kết quả')
+            ->assertSeeText('Chưa cập nhật điểm từng ván.')
+            ->assertSeeText('—')
+            ->assertDontSeeText('Thắng trận');
+    }
+
+    public function test_scoreboard_handles_incomplete_legacy_scores_and_escapes_player_names(): void
+    {
+        $tran = new TranDau($this->tranHopLe(['TiSo' => '21-15, chưa cập nhật', 'DoiA' => '<script>alert(1)</script>']));
+        $tran->setRelation('tinTucs', collect());
+
+        $this->view('BangTin._bangdiem', ['ds' => collect([$tran])])
+            ->assertSeeText('Điểm từng ván chưa đầy đủ.')
+            ->assertSee('<script>alert(1)</script>')
+            ->assertDontSee('<script>alert(1)</script>', false);
     }
 
     /* ---------- Phân quyền ---------- */
@@ -178,7 +217,7 @@ class BangTinTest extends TestCase
             TinTuc::create($this->tinHopLe(['TieuDe' => "Bài phân trang số {$i}"]));
         }
 
-        $res = $this->actingAs($admin)->get('/admin/ban-tin?keyword=' . urlencode('Bài phân trang'))->assertStatus(200);
+        $res = $this->actingAs($admin)->get('/admin/ban-tin?keyword='.urlencode('Bài phân trang'))->assertStatus(200);
         $res->assertSee('keyword=B', false)->assertSee('page=2', false);
     }
 

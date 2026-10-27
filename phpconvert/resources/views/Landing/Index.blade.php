@@ -192,31 +192,29 @@
     </div>
 </section>
 
-{{-- ===== 5b. Bảng tin cầu lông (CSDL): tin mới + bảng điểm ===== --}}
-@if ($tinMoi->isNotEmpty())
-<section class="l-section l-news-sec">
+{{-- Tin tức và kết quả từ bảng tin cửa hàng. --}}
+@if ($tinMoi->isNotEmpty() || $tranMoi->isNotEmpty())
+<section class="l-section l-news-sec" id="tin-tuc" aria-label="Tin tức và sự kiện cầu lông">
     <div class="container">
-        <div class="l-head l-head-row l-reveal">
-            <div>
-                <span class="l-board-tag"><span class="bt-live"><i></i> Bảng tin</span></span>
-                <h2>Tin nóng làng cầu lông</h2>
-                <p>Tin mới nhất, kết quả trận đấu và sản phẩm được quan tâm, cập nhật liên tục.</p>
-            </div>
-            <a href="{{ route('bangtin.index') }}" class="btn-xem-tat-ca">Mở bảng tin <i class="fa-solid fa-arrow-right ms-1"></i></a>
-        </div>
+        @include('BangTin._banner')
 
-        <div class="l-board l-reveal">
+        <div class="l-board">
             <div class="l-board-feed">
+                <div class="bt-column-heading"><h3>Bài viết nổi bật</h3><a href="{{ route('bangtin.index') }}">Tất cả bài viết <span aria-hidden="true">↗</span></a></div>
+                @if ($tinMoi->isNotEmpty())
                 @include('BangTin._noibat', ['t' => $tinMoi->first()])
                 <div class="bt-timeline">
                     @foreach ($tinMoi->skip(1) as $t)
                         @include('BangTin._dong', ['t' => $t, 'nho' => true])
                     @endforeach
                 </div>
+                @else
+                    <p class="bt-empty-feed">Bài viết đang được cập nhật.</p>
+                @endif
             </div>
-            <div class="l-board-score">
-                @include('BangTin._bangdiem', ['ds' => $tranMoi, 'tieuDe' => 'Bảng điểm'])
-            </div>
+            <aside class="l-board-score">
+                @include('BangTin._bangdiem', ['ds' => $tranMoi, 'tieuDe' => 'Kết quả thi đấu'])
+            </aside>
         </div>
     </div>
 </section>
