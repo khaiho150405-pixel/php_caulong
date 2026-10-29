@@ -62,6 +62,7 @@ class QuanLyDuLieuTest extends TestCase
             ->assertRedirect(route('quanlysanpham.index'))
             ->assertSessionHas('message');
         $this->assertSoftDeleted('SanPham', ['MaSanPham' => $sp->MaSanPham]);
+        auth()->logout();
         $this->get("/Home/ChiTietSanPham/{$sp->MaSanPham}")->assertStatus(404);
     }
 
