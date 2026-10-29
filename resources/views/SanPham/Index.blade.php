@@ -21,55 +21,112 @@
     .sort-box { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); }
     .sort-box .form-select { width: auto; min-width: 170px; }
 
-    /* ----- Khung bộ lọc ----- */
-    .filter-panel {
-        position: sticky;
-        top: 150px;
-        background: var(--surface);
-        border: 1px solid var(--line);
-        border-radius: var(--radius);
-        padding: 4px 18px 18px;
+    /* ----- Khung bộ lọc cố định & tinh chỉnh nhỏ gọn không cần scroll ----- */
+    @media (min-width: 992px) {
+        aside.col-lg-3 {
+            position: relative;
+        }
+        #filterCollapse {
+            position: -webkit-sticky;
+            position: sticky;
+            top: 145px; /* Giữ khoảng cách thoáng 20-24px so với Header, không bị chạm */
+            z-index: 90;
+            display: block !important;
+            height: auto;
+            transition: top 0.2s ease;
+        }
+        .filter-panel {
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg, 14px);
+            padding: 12px 14px 14px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: visible;
+        }
     }
-    .filter-group { padding: 16px 0; border-bottom: 1px solid var(--line); }
-    .filter-group:last-of-type { border-bottom: 0; }
-    .filter-title {
-        font-size: .74rem;
-        font-weight: 700;
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        color: var(--muted);
-        margin: 0 0 10px;
+    @media (max-width: 991px) {
+        .filter-panel {
+            background: #ffffff;
+            border: 1px solid var(--line);
+            border-radius: var(--radius-lg, 14px);
+            padding: 14px 16px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+        }
     }
 
-    .price-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+    .filter-header { font-size: 0.92rem; }
+    .filter-group { padding: 8px 0; border-bottom: 1px solid var(--line); }
+    .filter-group:last-of-type { border-bottom: 0; padding-bottom: 6px; }
+    .filter-title {
+        display: block;
+        font-size: .7rem;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin: 0 0 6px;
+    }
+
+    .price-chips { display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; }
+    .price-chips > span:last-child:nth-child(odd) { grid-column: span 2; }
     .price-chips input { position: absolute; opacity: 0; pointer-events: none; }
     .price-chips label {
-        padding: 6px 12px;
+        display: block;
+        text-align: center;
+        padding: 4px 6px;
         border: 1px solid var(--line-strong);
-        border-radius: 999px;
-        font-size: .82rem;
+        border-radius: 6px;
+        font-size: .74rem;
         font-weight: 500;
         color: var(--ink-soft);
         cursor: pointer;
         transition: all .15s ease;
+        background: #f8fafc;
+        white-space: nowrap;
     }
-    .price-chips label:hover { border-color: var(--brand); color: var(--brand-700); }
-    .price-chips input:checked + label {
-        background: var(--brand-50);
+    .price-chips label:hover {
         border-color: var(--brand);
         color: var(--brand-700);
-        font-weight: 600;
+        background: #fff;
     }
-    .price-chips input:focus-visible + label { box-shadow: 0 0 0 .2rem rgba(20, 143, 95, .25); }
+    .price-chips input:checked + label {
+        background: var(--brand-50, #fef2f2);
+        border-color: var(--brand, #dc2626);
+        color: var(--brand-700, #b91c1c);
+        font-weight: 700;
+    }
 
-    .price-range { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
-    .price-range .form-control { font-size: .85rem; padding: .4rem .6rem; }
-    .price-range span { color: var(--muted); }
+    .price-range { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px; }
+    .price-range .form-control { font-size: .8rem; padding: 4px 8px; height: 31px; border-radius: 6px; }
+    .price-range span { color: var(--muted); font-size: 0.8rem; }
 
-    .filter-check { display: flex; align-items: center; gap: 10px; padding: 5px 0; font-size: .9rem; cursor: pointer; font-weight: 500; color: var(--ink-soft); }
-    .filter-check input { width: 17px; height: 17px; accent-color: var(--brand); flex-shrink: 0; }
-    .filter-actions { display: flex; gap: 8px; padding-top: 6px; }
-    .filter-actions .btn { flex: 1; }
+    .brand-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px 8px; }
+    .utility-grid { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+
+    .filter-check {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: .82rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--ink-soft);
+        margin: 0;
+        user-select: none;
+    }
+    .filter-check input {
+        width: 15px;
+        height: 15px;
+        accent-color: var(--brand, #dc2626);
+        flex-shrink: 0;
+        cursor: pointer;
+        border-radius: 3px;
+    }
+    .filter-check:hover { color: var(--brand-700, #b91c1c); }
+
+    .filter-actions { display: flex; gap: 8px; padding-top: 8px; }
+    .filter-actions .btn { font-size: 0.82rem; padding: 5px 10px; }
 
     .active-filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 18px; }
     .filter-tag {
@@ -141,10 +198,25 @@
                         <input type="hidden" name="ten" value="{{ request('ten') }}">
                     @endif
 
+                    {{-- Tiêu đề bộ lọc tinh chỉnh --}}
+                    <div class="filter-header d-flex align-items-center justify-content-between pb-2 mb-1 border-bottom">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-sliders text-danger"></i>
+                            <span class="fw-bold text-dark">Bộ lọc tìm kiếm</span>
+                        </div>
+                        @if ($dangLoc)
+                            <a href="{{ url()->current() }}{{ $tuKhoa ? '?keyword=' . urlencode($tuKhoa) : '' }}"
+                               class="clear-filter small text-danger text-decoration-none fw-semibold d-inline-flex align-items-center gap-1"
+                               title="Đặt lại tất cả bộ lọc">
+                                <i class="fa-solid fa-rotate-left"></i> Đặt lại
+                            </a>
+                        @endif
+                    </div>
+
                     @if ($laTrangDanhMuc)
                         <div class="filter-group">
-                            <h3 class="filter-title">Danh mục</h3>
-                            <select name="loai" class="form-select form-select-sm">
+                            <label for="filterLoaiSelect" class="filter-title"><i class="fa-solid fa-layer-group me-1 text-muted"></i> Danh mục</label>
+                            <select name="loai" id="filterLoaiSelect" class="form-select form-select-sm">
                                 <option value="">Tất cả danh mục</option>
                                 @foreach ($dsLoai as $l)
                                     <option value="{{ $l->MaLoai }}" @selected((string) request('loai', request('maLoai')) === (string) $l->MaLoai)>{{ $l->TenLoai }}</option>
@@ -154,7 +226,7 @@
                     @endif
 
                     <div class="filter-group">
-                        <h3 class="filter-title">Khoảng giá</h3>
+                        <span class="filter-title"><i class="fa-solid fa-money-bill-wave me-1 text-muted"></i> Khoảng giá</span>
                         <div class="price-chips">
                             @foreach ($khoangNhan as $khoa => $nhan)
                                 <span>
@@ -163,7 +235,7 @@
                                 </span>
                             @endforeach
                         </div>
-                        <div class="price-range">
+                        <div class="price-range mt-2">
                             <input type="number" name="gia_tu" min="0" step="10000" class="form-control" placeholder="Từ (đ)" value="{{ request('gia_tu') }}">
                             <span>–</span>
                             <input type="number" name="gia_den" min="0" step="10000" class="form-control" placeholder="Đến (đ)" value="{{ request('gia_den') }}">
@@ -171,31 +243,39 @@
                     </div>
 
                     <div class="filter-group">
-                        <h3 class="filter-title">Thương hiệu</h3>
-                        @foreach ($dsHang as $h)
-                            <label class="filter-check">
-                                <input type="checkbox" name="hangs[]" value="{{ $h->MaHang }}" @checked(in_array($h->MaHang, $locHang))>
-                                {{ $h->TenHang }}
-                            </label>
-                        @endforeach
+                        <span class="filter-title"><i class="fa-solid fa-medal me-1 text-muted"></i> Thương hiệu</span>
+                        <div class="brand-grid">
+                            @foreach ($dsHang as $h)
+                                <label class="filter-check">
+                                    <input type="checkbox" name="hangs[]" value="{{ $h->MaHang }}" @checked(in_array($h->MaHang, $locHang))>
+                                    <span>{{ $h->TenHang }}</span>
+                                </label>
+                            @endforeach
+                        </div>
                     </div>
 
                     <div class="filter-group">
-                        <h3 class="filter-title">Tiện ích</h3>
-                        <label class="filter-check">
-                            <input type="checkbox" name="giam_gia" value="1" @checked(request()->boolean('giam_gia'))>
-                            Đang giảm giá
-                        </label>
-                        <label class="filter-check">
-                            <input type="checkbox" name="con_hang" value="1" @checked(request()->boolean('con_hang'))>
-                            Còn hàng
-                        </label>
+                        <span class="filter-title"><i class="fa-solid fa-bolt me-1 text-muted"></i> Tiện ích</span>
+                        <div class="utility-grid">
+                            <label class="filter-check">
+                                <input type="checkbox" name="giam_gia" value="1" @checked(request()->boolean('giam_gia'))>
+                                <span>Đang giảm giá</span>
+                            </label>
+                            <label class="filter-check">
+                                <input type="checkbox" name="con_hang" value="1" @checked(request()->boolean('con_hang'))>
+                                <span>Còn hàng</span>
+                            </label>
+                        </div>
                     </div>
 
                     <div class="filter-actions">
-                        <button type="submit" class="btn btn-primary"><i class="fa-solid fa-filter"></i> Áp dụng</button>
+                        <button type="submit" class="btn btn-danger btn-sm fw-semibold flex-fill shadow-sm">
+                            <i class="fa-solid fa-filter me-1"></i> Áp dụng
+                        </button>
                         @if ($dangLoc)
-                            <a href="{{ url()->current() }}{{ $tuKhoa ? '?keyword=' . urlencode($tuKhoa) : '' }}" class="btn btn-outline-secondary">Xóa lọc</a>
+                            <a href="{{ url()->current() }}{{ $tuKhoa ? '?keyword=' . urlencode($tuKhoa) : '' }}" class="btn btn-outline-secondary btn-sm flex-fill">
+                                Xóa lọc
+                            </a>
                         @endif
                     </div>
                 </form>
@@ -293,4 +373,21 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    function adjustFilterStickyOffset() {
+        var header = document.querySelector('.main-header');
+        var filter = document.getElementById('filterCollapse');
+        if (header && filter && window.innerWidth >= 992) {
+            var offset = header.offsetHeight + 20; // Giữ khoảng cách thoáng đúng 20px dưới header
+            filter.style.top = offset + 'px';
+        }
+    }
+    adjustFilterStickyOffset();
+    window.addEventListener('resize', adjustFilterStickyOffset);
+});
+</script>
+@endpush
 @endsection

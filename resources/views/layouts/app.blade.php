@@ -465,6 +465,7 @@
             });
         });
     </script>
+    <script src="{{ asset('js/horizontal-slider.js') }}" defer></script>
     @yield('scripts')
     @stack('scripts')
 </body>

@@ -84,14 +84,6 @@
         <section class="promo-block" id="promo-{{ $km->MaKhuyenMai }}">
             <div class="container">
                 <header class="promo-head">
-                    <div class="promo-percent" aria-hidden="true">
-                        <strong>-{{ round($km->PhanTramGiam) }}%</strong>
-                        @if ($km->GiamToiDa > 0)
-                            <small>Tối đa {{ $hamTien($km->GiamToiDa) }}</small>
-                        @else
-                            <small>Không giới hạn</small>
-                        @endif
-                    </div>
                     <div class="promo-meta">
                         <h2>{{ $km->TenChuongTrinh }}</h2>
                         @if ($km->MoTa)<p>{{ $km->MoTa }}</p>@endif
@@ -111,36 +103,75 @@
                     </div>
                 </header>
 
-                <div class="promo-grid">
-                    @foreach ($sps as $sp)
-                        @php
-                            $giaGoc = (float) ($sp->GiaGoc ?? 0);
-                            $giaBan = (float) $sp->gia_sau_khuyen_mai;
-                            $pt = $phanTramGiam($sp);
-                            $tietKiem = max(0, $giaGoc - $giaBan);
-                        @endphp
-                        <div class="product-card">
-                            @if ($pt)<div class="badge-promo">-{{ $pt }}%</div>@endif
-                            <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
-                                <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
-                                     onerror="this.src='{{ asset('images/default-product.jpg') }}'">
-                            </a>
-                            <div class="body">
-                                <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
-                                <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
-                                <div class="product-footer">
-                                    <span class="product-price">{{ $hamTien($giaBan) }}</span>
-                                    @if ($tietKiem > 0)
-                                        <span class="price-small">{{ $hamTien($giaGoc) }}</span>
-                                    @endif
-                                </div>
-                                @if ($tietKiem > 0)
-                                    <div class="promo-save"><i class="fa-solid fa-piggy-bank"></i> Tiết kiệm {{ $hamTien($tietKiem) }}</div>
-                                @endif
+                @if ($sps->count() > 4)
+                    <div class="promo-slider-container">
+                        <button type="button" class="promo-slider-btn prev" aria-label="Sản phẩm trước"><i class="fa-solid fa-chevron-left"></i></button>
+                        <div class="promo-slider-track-wrap">
+                            <div class="promo-slider-track">
+                                @foreach ($sps as $sp)
+                                    @php
+                                        $giaGoc = (float) ($sp->GiaGoc ?? 0);
+                                        $giaBan = (float) $sp->gia_sau_khuyen_mai;
+                                        $pt = $phanTramGiam($sp);
+                                        $tietKiem = max(0, $giaGoc - $giaBan);
+                                    @endphp
+                                    <div class="product-card">
+                                        @if ($pt)<div class="badge-promo">-{{ $pt }}%</div>@endif
+                                        <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
+                                            <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
+                                                 onerror="this.src='{{ asset('images/default-product.jpg') }}'">
+                                        </a>
+                                        <div class="body">
+                                            <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
+                                            <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
+                                            <div class="product-footer">
+                                                <span class="product-price">{{ $hamTien($giaBan) }}</span>
+                                                @if ($tietKiem > 0)
+                                                    <span class="price-small">{{ $hamTien($giaGoc) }}</span>
+                                                @endif
+                                            </div>
+                                            @if ($tietKiem > 0)
+                                                <div class="promo-save"><i class="fa-solid fa-piggy-bank"></i> Tiết kiệm {{ $hamTien($tietKiem) }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
                         </div>
-                    @endforeach
-                </div>
+                        <button type="button" class="promo-slider-btn next" aria-label="Sản phẩm tiếp theo"><i class="fa-solid fa-chevron-right"></i></button>
+                    </div>
+                @else
+                    <div class="promo-grid">
+                        @foreach ($sps as $sp)
+                            @php
+                                $giaGoc = (float) ($sp->GiaGoc ?? 0);
+                                $giaBan = (float) $sp->gia_sau_khuyen_mai;
+                                $pt = $phanTramGiam($sp);
+                                $tietKiem = max(0, $giaGoc - $giaBan);
+                            @endphp
+                            <div class="product-card">
+                                @if ($pt)<div class="badge-promo">-{{ $pt }}%</div>@endif
+                                <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
+                                    <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
+                                         onerror="this.src='{{ asset('images/default-product.jpg') }}'">
+                                </a>
+                                <div class="body">
+                                    <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
+                                    <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
+                                    <div class="product-footer">
+                                        <span class="product-price">{{ $hamTien($giaBan) }}</span>
+                                        @if ($tietKiem > 0)
+                                            <span class="price-small">{{ $hamTien($giaGoc) }}</span>
+                                        @endif
+                                    </div>
+                                    @if ($tietKiem > 0)
+                                        <div class="promo-save"><i class="fa-solid fa-piggy-bank"></i> Tiết kiệm {{ $hamTien($tietKiem) }}</div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </section>
     @endforeach
@@ -156,4 +187,72 @@
         </div>
     </section>
 @endif
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.promo-slider-container').forEach(function (container) {
+        var wrap = container.querySelector('.promo-slider-track-wrap');
+        var prevBtn = container.querySelector('.promo-slider-btn.prev');
+        var nextBtn = container.querySelector('.promo-slider-btn.next');
+        if (!wrap) return;
+
+        function getStep() {
+            var card = wrap.querySelector('.product-card');
+            return card ? (card.offsetWidth + 20) : 280;
+        }
+
+        if (nextBtn) {
+            nextBtn.addEventListener('click', function () {
+                var step = getStep();
+                if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
+                    wrap.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    wrap.scrollBy({ left: step, behavior: 'smooth' });
+                }
+            });
+        }
+
+        if (prevBtn) {
+            prevBtn.addEventListener('click', function () {
+                var step = getStep();
+                if (wrap.scrollLeft <= 20) {
+                    wrap.scrollTo({ left: wrap.scrollWidth, behavior: 'smooth' });
+                } else {
+                    wrap.scrollBy({ left: -step, behavior: 'smooth' });
+                }
+            });
+        }
+
+        // Tự động chạy ngang qua các sản phẩm
+        var autoTimer = null;
+        function startAuto() {
+            stopAuto();
+            autoTimer = setInterval(function () {
+                var step = getStep();
+                if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
+                    wrap.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    wrap.scrollBy({ left: step, behavior: 'smooth' });
+                }
+            }, 4000);
+        }
+
+        function stopAuto() {
+            if (autoTimer) {
+                clearInterval(autoTimer);
+                autoTimer = null;
+            }
+        }
+
+        container.addEventListener('mouseenter', stopAuto);
+        container.addEventListener('mouseleave', startAuto);
+        container.addEventListener('touchstart', stopAuto, { passive: true });
+        container.addEventListener('touchend', startAuto, { passive: true });
+
+        startAuto();
+    });
+});
+</script>
+@endpush
 @endsection

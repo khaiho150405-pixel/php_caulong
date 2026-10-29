@@ -129,34 +129,71 @@
             <a href="{{ route('khuyenmai.index') }}" class="btn-xem-tat-ca">Xem tất cả ưu đãi <i class="fa-solid fa-arrow-right ms-1"></i></a>
         </div>
 
-        <div class="l-products">
-            @foreach ($uuDai as $sp)
-                @php
-                    $giaGoc = (float) ($sp->GiaGoc ?? 0);
-                    $giaBan = (float) $sp->gia_sau_khuyen_mai;
-                    $giam = $giaGoc > 0 && $giaBan < $giaGoc;
-                @endphp
-                <div class="product-card l-reveal" style="--d: {{ ($loop->index % 4) * 50 }}ms">
-                    @if ($giam)
-                        <div class="badge-promo">-{{ max(1, round((1 - $giaBan / $giaGoc) * 100)) }}%</div>
-                    @endif
-                    <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
-                        <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
-                             onerror="this.src='{{ asset('images/default-product.jpg') }}'">
-                    </a>
-                    <div class="body">
-                        <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
-                        <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
-                        <div class="product-footer">
-                            <span class="product-price">{{ $hamTien($giaBan) }}</span>
-                            @if ($giam)
-                                <span class="price-small">{{ $hamTien($giaGoc) }}</span>
-                            @endif
-                        </div>
+        @if ($uuDai->count() > 4)
+            <div class="promo-slider-container">
+                <button type="button" class="promo-slider-btn prev" aria-label="Sản phẩm trước"><i class="fa-solid fa-chevron-left"></i></button>
+                <div class="promo-slider-track-wrap">
+                    <div class="promo-slider-track">
+                        @foreach ($uuDai as $sp)
+                            @php
+                                $giaGoc = (float) ($sp->GiaGoc ?? 0);
+                                $giaBan = (float) $sp->gia_sau_khuyen_mai;
+                                $giam = $giaGoc > 0 && $giaBan < $giaGoc;
+                            @endphp
+                            <div class="product-card">
+                                @if ($giam)
+                                    <div class="badge-promo">-{{ max(1, round((1 - $giaBan / $giaGoc) * 100)) }}%</div>
+                                @endif
+                                <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
+                                    <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
+                                         onerror="this.src='{{ asset('images/default-product.jpg') }}'">
+                                </a>
+                                <div class="body">
+                                    <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
+                                    <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
+                                    <div class="product-footer">
+                                        <span class="product-price">{{ $hamTien($giaBan) }}</span>
+                                        @if ($giam)
+                                            <span class="price-small">{{ $hamTien($giaGoc) }}</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-            @endforeach
-        </div>
+                <button type="button" class="promo-slider-btn next" aria-label="Sản phẩm tiếp theo"><i class="fa-solid fa-chevron-right"></i></button>
+            </div>
+        @else
+            <div class="l-products">
+                @foreach ($uuDai as $sp)
+                    @php
+                        $giaGoc = (float) ($sp->GiaGoc ?? 0);
+                        $giaBan = (float) $sp->gia_sau_khuyen_mai;
+                        $giam = $giaGoc > 0 && $giaBan < $giaGoc;
+                    @endphp
+                    <div class="product-card l-reveal" style="--d: {{ ($loop->index % 4) * 50 }}ms">
+                        @if ($giam)
+                            <div class="badge-promo">-{{ max(1, round((1 - $giaBan / $giaGoc) * 100)) }}%</div>
+                        @endif
+                        <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="thumb">
+                            <img src="{{ asset('images/' . $sp->anh_thumb) }}" alt="{{ $sp->TenSanPham }}" loading="lazy" decoding="async"
+                                 onerror="this.src='{{ asset('images/default-product.jpg') }}'">
+                        </a>
+                        <div class="body">
+                            <div class="product-brand">{{ $sp->hang->TenHang ?? 'Hãng khác' }}</div>
+                            <a href="{{ route('home.chitietsanpham', ['id' => $sp->MaSanPham]) }}" class="product-title" title="{{ $sp->TenSanPham }}">{{ $sp->TenSanPham }}</a>
+                            <div class="product-footer">
+                                <span class="product-price">{{ $hamTien($giaBan) }}</span>
+                                @if ($giam)
+                                    <span class="price-small">{{ $hamTien($giaGoc) }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @endif
     </div>
 </section>
 
