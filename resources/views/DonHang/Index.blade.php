@@ -44,7 +44,7 @@
                             <a href="{{ route('donhang.details', ['id' => $order->MaDonHang]) }}" class="btn btn-info btn-sm">
                                 <i class="fa fa-eye"></i> Xem Chi tiết
                             </a>
-                            @if ($order->TrangThai == 'Chờ xác nhận' || $order->TrangThai == 'Chờ thanh toán MoMo')
+                            @if (in_array($order->TrangThai, \App\Services\OrderService::KHACH_DUOC_HUY, true))
                                 <form action="{{ route('donhang.huydonhang', ['id' => $order->MaDonHang]) }}" method="POST" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
                                     @csrf
                                     <button type="submit" class="btn btn-danger btn-sm" style="margin-left: 5px;">

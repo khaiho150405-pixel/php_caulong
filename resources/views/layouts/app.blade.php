@@ -113,13 +113,10 @@
                     @endguest
                 </div>
 
-                <div class="cart-section">
-                    <a href="{{ route('home.viewcart') }}" class="cart-btn">
-                        <i class="fa-solid fa-cart-shopping"></i>
-                        <span class="cart-text">Giỏ hàng</span>
-                        <span class="cart-count">{{ session('GioHangCount', 0) }}</span>
-                    </a>
-                </div>
+                <a href="{{ route('home.viewcart') }}" class="cart-btn" aria-label="Giỏ hàng" title="Giỏ hàng">
+                    <i class="fa-solid fa-cart-shopping" aria-hidden="true"></i>
+                    <span class="cart-count">{{ session('GioHangCount', 0) }}</span>
+                </a>
             </div>
         </div>
 
@@ -235,7 +232,6 @@
 
                 <li><a href="{{ route('khuyenmai.index') }}">KHUYẾN MÃI</a></li>
                 <li><a href="{{ route('bangtin.index') }}">BẢNG TIN</a></li>
-                <li><a href="{{ route('home.viewcart') }}">GIỎ HÀNG</a></li>
                 <li><a href="{{ route('donhang.index') }}">ĐƠN HÀNG</a></li>
                 <li><a href="{{ route('home.contact') }}">LIÊN HỆ</a></li>
             </ul>
@@ -464,14 +460,9 @@
                 $('.user-menu').removeClass('show');
             });
 
-            // Cập nhật số lượng giỏ hàng qua AJAX
-            function updateCartCount() {
-                $.get('{{ route("giohang.getcartcount") }}')
-                    .done(function (data) {
-                        $('.cart-count').text(data);
-                    });
-            }
-            updateCartCount();
+            $.get('{{ route("giohang.getcartcount") }}').done(function (data) {
+                $('.cart-count').text(data);
+            });
         });
     </script>
     @yield('scripts')

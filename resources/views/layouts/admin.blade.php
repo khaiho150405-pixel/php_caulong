@@ -28,6 +28,7 @@
             request()->is('admin/tran-dau*') => 'Kết quả trận đấu',
             request()->is('admin/tai-khoan*') => 'Quản lý tài khoản',
             request()->is('admin/thong-bao*') => 'Cảnh báo đánh giá',
+            request()->routeIs('taikhoan.doimatkhau') => 'Đổi mật khẩu',
             default => 'Bảng điều khiển',
         };
     @endphp
@@ -80,9 +81,15 @@
         </nav>
 
         <div class="admin-sidebar-foot">
-            <a href="{{ route('home') }}" class="admin-link">
-                <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem trang khách hàng
-            </a>
+            @if ($adminUser?->isAdmin())
+                <a href="{{ route('taikhoan.doimatkhau') }}" class="admin-link {{ request()->routeIs('taikhoan.doimatkhau') ? 'active' : '' }}">
+                    <i class="fa-solid fa-key"></i> Đổi mật khẩu
+                </a>
+            @else
+                <a href="{{ route('home') }}" class="admin-link">
+                    <i class="fa-solid fa-arrow-up-right-from-square"></i> Xem trang khách hàng
+                </a>
+            @endif
             <form action="{{ route('taikhoan.dangxuat') }}" method="POST" class="m-0">
                 @csrf
                 <button type="submit" class="admin-link danger">

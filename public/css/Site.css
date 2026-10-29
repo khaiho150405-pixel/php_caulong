@@ -2,7 +2,7 @@
    Giao diện trang khách hàng (nạp sau theme.css)
    ========================================================================== */
 
-html, body { height: 100%; }
+html { min-height: 100%; }
 
 body {
     margin: 0;
@@ -25,6 +25,7 @@ ul { list-style: none; padding: 0; margin: 0; }
     position: sticky;
     top: 0;
     z-index: 1000;
+    flex-shrink: 0;
 }
 
 .header-top {
@@ -116,6 +117,44 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .account-section { position: relative; }
 
+.cart-btn {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border: 1px solid var(--brand-200);
+    border-radius: var(--radius);
+    background: var(--brand-50);
+    color: var(--brand-700);
+    font-size: 1.1rem;
+    box-shadow: var(--shadow-xs);
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease, box-shadow .15s ease;
+}
+
+.cart-btn:hover { background: var(--brand); border-color: var(--brand); color: #fff; box-shadow: var(--shadow-sm); }
+.cart-btn:active { background: var(--brand-700); border-color: var(--brand-700); }
+.cart-btn:focus-visible { outline: 3px solid var(--brand); outline-offset: 3px; }
+
+.cart-count {
+    position: absolute;
+    top: -6px;
+    right: -4px;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 5px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #fff;
+    border-radius: 999px;
+    background: var(--accent-700);
+    color: #fff;
+    font-size: .68rem;
+    font-weight: 700;
+    line-height: 1;
+}
+
 .auth-buttons { display: flex; gap: 8px; align-items: center; }
 
 .auth-btn {
@@ -195,44 +234,6 @@ ul { list-style: none; padding: 0; margin: 0; }
 .user-menu-item:hover i { color: var(--brand); }
 
 .user-menu-item.is-admin { font-weight: 600; color: var(--ink); }
-
-/* Giỏ hàng */
-.cart-section { position: relative; }
-
-.cart-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 18px;
-    background: var(--brand-900);
-    color: #fff;
-    border-radius: 999px;
-    font-weight: 600;
-    font-size: .88rem;
-    position: relative;
-}
-
-.cart-btn:hover { background: var(--brand-700); color: #fff; }
-
-.cart-text { font-size: .88rem; }
-
-.cart-count {
-    background: var(--accent);
-    color: #fff;
-    font-size: .68rem;
-    font-weight: 700;
-    min-width: 20px;
-    height: 20px;
-    padding: 0 5px;
-    border-radius: 999px;
-    display: grid;
-    place-items: center;
-    line-height: 1;
-    position: absolute;
-    top: -6px;
-    right: -4px;
-    border: 2px solid #fff;
-}
 
 /* ---------- Thanh điều hướng ---------- */
 .main-nav {
@@ -652,7 +653,6 @@ footer {
     .auth-btn { padding: 8px 12px; font-size: .82rem; }
 
     .user-btn span { max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .cart-text { display: none; }
 
     .main-nav ul { flex-wrap: nowrap; justify-content: flex-start; padding: 0 8px; overflow-x: auto; scrollbar-width: none; }
     .main-nav ul::-webkit-scrollbar { display: none; }

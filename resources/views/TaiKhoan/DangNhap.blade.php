@@ -41,7 +41,12 @@
 
             <div class="mb-4">
                 <label for="MatKhau" class="form-label">Mật khẩu</label>
-                <input type="password" id="MatKhau" name="MatKhau" class="form-control" required />
+                <div class="input-group">
+                    <input type="password" id="MatKhau" name="MatKhau" class="form-control" autocomplete="current-password" required />
+                    <button type="button" id="togglePassword" class="btn btn-outline-secondary" style="min-width: 46px;" aria-label="Hiện mật khẩu" aria-controls="MatKhau">
+                        <i class="fa-solid fa-eye" aria-hidden="true"></i>
+                    </button>
+                </div>
             </div>
 
             <button type="submit" class="btn btn-primary">Đăng nhập</button>
@@ -52,4 +57,17 @@
         </div>
     </section>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.getElementById('togglePassword').addEventListener('click', function () {
+        const password = document.getElementById('MatKhau');
+        const showPassword = password.type === 'password';
+        password.type = showPassword ? 'text' : 'password';
+        this.setAttribute('aria-label', showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu');
+        this.querySelector('i').classList.toggle('fa-eye', !showPassword);
+        this.querySelector('i').classList.toggle('fa-eye-slash', showPassword);
+    });
+</script>
 @endsection

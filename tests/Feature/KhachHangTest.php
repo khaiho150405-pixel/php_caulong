@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\ChiTietSanPham;
 use App\Models\DonHang;
+use App\Models\GioHang;
 use App\Models\TaiKhoan;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -51,6 +52,37 @@ class KhachHangTest extends TestCase
         ]);
     }
 
+    public function test_login_page_has_password_visibility_button(): void
+    {
+        $this->get(route('taikhoan.dangnhap'))
+            ->assertOk()
+            ->assertSee('type="password"', false)
+            ->assertSee('type="button" id="togglePassword"', false)
+            ->assertSee('aria-label="Hiện mật khẩu"', false)
+            ->assertSee('aria-controls="MatKhau"', false);
+    }
+
+    public function test_customer_order_pages_only_show_cancel_for_allowed_statuses(): void
+    {
+        $kh = $this->khachHang();
+        $don = DonHang::where('MaKhachHang', $kh->khachHang->MaKhachHang)->firstOrFail();
+        $cancelAction = 'action="'.route('donhang.huydonhang', ['id' => $don->MaDonHang]).'"';
+
+        foreach (['Chờ xác nhận', 'Chờ thanh toán MoMo', 'Đang xử lý', 'Đang giao hàng', 'Đã thanh toán bằng MoMo', 'Đã hoàn thành', 'Đã hủy'] as $status) {
+            $don->update(['TrangThai' => $status]);
+
+            foreach (['donhang.index', 'donhang.details'] as $page) {
+                $response = $this->actingAs($kh)->get(route($page, ['id' => $don->MaDonHang]))->assertOk();
+
+                if (in_array($status, ['Chờ xác nhận', 'Chờ thanh toán MoMo', 'Đang xử lý'], true)) {
+                    $response->assertSee($cancelAction, false);
+                } else {
+                    $response->assertDontSee($cancelAction, false);
+                }
+            }
+        }
+    }
+
     public function test_admin_login_redirects_to_admin_dashboard(): void
     {
         $this->post('/TaiKhoan/DangNhap', ['TenDangNhap' => 'admin', 'MatKhau' => 'admin@123'])
@@ -61,6 +93,13 @@ class KhachHangTest extends TestCase
     {
         $this->post('/TaiKhoan/DangNhap', ['TenDangNhap' => 'nguyenvana', 'MatKhau' => 'vana@123', 'returnUrl' => '//evil.example.com'])
             ->assertRedirect(route('home'));
+    }
+
+    public function test_admin_login_ignores_customer_return_url(): void
+    {
+        $this->post('/TaiKhoan/DangNhap', [
+            'TenDangNhap' => 'admin', 'MatKhau' => 'admin@123', 'returnUrl' => '/Home/ViewCart',
+        ])->assertRedirect(route('quanlysanpham.dashboard'));
     }
 
     public function test_add_to_cart_checkout_and_cancel_order_restores_stock(): void
@@ -99,7 +138,7 @@ class KhachHangTest extends TestCase
     {
         $kh = $this->khachHang();
         $this->actingAs($kh)->post('/Home/AddToCart', ['chiTietId' => 1, 'quantity' => 1]);
-        $maGioHang = \App\Models\GioHang::firstOrFail()->MaGioHang;
+        $maGioHang = GioHang::firstOrFail()->MaGioHang;
 
         $this->actingAs($kh)->post("/Home/RemoveFromCart/{$maGioHang}")->assertRedirect(route('home.viewcart'));
         $this->assertDatabaseCount('GioHang', 0);
@@ -149,18 +188,18 @@ class KhachHangTest extends TestCase
         ];
 
         // Chữ ký giả -> không được cập nhật đơn
-        $this->get('/DonHang/ThanhToanMomoSuccess?' . http_build_query($data + ['signature' => 'gia-mao']))->assertStatus(200);
+        $this->get('/DonHang/ThanhToanMomoSuccess?'.http_build_query($data + ['signature' => 'gia-mao']))->assertStatus(200);
         $this->assertSame('Chờ thanh toán MoMo', $don->fresh()->TrangThai);
 
         // Chữ ký hợp lệ -> đã thanh toán
-        $raw = 'accessKey=' . config('services.momo.access_key')
-            . "&amount={$data['amount']}&extraData={$data['extraData']}&message={$data['message']}"
-            . "&orderId={$data['orderId']}&orderInfo={$data['orderInfo']}&orderType={$data['orderType']}"
-            . "&partnerCode={$data['partnerCode']}&payType={$data['payType']}&requestId={$data['requestId']}"
-            . "&responseTime={$data['responseTime']}&resultCode={$data['resultCode']}&transId={$data['transId']}";
+        $raw = 'accessKey='.config('services.momo.access_key')
+            ."&amount={$data['amount']}&extraData={$data['extraData']}&message={$data['message']}"
+            ."&orderId={$data['orderId']}&orderInfo={$data['orderInfo']}&orderType={$data['orderType']}"
+            ."&partnerCode={$data['partnerCode']}&payType={$data['payType']}&requestId={$data['requestId']}"
+            ."&responseTime={$data['responseTime']}&resultCode={$data['resultCode']}&transId={$data['transId']}";
         $data['signature'] = hash_hmac('sha256', $raw, config('services.momo.secret_key'));
 
-        $this->get('/DonHang/ThanhToanMomoSuccess?' . http_build_query($data))->assertStatus(200);
+        $this->get('/DonHang/ThanhToanMomoSuccess?'.http_build_query($data))->assertStatus(200);
         $this->assertSame('Đã thanh toán bằng MoMo', $don->fresh()->TrangThai);
     }
 }

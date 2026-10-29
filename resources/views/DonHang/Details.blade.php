@@ -56,6 +56,14 @@
         <div class="col-md-5" style="text-align: right;">
             <h4>Tổng thanh toán</h4>
             <h2 style="color: var(--brand); font-weight: bold; margin-top: 10px;">{{ number_format($order->TongTien, 0, ',', '.') }}đ</h2>
+            @if (in_array($order->TrangThai, \App\Services\OrderService::KHACH_DUOC_HUY, true))
+                <form action="{{ route('donhang.huydonhang', ['id' => $order->MaDonHang]) }}" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn hàng này không?');">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa fa-times" aria-hidden="true"></i> Hủy đơn
+                    </button>
+                </form>
+            @endif
         </div>
     </div>
 

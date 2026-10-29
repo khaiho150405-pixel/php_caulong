@@ -5,14 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Auth\DangKyRequest;
 use App\Http\Requests\Auth\DangNhapRequest;
 use App\Http\Requests\Auth\DoiMatKhauRequest;
-use App\Models\TaiKhoan;
-use App\Models\KhachHang;
 use App\Models\GioHang;
+use App\Models\KhachHang;
+use App\Models\TaiKhoan;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use Illuminate\Support\Facades\Hash;
 
 class TaiKhoanController extends Controller
 {
@@ -22,6 +22,7 @@ class TaiKhoanController extends Controller
             return redirect()->route('home');
         }
         $returnUrl = $request->query('returnUrl');
+
         return view('TaiKhoan.DangNhap', compact('returnUrl'));
     }
 
@@ -56,7 +57,7 @@ class TaiKhoanController extends Controller
                 session([
                     'MaTaiKhoan' => $user->MaTaiKhoan,
                     'TenDangNhap' => $user->TenDangNhap,
-                    'MaQuyen' => (int)$user->MaQuyen,
+                    'MaQuyen' => (int) $user->MaQuyen,
                     'HoTen' => $user->khachHang ? $user->khachHang->HoTen : $user->TenDangNhap,
                 ]);
 
@@ -65,12 +66,16 @@ class TaiKhoanController extends Controller
                 if ($user->khachHang) {
                     $cartCount = GioHang::where('MaKhachHang', $user->khachHang->MaKhachHang)->sum('SoLuong');
                 }
-                session(['GioHangCount' => (int)$cartCount]);
+                session(['GioHangCount' => (int) $cartCount]);
+
+                if ($user->isAdmin()) {
+                    return redirect()->route('quanlysanpham.dashboard');
+                }
 
                 // Chỉ chuyển hướng về URL nội bộ (chặn open-redirect kiểu //trang-la.com)
-                if (!empty($returnUrl)) {
-                    $laUrlNoiBo = (str_starts_with($returnUrl, '/') && !str_starts_with($returnUrl, '//'))
-                        || str_starts_with($returnUrl, url('/') . '/');
+                if (! empty($returnUrl)) {
+                    $laUrlNoiBo = (str_starts_with($returnUrl, '/') && ! str_starts_with($returnUrl, '//'))
+                        || str_starts_with($returnUrl, url('/').'/');
                     if ($laUrlNoiBo) {
                         return redirect($returnUrl);
                     }
@@ -95,6 +100,7 @@ class TaiKhoanController extends Controller
         if (Auth::check()) {
             return redirect()->route('home');
         }
+
         return view('TaiKhoan.DangKy');
     }
 
@@ -134,7 +140,7 @@ class TaiKhoanController extends Controller
             return redirect()->route('home')->with('message', 'Đăng ký tài khoản thành công!');
         } catch (Exception $e) {
             return back()->withInput()->withErrors([
-                'register' => 'Lỗi khi tạo tài khoản: ' . $e->getMessage(),
+                'register' => 'Lỗi khi tạo tài khoản: '.$e->getMessage(),
             ]);
         }
     }
@@ -160,14 +166,14 @@ class TaiKhoanController extends Controller
         // Kiểm tra mật khẩu cũ
         $isOldValid = Hash::check($request->input('matKhauCu'), $user->MatKhau) || ($user->MatKhau === $request->input('matKhauCu'));
 
-        if (!$isOldValid) {
+        if (! $isOldValid) {
             return back()->withErrors(['matKhauCu' => 'Mật khẩu cũ không chính xác.']);
         }
 
         $user->MatKhau = Hash::make($request->input('matKhauMoi'));
         $user->save();
 
-        return redirect()->route('home')->with('message', 'Đổi mật khẩu thành công!');
+        return redirect()->route($user->isAdmin() ? 'quanlysanpham.dashboard' : 'home')->with('message', 'Đổi mật khẩu thành công!');
     }
 
     public function thongTin()
@@ -175,7 +181,7 @@ class TaiKhoanController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('home')->with('error', 'Tài khoản của bạn là quản trị, không có thông tin khách hàng.');
         }
 

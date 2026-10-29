@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(Auth::user()?->isAdmin() ? 'layouts.admin' : 'layouts.app')
 
 @section('title', 'Đổi Mật Khẩu - Cửa Hàng Cầu Lông')
 
