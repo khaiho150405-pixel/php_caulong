@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Middleware\CheckLogin;
+use App\Http\Middleware\CheckRole;
+use App\Http\Middleware\RedirectAdminToDashboard;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -12,10 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [RedirectAdminToDashboard::class]);
+
         $middleware->alias([
             // Phân quyền theo vai trò: role:admin | role:admin,nhanvien | role:khachhang
-            'role' => \App\Http\Middleware\CheckRole::class,
-            'check.login' => \App\Http\Middleware\CheckLogin::class,
+            'role' => CheckRole::class,
+            'check.login' => CheckLogin::class,
         ]);
 
         // IPN của MoMo gọi server-to-server nên không có CSRF token (đã xác thực bằng chữ ký HMAC)
