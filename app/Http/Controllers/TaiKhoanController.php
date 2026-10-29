@@ -95,6 +95,59 @@ class TaiKhoanController extends Controller
         ]);
     }
 
+    public function adminDangNhapPost(DangNhapRequest $request)
+    {
+        $username = trim($request->input('TenDangNhap'));
+        $password = $request->input('MatKhau');
+        $returnUrl = $request->input('returnUrl');
+
+        $user = TaiKhoan::with('khachHang')->where('TenDangNhap', $username)->first();
+
+        if ($user) {
+            $isPasswordValid = false;
+
+            if (Hash::check($password, $user->MatKhau)) {
+                $isPasswordValid = true;
+            } elseif ($user->MatKhau === $password) {
+                $isPasswordValid = true;
+                $user->MatKhau = Hash::make($password);
+                $user->save();
+            }
+
+            if ($isPasswordValid) {
+                if (! $user->hasAdminAccess()) {
+                    return back()->withInput()->withErrors([
+                        'login' => 'Tài khoản không có quyền truy cập vào trang quản trị.',
+                    ]);
+                }
+
+                Auth::login($user);
+                $request->session()->regenerate();
+
+                session([
+                    'MaTaiKhoan' => $user->MaTaiKhoan,
+                    'TenDangNhap' => $user->TenDangNhap,
+                    'MaQuyen' => (int) $user->MaQuyen,
+                    'HoTen' => $user->khachHang ? $user->khachHang->HoTen : $user->TenDangNhap,
+                ]);
+
+                if (! empty($returnUrl)) {
+                    $laUrlNoiBo = (str_starts_with($returnUrl, '/') && ! str_starts_with($returnUrl, '//'))
+                        || str_starts_with($returnUrl, url('/').'/');
+                    if ($laUrlNoiBo && ! str_contains($returnUrl, '/TaiKhoan/')) {
+                        return redirect($returnUrl);
+                    }
+                }
+
+                return redirect()->route('quanlysanpham.dashboard');
+            }
+        }
+
+        return back()->withInput()->withErrors([
+            'login' => 'Tên đăng nhập hoặc mật khẩu không đúng.',
+        ]);
+    }
+
     public function dangKy()
     {
         if (Auth::check()) {

@@ -19,6 +19,7 @@ use App\Models\Size;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -205,6 +206,17 @@ class QuanLySanPhamController extends Controller
 
     public function dashboard(Request $request)
     {
+        if (! Auth::check()) {
+            $returnUrl = $request->query('returnUrl');
+
+            return view('TaiKhoan.AdminDangNhap', compact('returnUrl'));
+        }
+
+        $user = Auth::user();
+        if (! $user->hasAdminAccess()) {
+            return redirect()->route('home')->with('error', 'Bạn không có quyền truy cập vào trang quản trị.');
+        }
+
         $namHienTai = (int) $request->query('nam', date('Y'));
         if ($namHienTai < 2000 || $namHienTai > 2100) {
             $namHienTai = (int) date('Y');
@@ -321,7 +333,7 @@ class QuanLySanPhamController extends Controller
      */
     private function xoaAnhUpload(?string $duongDan): void
     {
-        if ($duongDan && str_starts_with($duongDan, self::THU_MUC_UPLOAD . '/')) {
+        if ($duongDan && str_starts_with($duongDan, self::THU_MUC_UPLOAD.'/')) {
             Storage::disk('images')->delete($duongDan);
         }
     }

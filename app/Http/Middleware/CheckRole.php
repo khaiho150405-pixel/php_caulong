@@ -20,7 +20,12 @@ class CheckRole
 {
     public function handle(Request $request, Closure $next, string ...$roles): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
+            if ($request->is('admin', 'admin/*')) {
+                return redirect()->route('quanlysanpham.dashboard', ['returnUrl' => $request->fullUrl()])
+                    ->with('error', 'Vui lòng đăng nhập để tiếp tục.');
+            }
+
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => $request->fullUrl()])
                 ->with('error', 'Vui lòng đăng nhập để tiếp tục.');
         }

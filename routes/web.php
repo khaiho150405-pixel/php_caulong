@@ -1,22 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\BangTinController;
+use App\Http\Controllers\ChatbotController;
+use App\Http\Controllers\DonHangController;
+use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\LandingController;
-use App\Http\Controllers\BangTinController;
 use App\Http\Controllers\QuanLyBangTinController;
+use App\Http\Controllers\QuanLyDonHangController;
+use App\Http\Controllers\QuanLyKhuyenMaiController;
+use App\Http\Controllers\QuanLySanPhamController;
+use App\Http\Controllers\QuanLyTaiKhoanController;
+use App\Http\Controllers\QuanLyThongBaoController;
 use App\Http\Controllers\QuanLyTranDauController;
 use App\Http\Controllers\SanPhamController;
-use App\Http\Controllers\GioHangController;
 use App\Http\Controllers\TaiKhoanController;
-use App\Http\Controllers\DonHangController;
 use App\Http\Controllers\ThemPhanHoiSPController;
-use App\Http\Controllers\ChatbotController;
-use App\Http\Controllers\QuanLySanPhamController;
-use App\Http\Controllers\QuanLyDonHangController;
-use App\Http\Controllers\QuanLyTaiKhoanController;
-use App\Http\Controllers\QuanLyKhuyenMaiController;
-use App\Http\Controllers\QuanLyThongBaoController;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,10 +94,14 @@ Route::middleware('check.login')->group(function () {
 | - role:admin,nhanvien : Quản trị viên + Nhân viên (sản phẩm, đơn hàng, thống kê, cảnh báo)
 | - role:admin          : chỉ Quản trị viên (tài khoản, khuyến mãi)
 */
-Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
+// Khu vực quản trị: URL /admin
+// - Chưa đăng nhập: hiển thị trang đăng nhập admin đơn giản tại /admin
+// - Đã đăng nhập (admin / nhân viên): hiển thị Dashboard thống kê
+Route::get('/admin', [QuanLySanPhamController::class, 'dashboard'])->name('quanlysanpham.dashboard');
+Route::post('/admin', [TaiKhoanController::class, 'adminDangNhapPost'])->name('admin.login.post');
+Route::redirect('/admin/login', '/admin');
 
-    // Dashboard thống kê
-    Route::get('/', [QuanLySanPhamController::class, 'dashboard'])->name('quanlysanpham.dashboard');
+Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
 
     // Quản lý sản phẩm (CRUD + tìm kiếm, phân trang)
     Route::prefix('san-pham')->whereNumber('id')->group(function () {

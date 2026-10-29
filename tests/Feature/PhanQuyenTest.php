@@ -16,9 +16,37 @@ class PhanQuyenTest extends TestCase
 
     public function test_guest_is_redirected_to_login_from_admin_area(): void
     {
-        $this->get('/admin')->assertRedirect();
-        $this->get('/admin/san-pham')->assertRedirectContains('/TaiKhoan/DangNhap');
+        // Khi chưa đăng nhập, truy cập /admin hiển thị trực tiếp form đăng nhập admin (đơn giản, không có header khách)
+        $this->get('/admin')
+            ->assertOk()
+            ->assertSee('Đăng nhập Quản trị')
+            ->assertDontSee('class="main-header"', false);
+
+        // Truy cập trang con trong admin khi chưa đăng nhập chuyển về /admin
+        $this->get('/admin/san-pham')->assertRedirectContains('/admin');
+
+        // Trang khách hàng vẫn chuyển về trang đăng nhập khách
         $this->get('/DonHang/Index')->assertRedirectContains('/TaiKhoan/DangNhap');
+    }
+
+    public function test_admin_can_login_directly_at_admin_url(): void
+    {
+        $this->post('/admin', [
+            'TenDangNhap' => 'admin',
+            'MatKhau' => 'admin@123',
+        ])->assertRedirect(route('quanlysanpham.dashboard'));
+
+        $this->assertAuthenticated();
+    }
+
+    public function test_customer_cannot_login_at_admin_url(): void
+    {
+        $this->from('/admin')->post('/admin', [
+            'TenDangNhap' => 'nguyenvana',
+            'MatKhau' => 'vana@123',
+        ])->assertRedirect('/admin')->assertSessionHasErrors('login');
+
+        $this->assertGuest();
     }
 
     public function test_customer_cannot_access_admin_area(): void
