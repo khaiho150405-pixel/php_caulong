@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SanPham;
 use App\Models\Hang;
-use App\Models\LoaiSanPham;
 use App\Models\KhuyenMai;
+use App\Models\LoaiSanPham;
+use App\Models\SanPham;
 use Illuminate\Http\Request;
 
 class SanPhamController extends Controller
@@ -19,9 +19,9 @@ class SanPhamController extends Controller
         $ten = $request->query('ten');
 
         // Lọc theo loại sản phẩm
-        if (!empty($loai)) {
+        if (! empty($loai)) {
             if (is_numeric($loai)) {
-                $query->where('MaLoai', (int)$loai);
+                $query->where('MaLoai', (int) $loai);
             } else {
                 $key = mb_strtolower(trim($loai), 'UTF-8');
                 if ($key == 'vot' || $key == 'votc' || str_contains($key, 'vot')) {
@@ -49,7 +49,7 @@ class SanPhamController extends Controller
         }
 
         // Lọc theo Hãng
-        if (!empty($hang)) {
+        if (! empty($hang)) {
             $hangKey = trim($hang);
             $query->whereHas('hang', function ($q) use ($hangKey) {
                 $q->where('TenHang', 'LIKE', "%{$hangKey}%");
@@ -57,7 +57,7 @@ class SanPhamController extends Controller
         }
 
         // Lọc theo Tên
-        if (!empty($ten)) {
+        if (! empty($ten)) {
             $tenKey = trim($ten);
             $query->where('TenSanPham', 'LIKE', "%{$tenKey}%");
         }
@@ -76,7 +76,7 @@ class SanPhamController extends Controller
 
     public function timKiem(Request $request)
     {
-        $keyword = trim((string)$request->query('keyword', ''));
+        $keyword = trim((string) $request->query('keyword', ''));
         if (empty($keyword)) {
             return redirect()->route('sanpham.index');
         }
@@ -158,7 +158,7 @@ class SanPhamController extends Controller
 
         $dsHang = Hang::orderBy('TenHang')->get();
         // Hỗ trợ lọc theo query param dạng ?hang=Yonex: tự động chọn hãng tương ứng
-        if (!$hangDangChon && $hangTheoTen !== '') {
+        if (! $hangDangChon && $hangTheoTen !== '') {
             $hangDangChon = $dsHang->filter(fn ($h) => stripos($h->TenHang, $hangTheoTen) !== false)->pluck('MaHang')->all();
         }
 

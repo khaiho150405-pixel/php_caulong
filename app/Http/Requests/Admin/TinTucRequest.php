@@ -18,11 +18,14 @@ class TinTucRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        // Ô chọn "Gắn sản phẩm/trận đấu" để trống => null; checkbox "Nổi bật" chưa tick => false
+        // Ô chọn "Gắn sản phẩm/trận đấu" để trống => null; boolean switches; default LoaiTin
         $this->merge([
             'MaSanPham' => $this->input('MaSanPham') ?: null,
             'MaTranDau' => $this->input('MaTranDau') ?: null,
+            'LoaiTin' => $this->input('LoaiTin') ?: 'san-pham-hot',
             'NoiBat' => $this->boolean('NoiBat'),
+            'HienThi' => $this->boolean('HienThi'),
+            'ThuTu' => (int) ($this->input('ThuTu') ?: 1),
         ]);
     }
 
@@ -30,14 +33,18 @@ class TinTucRequest extends FormRequest
     {
         return [
             'TieuDe' => ['required', 'string', 'max:200'],
-            'TomTat' => ['nullable', 'string', 'max:300'],
+            'TomTat' => ['nullable', 'string', 'max:500'],
             'NoiDung' => ['required', 'string', 'min:20'],
             'LoaiTin' => ['required', Rule::in(array_keys(TinTuc::LOAI))],
+            'HinhAnh' => ['nullable', 'string', 'max:255'],
+            'HinhAnh_file' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
             'MaSanPham' => ['nullable', 'integer', Rule::exists('SanPham', 'MaSanPham')],
             'MaTranDau' => ['nullable', 'integer', Rule::exists('TranDau', 'MaTranDau')],
             'NguonTin' => ['nullable', 'string', 'max:150'],
             'LienKetNguon' => ['nullable', 'url', 'max:300'],
             'NoiBat' => ['boolean'],
+            'HienThi' => ['boolean'],
+            'ThuTu' => ['nullable', 'integer', 'min:0'],
             'NgayDang' => ['nullable', 'date'],
         ];
     }

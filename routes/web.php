@@ -9,6 +9,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\QuanLyBangTinController;
 use App\Http\Controllers\QuanLyDonHangController;
 use App\Http\Controllers\QuanLyKhuyenMaiController;
+use App\Http\Controllers\QuanLyLogoController;
 use App\Http\Controllers\QuanLySanPhamController;
 use App\Http\Controllers\QuanLyTaiKhoanController;
 use App\Http\Controllers\QuanLyThongBaoController;
@@ -103,26 +104,6 @@ Route::redirect('/admin/login', '/admin');
 
 Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
 
-    // Quản lý sản phẩm (CRUD + tìm kiếm, phân trang)
-    Route::prefix('san-pham')->whereNumber('id')->group(function () {
-        Route::get('/', [QuanLySanPhamController::class, 'index'])->name('quanlysanpham.index');
-        Route::get('/create', [QuanLySanPhamController::class, 'create'])->name('quanlysanpham.create');
-        Route::post('/create', [QuanLySanPhamController::class, 'createPost'])->name('quanlysanpham.create.post');
-        Route::get('/{id}', [QuanLySanPhamController::class, 'details'])->name('quanlysanpham.details');
-        Route::get('/{id}/edit', [QuanLySanPhamController::class, 'edit'])->name('quanlysanpham.edit');
-        Route::post('/{id}/edit', [QuanLySanPhamController::class, 'editPost'])->name('quanlysanpham.edit.post');
-        Route::get('/{id}/delete', [QuanLySanPhamController::class, 'delete'])->name('quanlysanpham.delete');
-        Route::post('/{id}/delete', [QuanLySanPhamController::class, 'deleteConfirmed'])->name('quanlysanpham.delete.post');
-
-        // Biến thể sản phẩm (ChiTietSanPham: màu, size, giá bán, tồn kho)
-        Route::post('/{id}/bien-the', [QuanLySanPhamController::class, 'bienTheStore'])->name('quanlysanpham.bienthe.store');
-    });
-    Route::prefix('bien-the')->whereNumber('maChiTiet')->group(function () {
-        Route::get('/{maChiTiet}/edit', [QuanLySanPhamController::class, 'bienTheEdit'])->name('quanlysanpham.bienthe.edit');
-        Route::post('/{maChiTiet}/edit', [QuanLySanPhamController::class, 'bienTheUpdate'])->name('quanlysanpham.bienthe.update');
-        Route::post('/{maChiTiet}/delete', [QuanLySanPhamController::class, 'bienTheDestroy'])->name('quanlysanpham.bienthe.destroy');
-    });
-
     // Quản lý đơn hàng
     Route::prefix('don-hang')->whereNumber('id')->group(function () {
         Route::get('/', [QuanLyDonHangController::class, 'index'])->name('quanlydonhang.index');
@@ -130,16 +111,21 @@ Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
         Route::post('/{id}/trang-thai', [QuanLyDonHangController::class, 'setTrangThai'])->name('quanlydonhang.settrangthai');
     });
 
-    // Quản lý bảng tin: bài viết (xóa mềm) + kết quả trận đấu
-    Route::prefix('ban-tin')->whereNumber('id')->group(function () {
+    // Quản lý bảng tin: bài viết (xóa mềm) + kết quả trận đấu + upload ảnh CKEditor + viết bài AI
+    Route::prefix('ban-tin')->group(function () {
+        Route::post('/upload-image', [QuanLyBangTinController::class, 'uploadImage'])->name('quanlybantin.upload_image');
+        Route::post('/ai-generate', [QuanLyBangTinController::class, 'aiGenerate'])->name('quanlybantin.ai_generate');
+        Route::post('/{id}/toggle-status', [QuanLyBangTinController::class, 'toggleStatus'])->whereNumber('id')->name('quanlybantin.togglestatus');
+
         Route::get('/', [QuanLyBangTinController::class, 'index'])->name('quanlybantin.index');
         Route::get('/create', [QuanLyBangTinController::class, 'create'])->name('quanlybantin.create');
         Route::post('/create', [QuanLyBangTinController::class, 'createPost'])->name('quanlybantin.create.post');
-        Route::get('/{id}/edit', [QuanLyBangTinController::class, 'edit'])->name('quanlybantin.edit');
-        Route::post('/{id}/edit', [QuanLyBangTinController::class, 'editPost'])->name('quanlybantin.edit.post');
-        Route::get('/{id}/delete', [QuanLyBangTinController::class, 'delete'])->name('quanlybantin.delete');
-        Route::post('/{id}/delete', [QuanLyBangTinController::class, 'deleteConfirmed'])->name('quanlybantin.delete.post');
+        Route::get('/{id}/edit', [QuanLyBangTinController::class, 'edit'])->whereNumber('id')->name('quanlybantin.edit');
+        Route::post('/{id}/edit', [QuanLyBangTinController::class, 'editPost'])->whereNumber('id')->name('quanlybantin.edit.post');
+        Route::get('/{id}/delete', [QuanLyBangTinController::class, 'delete'])->whereNumber('id')->name('quanlybantin.delete');
+        Route::post('/{id}/delete', [QuanLyBangTinController::class, 'deleteConfirmed'])->whereNumber('id')->name('quanlybantin.delete.post');
     });
+
     Route::prefix('tran-dau')->whereNumber('id')->group(function () {
         Route::get('/', [QuanLyTranDauController::class, 'index'])->name('quanlytrandau.index');
         Route::get('/create', [QuanLyTranDauController::class, 'create'])->name('quanlytrandau.create');
@@ -154,8 +140,28 @@ Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
     Route::get('/thong-bao', [QuanLyThongBaoController::class, 'thongBao'])->name('quanlythongbao.thongbao');
     Route::get('/thong-bao/so-luong', [QuanLyThongBaoController::class, 'soThongBao'])->name('quanlythongbao.sothongbao');
 
-    // ---- Chỉ dành cho Quản trị viên ----
+    // ---- Chỉ dành cho Quản trị viên (Admin) ----
     Route::middleware('role:admin')->group(function () {
+        // Quản lý sản phẩm (CRUD + tìm kiếm, phân trang)
+        Route::prefix('san-pham')->whereNumber('id')->group(function () {
+            Route::get('/', [QuanLySanPhamController::class, 'index'])->name('quanlysanpham.index');
+            Route::get('/create', [QuanLySanPhamController::class, 'create'])->name('quanlysanpham.create');
+            Route::post('/create', [QuanLySanPhamController::class, 'createPost'])->name('quanlysanpham.create.post');
+            Route::get('/{id}', [QuanLySanPhamController::class, 'details'])->name('quanlysanpham.details');
+            Route::get('/{id}/edit', [QuanLySanPhamController::class, 'edit'])->name('quanlysanpham.edit');
+            Route::post('/{id}/edit', [QuanLySanPhamController::class, 'editPost'])->name('quanlysanpham.edit.post');
+            Route::get('/{id}/delete', [QuanLySanPhamController::class, 'delete'])->name('quanlysanpham.delete');
+            Route::post('/{id}/delete', [QuanLySanPhamController::class, 'deleteConfirmed'])->name('quanlysanpham.delete.post');
+
+            // Biến thể sản phẩm (ChiTietSanPham: màu, size, giá bán, tồn kho)
+            Route::post('/{id}/bien-the', [QuanLySanPhamController::class, 'bienTheStore'])->name('quanlysanpham.bienthe.store');
+        });
+        Route::prefix('bien-the')->whereNumber('maChiTiet')->group(function () {
+            Route::get('/{maChiTiet}/edit', [QuanLySanPhamController::class, 'bienTheEdit'])->name('quanlysanpham.bienthe.edit');
+            Route::post('/{maChiTiet}/edit', [QuanLySanPhamController::class, 'bienTheUpdate'])->name('quanlysanpham.bienthe.update');
+            Route::post('/{maChiTiet}/delete', [QuanLySanPhamController::class, 'bienTheDestroy'])->name('quanlysanpham.bienthe.destroy');
+        });
+
         // Quản lý tài khoản
         Route::prefix('tai-khoan')->whereNumber('id')->group(function () {
             Route::get('/', [QuanLyTaiKhoanController::class, 'index'])->name('quanlytaikhoan.index');
@@ -176,6 +182,12 @@ Route::prefix('admin')->middleware('role:admin,nhanvien')->group(function () {
             Route::post('/{id}/edit', [QuanLyKhuyenMaiController::class, 'editPost'])->name('quanlykhuyenmai.edit.post');
             Route::get('/{id}/delete', [QuanLyKhuyenMaiController::class, 'delete'])->name('quanlykhuyenmai.delete');
             Route::post('/{id}/delete', [QuanLyKhuyenMaiController::class, 'deleteConfirmed'])->name('quanlykhuyenmai.delete.post');
+        });
+
+        // Quản lý Logo & Cấu hình thương hiệu
+        Route::prefix('logo')->group(function () {
+            Route::get('/', [QuanLyLogoController::class, 'index'])->name('admin.logo.index');
+            Route::post('/', [QuanLyLogoController::class, 'update'])->name('admin.logo.update');
         });
     });
 });

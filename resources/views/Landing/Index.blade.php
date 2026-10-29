@@ -193,7 +193,7 @@
 </section>
 
 {{-- Tin tức và kết quả từ bảng tin cửa hàng. --}}
-@if ($tinMoi->isNotEmpty() || $tranMoi->isNotEmpty())
+@if (($dsNoiBat && $dsNoiBat->isNotEmpty()) || $tinMoi->isNotEmpty() || $tranMoi->isNotEmpty())
 <section class="l-section l-news-sec" id="tin-tuc" aria-label="Tin tức và sự kiện cầu lông">
     <div class="container">
         @include('BangTin._banner')
@@ -201,13 +201,22 @@
         <div class="l-board">
             <div class="l-board-feed">
                 <div class="bt-column-heading"><h3>Bài viết nổi bật</h3><a href="{{ route('bangtin.index') }}">Tất cả bài viết <span aria-hidden="true">↗</span></a></div>
-                @if ($tinMoi->isNotEmpty())
-                @include('BangTin._noibat', ['t' => $tinMoi->first()])
-                <div class="bt-timeline">
-                    @foreach ($tinMoi->skip(1) as $t)
-                        @include('BangTin._dong', ['t' => $t, 'nho' => true])
-                    @endforeach
-                </div>
+                @if ($dsNoiBat && $dsNoiBat->isNotEmpty())
+                    @include('BangTin._noibat', ['dsNoiBat' => $dsNoiBat, 't' => $dsNoiBat->first()])
+                    @if ($tinMoi->isNotEmpty())
+                        <div class="bt-timeline">
+                            @foreach ($tinMoi as $t)
+                                @include('BangTin._dong', ['t' => $t, 'nho' => true])
+                            @endforeach
+                        </div>
+                    @endif
+                @elseif ($tinMoi->isNotEmpty())
+                    @include('BangTin._noibat', ['t' => $tinMoi->first()])
+                    <div class="bt-timeline">
+                        @foreach ($tinMoi->skip(1) as $t)
+                            @include('BangTin._dong', ['t' => $t, 'nho' => true])
+                        @endforeach
+                    </div>
                 @else
                     <p class="bt-empty-feed">Bài viết đang được cập nhật.</p>
                 @endif

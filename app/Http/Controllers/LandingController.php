@@ -73,10 +73,23 @@ class LandingController extends Controller
             ->take(3)
             ->get();
 
-        // Bảng tin: 3 tin mới nhất + kết quả trận đấu gần đây
-        $tinMoi = TinTuc::with(['sanPham', 'tranDau'])->daDang()->orderByDesc('NoiBat')->orderByDesc('NgayDang')->orderByDesc('MaTin')->take(3)->get();
+        // Bảng tin: Danh sách tin nổi bật cho slider ngoài trang chủ
+        $dsNoiBat = TinTuc::with(['sanPham', 'tranDau'])
+            ->daDang()
+            ->where('NoiBat', true)
+            ->orderBy('ThuTu')
+            ->orderByDesc('NgayDang')
+            ->orderByDesc('MaTin')
+            ->get();
+
+        // 3 tin mới nhất khác không trùng với bài nổi bật (hoặc fallback nếu không có bài nổi bật)
+        $tinMoiQuery = TinTuc::with(['sanPham', 'tranDau'])->daDang();
+        if ($dsNoiBat->isNotEmpty()) {
+            $tinMoiQuery->whereNotIn('MaTin', $dsNoiBat->pluck('MaTin'));
+        }
+        $tinMoi = $tinMoiQuery->orderByDesc('NgayDang')->orderByDesc('MaTin')->take(3)->get();
         $tranMoi = TranDau::with(['tinTucs' => fn ($q) => $q->daDang()->orderByDesc('NgayDang')])->orderByDesc('NgayThiDau')->orderByDesc('MaTranDau')->take(4)->get();
 
-        return view('Landing.Index', compact('thongKe', 'nganSach', 'danhMuc', 'uuDai', 'danhGia', 'heroSp', 'giamToiDa', 'tinMoi', 'tranMoi'));
+        return view('Landing.Index', compact('thongKe', 'nganSach', 'danhMuc', 'uuDai', 'danhGia', 'heroSp', 'giamToiDa', 'dsNoiBat', 'tinMoi', 'tranMoi'));
     }
 }

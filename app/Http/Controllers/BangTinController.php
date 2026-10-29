@@ -20,14 +20,22 @@ class BangTinController extends Controller
 
         $query = TinTuc::with(['sanPham', 'tranDau'])->daDang()->loai($loai)->timKiem($keyword);
 
-        // Tin nổi bật chỉ hiện ở trang đầu khi chưa lọc/tìm kiếm
-        $noiBat = null;
-        if (!$loai && $keyword === '' && (int) $request->query('page', 1) === 1) {
-            $noiBat = TinTuc::with(['sanPham', 'tranDau'])->daDang()->where('NoiBat', true)->orderByDesc('NgayDang')->first();
-            if ($noiBat) {
-                $query->where('MaTin', '!=', $noiBat->MaTin);
+        // Tin nổi bật chỉ hiện ở trang đầu khi chưa lọc/tìm kiếm: lấy toàn bộ danh sách bài được gạt nổi bật
+        $dsNoiBat = collect();
+        if (! $loai && $keyword === '' && (int) $request->query('page', 1) === 1) {
+            $dsNoiBat = TinTuc::with(['sanPham', 'tranDau'])
+                ->daDang()
+                ->where('NoiBat', true)
+                ->orderBy('ThuTu')
+                ->orderByDesc('NgayDang')
+                ->orderByDesc('MaTin')
+                ->get();
+
+            if ($dsNoiBat->isNotEmpty()) {
+                $query->whereNotIn('MaTin', $dsNoiBat->pluck('MaTin'));
             }
         }
+        $noiBat = $dsNoiBat->first();
 
         $tins = $query->orderByDesc('NgayDang')->orderByDesc('MaTin')->paginate(8)->withQueryString();
 
@@ -40,6 +48,7 @@ class BangTinController extends Controller
 
         return view('BangTin.Index', [
             'tins' => $tins,
+            'dsNoiBat' => $dsNoiBat,
             'noiBat' => $noiBat,
             'loai' => $loai,
             'keyword' => $keyword,
@@ -54,8 +63,8 @@ class BangTinController extends Controller
         $tin = TinTuc::with(['sanPham.hang', 'sanPham.khuyenMai', 'tranDau', 'tacGia'])->daDang()->findOrFail($id);
 
         // Tăng lượt xem (không cập nhật nếu người dùng vừa xem bài này trong phiên)
-        $key = 'da_xem_tin_' . $tin->MaTin;
-        if (!session()->has($key)) {
+        $key = 'da_xem_tin_'.$tin->MaTin;
+        if (! session()->has($key)) {
             TinTuc::whereKey($tin->MaTin)->increment('LuotXem');
             $tin->LuotXem++;
             session()->put($key, true);

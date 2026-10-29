@@ -14,7 +14,7 @@ class CheckLogin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => $request->fullUrl()]);
         }
 

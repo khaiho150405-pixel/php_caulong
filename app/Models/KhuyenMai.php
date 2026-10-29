@@ -13,7 +13,9 @@ class KhuyenMai extends Model
     use HasFactory;
 
     protected $table = 'KhuyenMai';
+
     protected $primaryKey = 'MaKhuyenMai';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -55,6 +57,7 @@ class KhuyenMai extends Model
         if ($end && $end->lt($today)) {
             return false;
         }
+
         return true;
     }
 }

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SanPham;
 use App\Models\ChiTietSanPham;
 use App\Models\GioHang;
-use App\Models\KhachHang;
 use App\Models\PhanHoi;
+use App\Models\SanPham;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -71,7 +70,7 @@ class HomeController extends Controller
 
     public function addToCart(Request $request)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => url()->previous()]);
         }
 
@@ -95,12 +94,12 @@ class HomeController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return back()->with('error', 'Không tìm thấy thông tin khách hàng của tài khoản.');
         }
 
         $productVariant = ChiTietSanPham::with('sanPham')->find($chiTietId);
-        if (!$productVariant || !$productVariant->sanPham || $productVariant->sanPham->trashed()) {
+        if (! $productVariant || ! $productVariant->sanPham || $productVariant->sanPham->trashed()) {
             return back()->with('error', 'Sản phẩm không còn kinh doanh.');
         }
 
@@ -134,14 +133,14 @@ class HomeController extends Controller
 
     public function viewCart()
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => route('home.viewcart')]);
         }
 
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('home')->with('error', 'Không tìm thấy thông tin khách hàng.');
         }
 
@@ -155,7 +154,7 @@ class HomeController extends Controller
 
     public function removeFromCart($maGioHang)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -179,6 +178,6 @@ class HomeController extends Controller
     private function updateCartCountInSession(int $maKhachHang)
     {
         $totalItems = GioHang::where('MaKhachHang', $maKhachHang)->sum('SoLuong');
-        session(['GioHangCount' => (int)$totalItems]);
+        session(['GioHangCount' => (int) $totalItems]);
     }
 }

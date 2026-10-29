@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class DonHang extends Model
 {
     protected $table = 'DonHang';
+
     protected $primaryKey = 'MaDonHang';
+
     public $timestamps = false;
 
     protected $fillable = [

@@ -20,6 +20,7 @@ class QuanLyThongBaoController extends Controller
     public function soThongBao()
     {
         $soThongBao = PhanHoi::where('DanhGia', '<=', 2)->count();
-        return response((string)$soThongBao, 200)->header('Content-Type', 'text/plain');
+
+        return response((string) $soThongBao, 200)->header('Content-Type', 'text/plain');
     }
 }

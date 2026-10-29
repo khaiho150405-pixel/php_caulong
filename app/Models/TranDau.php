@@ -11,7 +11,9 @@ use Illuminate\Database\Eloquent\Model;
 class TranDau extends Model
 {
     protected $table = 'TranDau';
+
     protected $primaryKey = 'MaTranDau';
+
     public $timestamps = false;
 
     protected $fillable = [

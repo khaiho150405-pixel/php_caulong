@@ -108,8 +108,8 @@
 <body class="admin-login-body">
     <div class="d-flex flex-column align-items-center w-100">
         <div class="admin-login-card">
-            <div class="admin-login-icon">
-                <i class="fa-solid fa-shield-halved"></i>
+            <div class="text-center mb-3">
+                <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo" class="rounded-circle shadow-sm border p-1 bg-white" style="width: 64px; height: 64px; object-fit: contain;">
             </div>
             <h1 class="admin-login-title">Đăng nhập Quản trị</h1>
             <p class="admin-login-subtitle">Hệ thống quản lý cửa hàng cầu lông</p>
@@ -184,3 +184,4 @@
     </script>
 </body>
 </html>
+

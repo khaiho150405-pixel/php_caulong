@@ -22,7 +22,7 @@ class SanPhamFactory extends Factory
         $dong = ['Astrox', 'Nanoflare', 'Arcsaber', 'Thruster', 'Auraspeed', 'Axforce', 'Tectonic', 'Fortius'];
 
         return [
-            'TenSanPham' => 'Vợt ' . fake()->randomElement($dong) . ' ' . fake()->unique()->numberBetween(10, 9999),
+            'TenSanPham' => 'Vợt '.fake()->randomElement($dong).' '.fake()->unique()->numberBetween(10, 9999),
             'MoTa' => fake()->sentence(12),
             'GiaGoc' => fake()->numberBetween(5, 60) * 100000,
             'HinhAnhDaiDien' => 'default-product.jpg',

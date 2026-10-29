@@ -83,10 +83,18 @@ class KhachHangTest extends TestCase
         }
     }
 
-    public function test_admin_login_redirects_to_admin_dashboard(): void
+    public function test_admin_cannot_login_via_general_login_page(): void
     {
         $this->post('/TaiKhoan/DangNhap', ['TenDangNhap' => 'admin', 'MatKhau' => 'admin@123'])
+            ->assertSessionHasErrors(['login' => 'Tài khoản Quản trị viên vui lòng đăng nhập tại trang quản trị (/admin).']);
+        $this->assertGuest();
+    }
+
+    public function test_staff_can_login_via_general_login_page_and_redirects_to_dashboard(): void
+    {
+        $this->post('/TaiKhoan/DangNhap', ['TenDangNhap' => 'nhanvien_banhang', 'MatKhau' => 'nv@123'])
             ->assertRedirect(route('quanlysanpham.dashboard'));
+        $this->assertAuthenticated();
     }
 
     public function test_open_redirect_is_blocked(): void
@@ -95,11 +103,12 @@ class KhachHangTest extends TestCase
             ->assertRedirect(route('home'));
     }
 
-    public function test_admin_login_ignores_customer_return_url(): void
+    public function test_admin_logs_in_at_admin_route(): void
     {
-        $this->post('/TaiKhoan/DangNhap', [
-            'TenDangNhap' => 'admin', 'MatKhau' => 'admin@123', 'returnUrl' => '/Home/ViewCart',
+        $this->post('/admin', [
+            'TenDangNhap' => 'admin', 'MatKhau' => 'admin@123',
         ])->assertRedirect(route('quanlysanpham.dashboard'));
+        $this->assertAuthenticated();
     }
 
     public function test_add_to_cart_checkout_and_cancel_order_restores_stock(): void

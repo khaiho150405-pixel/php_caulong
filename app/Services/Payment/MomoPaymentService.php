@@ -2,17 +2,22 @@
 
 namespace App\Services\Payment;
 
+use Exception;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
-use Exception;
 
 class MomoPaymentService
 {
     protected string $endpoint;
+
     protected string $partnerCode;
+
     protected string $accessKey;
+
     protected string $secretKey;
+
     protected string $returnUrl;
+
     protected string $notifyUrl;
 
     public function __construct()
@@ -30,26 +35,26 @@ class MomoPaymentService
      */
     public function createPayment(int $maDonHang, float $amount, string $orderInfo = ''): string
     {
-        $orderId = (string)$maDonHang;
-        $requestId = (string)Str::uuid();
-        $amountStr = (string)((int)$amount);
-        $orderInfoStr = !empty($orderInfo) ? $orderInfo : "Thanh toan don hang #{$maDonHang}";
-        $extraData = "";
-        $requestType = "captureWallet";
+        $orderId = (string) $maDonHang;
+        $requestId = (string) Str::uuid();
+        $amountStr = (string) ((int) $amount);
+        $orderInfoStr = ! empty($orderInfo) ? $orderInfo : "Thanh toan don hang #{$maDonHang}";
+        $extraData = '';
+        $requestType = 'captureWallet';
 
         // Tạo chữ ký HMAC-SHA256 theo chuẩn MoMo v2
-        $rawHash = "accessKey={$this->accessKey}" .
-            "&amount={$amountStr}" .
-            "&extraData={$extraData}" .
-            "&ipnUrl={$this->notifyUrl}" .
-            "&orderId={$orderId}" .
-            "&orderInfo={$orderInfoStr}" .
-            "&partnerCode={$this->partnerCode}" .
-            "&redirectUrl={$this->returnUrl}" .
-            "&requestId={$requestId}" .
+        $rawHash = "accessKey={$this->accessKey}".
+            "&amount={$amountStr}".
+            "&extraData={$extraData}".
+            "&ipnUrl={$this->notifyUrl}".
+            "&orderId={$orderId}".
+            "&orderInfo={$orderInfoStr}".
+            "&partnerCode={$this->partnerCode}".
+            "&redirectUrl={$this->returnUrl}".
+            "&requestId={$requestId}".
             "&requestType={$requestType}";
 
-        $signature = hash_hmac("sha256", $rawHash, $this->secretKey);
+        $signature = hash_hmac('sha256', $rawHash, $this->secretKey);
 
         $payload = [
             'partnerCode' => $this->partnerCode,
@@ -71,8 +76,8 @@ class MomoPaymentService
             'Content-Type' => 'application/json',
         ])->timeout(30)->post($this->endpoint, $payload);
 
-        if (!$response->successful()) {
-            throw new Exception("Lỗi kết nối cổng thanh toán MoMo: " . $response->body());
+        if (! $response->successful()) {
+            throw new Exception('Lỗi kết nối cổng thanh toán MoMo: '.$response->body());
         }
 
         $resJson = $response->json();
@@ -80,7 +85,7 @@ class MomoPaymentService
             return $resJson['payUrl'];
         }
 
-        throw new Exception("MoMo không trả về đường dẫn thanh toán: " . ($resJson['message'] ?? 'Lỗi không xác định'));
+        throw new Exception('MoMo không trả về đường dẫn thanh toán: '.($resJson['message'] ?? 'Lỗi không xác định'));
     }
 
     /**
@@ -88,25 +93,26 @@ class MomoPaymentService
      */
     public function verifySignature(array $data): bool
     {
-        if (!isset($data['signature'])) {
+        if (! isset($data['signature'])) {
             return false;
         }
 
-        $rawHash = "accessKey={$this->accessKey}" .
-            "&amount={$data['amount']}" .
-            "&extraData={$data['extraData']}" .
-            "&message={$data['message']}" .
-            "&orderId={$data['orderId']}" .
-            "&orderInfo={$data['orderInfo']}" .
-            "&orderType={$data['orderType']}" .
-            "&partnerCode={$data['partnerCode']}" .
-            "&payType={$data['payType']}" .
-            "&requestId={$data['requestId']}" .
-            "&responseTime={$data['responseTime']}" .
-            "&resultCode={$data['resultCode']}" .
+        $rawHash = "accessKey={$this->accessKey}".
+            "&amount={$data['amount']}".
+            "&extraData={$data['extraData']}".
+            "&message={$data['message']}".
+            "&orderId={$data['orderId']}".
+            "&orderInfo={$data['orderInfo']}".
+            "&orderType={$data['orderType']}".
+            "&partnerCode={$data['partnerCode']}".
+            "&payType={$data['payType']}".
+            "&requestId={$data['requestId']}".
+            "&responseTime={$data['responseTime']}".
+            "&resultCode={$data['resultCode']}".
             "&transId={$data['transId']}";
 
-        $expectedSignature = hash_hmac("sha256", $rawHash, $this->secretKey);
+        $expectedSignature = hash_hmac('sha256', $rawHash, $this->secretKey);
+
         return hash_equals($expectedSignature, $data['signature']);
     }
 }

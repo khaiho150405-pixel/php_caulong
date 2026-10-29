@@ -45,7 +45,7 @@ class TaiKhoanFactory extends Factory
             KhachHang::create([
                 'HoTen' => fake()->name(),
                 'Email' => $taiKhoan->Email,
-                'SoDienThoai' => '09' . fake()->numerify('########'),
+                'SoDienThoai' => '09'.fake()->numerify('########'),
                 'DiaChi' => fake()->address(),
                 'MaTaiKhoan' => $taiKhoan->MaTaiKhoan,
                 'NgayTao' => now(),

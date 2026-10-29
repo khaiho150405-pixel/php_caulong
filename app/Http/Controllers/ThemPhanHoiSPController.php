@@ -20,9 +20,9 @@ class ThemPhanHoiSPController extends Controller
     {
         $user = Auth::user();
         $khachHang = $user->khachHang;
-        $maSP = (int)$request->input('maSP');
+        $maSP = (int) $request->input('maSP');
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('home.chitietsanpham', ['id' => $maSP])
                 ->with('error', 'Tài khoản của bạn không phải là khách hàng và không thể gửi đánh giá.');
         }

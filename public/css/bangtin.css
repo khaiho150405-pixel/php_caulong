@@ -58,6 +58,134 @@
 .bt-more { display:inline-flex; align-items:center; gap:22px; min-height:44px; font-size:11px; font-weight:600; color:var(--brand); }
 .bt-more>span { font-size:18px; }
 
+/* Vertical Featured Slider: Tự động trượt lên từng bài khi có nhiều bài nổi bật */
+.bt-featured-slider-box {
+    margin: 0 0 16px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+}
+.bt-featured-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.bt-featured-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+.bt-featured-badge {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg);
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-weight: 500;
+    border: 1px solid var(--line);
+}
+.bt-live-dot {
+    width: 7px;
+    height: 7px;
+    background-color: var(--brand);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7);
+    animation: btPulse 1.8s infinite;
+}
+@keyframes btPulse {
+    0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+    70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+}
+.bt-featured-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    padding: 3px 8px;
+    border-radius: 20px;
+}
+.bt-nav-btn {
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: background 0.15s, color 0.15s;
+}
+.bt-nav-btn:hover {
+    background: var(--bg);
+    color: var(--ink);
+}
+.bt-featured-counter {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-weight: 600;
+    padding: 0 4px;
+    min-width: 36px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+.bt-featured-counter b {
+    color: var(--brand-700);
+}
+.bt-featured-viewport {
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    transition: height 0.35s ease;
+}
+.bt-featured-track {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    will-change: transform;
+}
+.bt-featured-slide {
+    width: 100%;
+    flex-shrink: 0;
+}
+.bt-featured-slide .bt-lead {
+    margin: 0;
+    padding-bottom: 8px;
+    border-bottom: none;
+}
+.bt-featured-indicators {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+}
+.bt-indicator-dot {
+    width: 20px;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--line-strong);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: background 0.25s, width 0.25s;
+}
+.bt-indicator-dot.active {
+    background: var(--brand);
+    width: 34px;
+}
+
 /* Article lists: simple rules replace the old colored timeline cards. */
 .bt-month { margin-top:24px; }
 .bt-month>h2 { display:flex; align-items:baseline; justify-content:space-between; gap:16px; font-size:13px; font-weight:600; color:var(--ink-soft); margin:0 0 8px; padding-bottom:12px; border-bottom:1px solid var(--line-strong); }

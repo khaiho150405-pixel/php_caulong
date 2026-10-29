@@ -2,7 +2,9 @@
 
 namespace Tests\Feature;
 
+use App\Models\CauHinh;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 /**
@@ -59,17 +61,43 @@ class PhanQuyenTest extends TestCase
         $this->assertDatabaseHas('SanPham', ['MaSanPham' => 1, 'deleted_at' => null]);
     }
 
-    public function test_staff_can_manage_products_and_orders_but_not_accounts_or_promotions(): void
+    public function test_staff_cannot_access_products_promotions_or_accounts(): void
     {
         $nv = $this->nhanVien();
 
-        $this->actingAs($nv)->get('/admin/san-pham')->assertStatus(200);
         $this->actingAs($nv)->get('/admin/don-hang')->assertStatus(200);
+        $this->actingAs($nv)->get('/admin/ban-tin')->assertStatus(200);
 
-        $this->actingAs($nv)->get('/admin/tai-khoan')->assertRedirect(route('quanlysanpham.dashboard'));
+        // Nhân viên bị chặn truy cập và chuyển hướng về dashboard khi vào sản phẩm, khuyến mãi, tài khoản, logo
+        $this->actingAs($nv)->get('/admin/san-pham')->assertRedirect(route('quanlysanpham.dashboard'));
         $this->actingAs($nv)->get('/admin/khuyen-mai')->assertRedirect(route('quanlysanpham.dashboard'));
+        $this->actingAs($nv)->get('/admin/tai-khoan')->assertRedirect(route('quanlysanpham.dashboard'));
+        $this->actingAs($nv)->get('/admin/logo')->assertRedirect(route('quanlysanpham.dashboard'));
         $this->actingAs($nv)->post('/admin/tai-khoan/3/delete')->assertRedirect(route('quanlysanpham.dashboard'));
         $this->assertDatabaseHas('TaiKhoan', ['MaTaiKhoan' => 3]);
+
+        // Trên giao diện trang quản trị của nhân viên: ẩn quyền Sản phẩm và Khuyến mãi
+        $response = $this->actingAs($nv)->get('/admin');
+        $response->assertStatus(200);
+        $response->assertDontSee('/admin/san-pham');
+        $response->assertDontSee('/admin/khuyen-mai');
+        $response->assertSee('/admin/don-hang');
+        $response->assertSee('/admin/ban-tin');
+    }
+
+    public function test_admin_can_manage_logo_and_system_branding(): void
+    {
+        $admin = $this->admin();
+        $this->actingAs($admin)->get('/admin/logo')->assertStatus(200)->assertSee('Quản lý Logo');
+
+        $file = UploadedFile::fake()->create('logo.png', 50, 'image/png');
+        $this->actingAs($admin)->post('/admin/logo', [
+            'site_name' => 'Shop Cầu Lông Nasani',
+            'logo_file' => $file,
+        ])->assertRedirect(route('admin.logo.index'))->assertSessionHas('message');
+
+        $this->assertSame('Shop Cầu Lông Nasani', CauHinh::get('site_name'));
+        $this->assertStringContainsString('images/uploads/logo/', CauHinh::get('logo_url'));
     }
 
     public function test_admin_stays_in_admin_area_instead_of_customer_pages(): void

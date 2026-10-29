@@ -49,6 +49,13 @@ class TaiKhoanController extends Controller
             }
 
             if ($isPasswordValid) {
+                // Chặn tài khoản Quản trị viên đăng nhập ở đường link chung, bắt buộc qua /admin
+                if ($user->isAdmin()) {
+                    return back()->withInput($request->only('TenDangNhap'))->withErrors([
+                        'login' => 'Tài khoản Quản trị viên vui lòng đăng nhập tại trang quản trị (/admin).',
+                    ]);
+                }
+
                 Auth::login($user);
                 // Chống tấn công Session Fixation
                 $request->session()->regenerate();

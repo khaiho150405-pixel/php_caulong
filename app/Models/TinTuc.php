@@ -14,7 +14,9 @@ class TinTuc extends Model
     use SoftDeletes;
 
     protected $table = 'TinTuc';
+
     protected $primaryKey = 'MaTin';
+
     public $timestamps = false;
 
     /** Các loại tin: khóa => [nhãn, biểu tượng Font Awesome] */
@@ -27,13 +29,15 @@ class TinTuc extends Model
     ];
 
     protected $fillable = [
-        'TieuDe', 'TomTat', 'NoiDung', 'LoaiTin', 'MaSanPham', 'MaTranDau', 'MaTaiKhoan',
-        'NguonTin', 'LienKetNguon', 'NoiBat', 'NgayDang',
+        'TieuDe', 'TomTat', 'NoiDung', 'HinhAnh', 'LoaiTin', 'MaSanPham', 'MaTranDau', 'MaTaiKhoan',
+        'NguonTin', 'LienKetNguon', 'NoiBat', 'HienThi', 'ThuTu', 'NgayDang',
     ];
 
     protected $casts = [
         'NgayDang' => 'datetime',
         'NoiBat' => 'boolean',
+        'HienThi' => 'boolean',
+        'ThuTu' => 'integer',
         'LuotXem' => 'integer',
     ];
 
@@ -52,10 +56,12 @@ class TinTuc extends Model
         return $this->belongsTo(TaiKhoan::class, 'MaTaiKhoan', 'MaTaiKhoan');
     }
 
-    /** Chỉ lấy các bài đã đến giờ đăng. */
+    /** Chỉ lấy các bài đã được bật hiển thị và đã đến giờ đăng. */
     public function scopeDaDang(Builder $query): Builder
     {
-        return $query->where('NgayDang', '<=', now());
+        return $query->where(function (Builder $q) {
+            $q->whereNull('HienThi')->orWhere('HienThi', true);
+        })->where('NgayDang', '<=', now());
     }
 
     public function scopeLoai(Builder $query, ?string $loai): Builder
@@ -88,9 +94,37 @@ class TinTuc extends Model
         return self::LOAI[$this->LoaiTin][1] ?? 'fa-newspaper';
     }
 
-    /** Ảnh minh họa: ảnh sản phẩm thật gắn kèm (nếu có), không dùng ảnh không rõ bản quyền. */
+    /** Ảnh minh họa: ưu tiên HinhAnh của bài viết, rồi đến ảnh sản phẩm gắn kèm. */
     public function getAnhAttribute(): ?string
     {
-        return $this->sanPham ? 'images/' . $this->sanPham->anh_thumb : null;
+        if (! empty($this->HinhAnh)) {
+            return $this->HinhAnh;
+        }
+
+        return $this->sanPham ? 'images/'.$this->sanPham->anh_thumb : null;
+    }
+
+    /** Trả về URL hình ảnh đầy đủ để hiển thị. */
+    public function getHinhAnhUrlAttribute(): string
+    {
+        if (! empty($this->HinhAnh)) {
+            if (str_starts_with($this->HinhAnh, 'http://') || str_starts_with($this->HinhAnh, 'https://')) {
+                return $this->HinhAnh;
+            }
+            if (is_file(public_path($this->HinhAnh))) {
+                return asset($this->HinhAnh);
+            }
+            if (is_file(storage_path('app/public/'.$this->HinhAnh))) {
+                return asset('storage/'.$this->HinhAnh);
+            }
+
+            return asset($this->HinhAnh);
+        }
+
+        if ($this->sanPham) {
+            return asset('images/'.$this->sanPham->anh_thumb);
+        }
+
+        return asset('images/news/court-journal-thumb.webp');
     }
 }

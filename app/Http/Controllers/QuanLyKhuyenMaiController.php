@@ -41,6 +41,7 @@ class QuanLyKhuyenMaiController extends Controller
     public function edit($id)
     {
         $km = KhuyenMai::findOrFail($id);
+
         return view('QuanLyKhuyenMai.Edit', compact('km'));
     }
 
@@ -55,6 +56,7 @@ class QuanLyKhuyenMaiController extends Controller
     public function delete($id)
     {
         $km = KhuyenMai::findOrFail($id);
+
         return view('QuanLyKhuyenMai.Delete', compact('km'));
     }
 

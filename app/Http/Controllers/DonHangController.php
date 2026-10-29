@@ -7,9 +7,9 @@ use App\Models\DonHang;
 use App\Models\GioHang;
 use App\Services\OrderService;
 use App\Services\Payment\MomoPaymentService;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Exception;
 use Illuminate\Support\Facades\Log;
 
 class DonHangController extends Controller
@@ -19,7 +19,7 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -45,7 +45,7 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -69,7 +69,7 @@ class DonHangController extends Controller
 
             return redirect()->route('donhang.index')->with('message', "Đặt hàng thành công! Đơn hàng #{$order->MaDonHang}");
         } catch (Exception $e) {
-            return redirect()->route('home.viewcart')->with('error', 'Lỗi khi đặt hàng: ' . $e->getMessage());
+            return redirect()->route('home.viewcart')->with('error', 'Lỗi khi đặt hàng: '.$e->getMessage());
         }
     }
 
@@ -79,7 +79,7 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -95,7 +95,7 @@ class DonHangController extends Controller
             $orderData = [
                 'DiaChiGiaoHang' => $request->input('DiaChiGiao'),
                 'SoDienThoaiNhanHang' => $request->input('SoDienThoaiNhan'),
-                'GhiChu' => $request->input('GhiChu', '') . ' (Thanh toán qua MoMo)',
+                'GhiChu' => $request->input('GhiChu', '').' (Thanh toán qua MoMo)',
             ];
 
             // Tạo đơn hàng tạm thời ở trạng thái Chờ thanh toán MoMo
@@ -103,7 +103,7 @@ class DonHangController extends Controller
             $order = $orderService->createOrder($khachHang->MaKhachHang, $orderData, $cartItems, 'Chờ thanh toán MoMo', false);
 
             // Tạo link thanh toán MoMo
-            $payUrl = $momoService->createPayment($order->MaDonHang, (float)$order->TongTien, "Thanh toan don hang #{$order->MaDonHang}");
+            $payUrl = $momoService->createPayment($order->MaDonHang, (float) $order->TongTien, "Thanh toan don hang #{$order->MaDonHang}");
 
             return redirect()->away($payUrl);
         } catch (Exception $e) {
@@ -111,7 +111,8 @@ class DonHangController extends Controller
                 // Không tạo được link thanh toán -> hủy đơn tạm và hoàn kho
                 $orderService->huyDoThanhToanThatBai($order->MaDonHang);
             }
-            return redirect()->route('donhang.checkout')->with('error', 'Lỗi cổng MoMo: ' . $e->getMessage());
+
+            return redirect()->route('donhang.checkout')->with('error', 'Lỗi cổng MoMo: '.$e->getMessage());
         }
     }
 
@@ -126,7 +127,7 @@ class DonHangController extends Controller
         $resultCode = (string) $request->query('resultCode', $request->query('errorCode', '-1'));
         $order = DonHang::find($orderId);
 
-        if (!$order || !$this->chuKyMomoHopLe($momoService, $data)) {
+        if (! $order || ! $this->chuKyMomoHopLe($momoService, $data)) {
             return view('DonHang.ThanhToanMomoSuccess', [
                 'isSuccess' => false,
                 'maDonHang' => $orderId,
@@ -168,7 +169,7 @@ class DonHangController extends Controller
         $batBuoc = ['amount', 'extraData', 'message', 'orderId', 'orderInfo', 'orderType', 'partnerCode',
             'payType', 'requestId', 'responseTime', 'resultCode', 'transId', 'signature'];
         foreach ($batBuoc as $key) {
-            if (!array_key_exists($key, $data)) {
+            if (! array_key_exists($key, $data)) {
                 return false;
             }
         }
@@ -202,7 +203,7 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -219,7 +220,7 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
@@ -240,15 +241,16 @@ class DonHangController extends Controller
         $user = Auth::user();
         $khachHang = $user->khachHang;
 
-        if (!$khachHang) {
+        if (! $khachHang) {
             return redirect()->route('taikhoan.dangnhap');
         }
 
         try {
-            $orderService->cancelOrder((int)$id, $khachHang->MaKhachHang, false);
+            $orderService->cancelOrder((int) $id, $khachHang->MaKhachHang, false);
+
             return back()->with('message', "Đã hủy đơn hàng #{$id}");
         } catch (Exception $e) {
-            return back()->with('error', 'Lỗi: ' . $e->getMessage());
+            return back()->with('error', 'Lỗi: '.$e->getMessage());
         }
     }
 }

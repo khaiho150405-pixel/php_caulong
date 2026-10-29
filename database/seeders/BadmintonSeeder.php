@@ -106,7 +106,7 @@ class BadmintonSeeder extends Seeder
         for ($i = 30; $i <= 47; $i++) {
             $sizes[] = [
                 'MaSize' => count($sizes) + 1,
-                'TenSize' => (string)$i,
+                'TenSize' => (string) $i,
                 'LoaiSize' => 'Giay',
             ];
         }

@@ -9,7 +9,7 @@ class ChatbotController extends Controller
 {
     public function ask(Request $request, GeminiChatbotService $chatbotService)
     {
-        $message = trim((string)$request->input('message', ''));
+        $message = trim((string) $request->input('message', ''));
         if ($message === '') {
             return response()->json(['success' => false, 'reply' => 'Vui lòng nhập câu hỏi của bạn.']);
         }
@@ -18,6 +18,7 @@ class ChatbotController extends Controller
         }
 
         $result = $chatbotService->ask($message);
+
         return response()->json($result);
     }
 }

@@ -6,6 +6,7 @@ use App\Models\SanPham;
 use App\Models\TinTuc;
 use App\Models\TranDau;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 /**
@@ -262,5 +263,136 @@ class BangTinTest extends TestCase
         // Trận chưa có tỉ số vẫn hợp lệ (lịch thi đấu sắp tới)
         $this->actingAs($admin)->post('/admin/tran-dau/create', $this->tranHopLe(['TiSo' => null, 'DoiThang' => null, 'TenGiaiDau' => 'Giải sắp diễn ra']))
             ->assertSessionHasNoErrors()->assertRedirect('/admin/tran-dau');
+    }
+
+    public function test_upload_image_for_rich_text_editor(): void
+    {
+        $admin = $this->admin();
+        $file = UploadedFile::fake()->create('editor-sample.jpg', 50, 'image/jpeg');
+
+        $response = $this->actingAs($admin)->post('/admin/ban-tin/upload-image', [
+            'upload' => $file,
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'uploaded' => 1,
+        ]);
+        $this->assertNotEmpty($response->json('url'));
+    }
+
+    public function test_ai_generate_article_endpoint(): void
+    {
+        $admin = $this->admin();
+
+        $response = $this->actingAs($admin)->postJson('/admin/ban-tin/ai-generate', [
+            'topic' => 'Vợt cầu lông Yonex Astrox 100ZZ',
+        ]);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+        ]);
+        $this->assertNotEmpty($response->json('content'));
+    }
+
+    public function test_toggling_noibat_makes_it_featured_and_hienthi_false_hides_it(): void
+    {
+        $admin = $this->admin();
+        $tin = TinTuc::create($this->tinHopLe([
+            'TieuDe' => 'Bài viết kiểm tra ẩn hiện',
+            'NoiBat' => false,
+            'HienThi' => true,
+        ]));
+
+        // Bật nổi bật qua AJAX toggle
+        $this->actingAs($admin)->postJson("/admin/ban-tin/{$tin->MaTin}/toggle-status", [
+            'field' => 'NoiBat',
+            'value' => 1,
+        ])->assertJson(['success' => true, 'value' => true]);
+
+        $this->assertTrue($tin->fresh()->NoiBat);
+
+        auth()->logout();
+
+        // Khách vào trang Bảng tin thấy bài này hiển thị ở vị trí chính
+        $res = $this->get(route('bangtin.index'));
+        $res->assertStatus(200);
+        $res->assertSee('Bài viết kiểm tra ẩn hiện');
+
+        // Tắt hiển thị qua AJAX toggle
+        $this->actingAs($admin)->postJson("/admin/ban-tin/{$tin->MaTin}/toggle-status", [
+            'field' => 'HienThi',
+            'value' => 0,
+        ])->assertJson(['success' => true, 'value' => false]);
+
+        $this->assertFalse($tin->fresh()->HienThi);
+
+        auth()->logout();
+
+        // Khách vào trang Bảng tin không còn thấy bài này nữa
+        $res2 = $this->get(route('bangtin.index'));
+        $res2->assertDontSee('Bài viết kiểm tra ẩn hiện');
+
+        // Khách truy cập trực tiếp bài viết bị 404
+        $this->get(route('bangtin.show', ['id' => $tin->MaTin]))->assertNotFound();
+    }
+
+    public function test_multiple_featured_articles_render_vertical_slider_on_bang_tin(): void
+    {
+        // Tạo 3 bài viết nổi bật
+        $tin1 = TinTuc::create($this->tinHopLe([
+            'TieuDe' => 'Bài nổi bật trượt 1',
+            'NoiBat' => true,
+            'HienThi' => true,
+            'ThuTu' => 1,
+            'NgayDang' => now()->subMinutes(10),
+        ]));
+        $tin2 = TinTuc::create($this->tinHopLe([
+            'TieuDe' => 'Bài nổi bật trượt 2',
+            'NoiBat' => true,
+            'HienThi' => true,
+            'ThuTu' => 2,
+            'NgayDang' => now()->subMinutes(5),
+        ]));
+
+        $res = $this->get(route('bangtin.index'))->assertStatus(200);
+
+        // View nhận tập hợp dsNoiBat gồm nhiều bài
+        $dsNoiBat = $res->viewData('dsNoiBat');
+        $this->assertNotNull($dsNoiBat);
+        $this->assertGreaterThanOrEqual(2, $dsNoiBat->count());
+
+        // Giao diện render slider trượt lên
+        $res->assertSee('id="featuredSliderBox"', false);
+        $res->assertSee('id="featuredTrack"', false);
+        $res->assertDontSee('Tự động trượt');
+        $res->assertSee('Bài nổi bật trượt 1');
+        $res->assertSee('Bài nổi bật trượt 2');
+
+        // Các bài nổi bật không bị trùng lặp trong danh sách dòng thời gian phía dưới
+        $timelineIds = collect($res->viewData('tins')->items())->pluck('MaTin');
+        $this->assertFalse($timelineIds->contains($tin1->MaTin));
+        $this->assertFalse($timelineIds->contains($tin2->MaTin));
+
+        // Ngoài trang chủ (landing page) cũng tự động trượt các bài nổi bật
+        $homeRes = $this->get('/')->assertStatus(200);
+        $homeDsNoiBat = $homeRes->viewData('dsNoiBat');
+        $this->assertNotNull($homeDsNoiBat);
+        $this->assertGreaterThanOrEqual(2, $homeDsNoiBat->count());
+        $homeRes->assertSee('id="featuredSliderBox"', false);
+        $homeRes->assertSee('id="featuredTrack"', false);
+        $homeRes->assertSee('Bài nổi bật trượt 1');
+        $homeRes->assertSee('Bài nổi bật trượt 2');
+    }
+
+    public function test_article_form_does_not_contain_preview_button(): void
+    {
+        $admin = $this->admin();
+        $tin = TinTuc::first();
+
+        $res = $this->actingAs($admin)->get(route('quanlybantin.edit', ['id' => $tin->MaTin]));
+        $res->assertStatus(200);
+        $res->assertDontSee('Xem trước trên website');
     }
 }

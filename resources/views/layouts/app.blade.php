@@ -20,7 +20,7 @@
         <div class="header-top">
             <div class="logo">
                 <a href="{{ route('home') }}">
-                    <img src="{{ asset('images/HUIT.jpg') }}" alt="Logo Cửa Hàng Cầu Lông" />
+                    <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo Cửa Hàng Cầu Lông" />
                 </a>
             </div>
 
@@ -293,8 +293,8 @@
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center" style="flex-shrink: 0;">
             <h6 class="mb-0 font-weight-bold chat-header-title d-flex align-items-center">
                 <img class="chat-header-avatar rounded-circle shadow-sm"
-                     src="{{ asset('images/HUIT.jpg') }}"
-                     alt="HUIT"
+                     src="{{ \App\Models\CauHinh::getLogoUrl() }}"
+                     alt="Logo"
                      style="width: 35px; height: 35px; object-fit: cover; margin-right: 10px;" />
                 Trợ lý Tư Vấn AI
             </h6>
@@ -466,5 +466,6 @@
         });
     </script>
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

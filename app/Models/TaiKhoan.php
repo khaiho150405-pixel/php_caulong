@@ -14,7 +14,9 @@ class TaiKhoan extends Authenticatable
 
     // Mã quyền trong bảng PhanQuyen
     public const QUYEN_ADMIN = 1;
+
     public const QUYEN_NHANVIEN = 2;
+
     public const QUYEN_KHACHHANG = 3;
 
     /** Tên vai trò dùng trong middleware `role:` => MaQuyen */
@@ -30,7 +32,7 @@ class TaiKhoan extends Authenticatable
         if (is_numeric($role)) {
             return (int) $role;
         }
-        if (!array_key_exists($role, self::ROLES)) {
+        if (! array_key_exists($role, self::ROLES)) {
             throw new \InvalidArgumentException("Vai trò không hợp lệ: {$role}");
         }
 
@@ -38,7 +40,9 @@ class TaiKhoan extends Authenticatable
     }
 
     protected $table = 'TaiKhoan';
+
     protected $primaryKey = 'MaTaiKhoan';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -81,21 +85,21 @@ class TaiKhoan extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return (int)$this->MaQuyen === self::QUYEN_ADMIN;
+        return (int) $this->MaQuyen === self::QUYEN_ADMIN;
     }
 
     public function isStaff(): bool
     {
-        return (int)$this->MaQuyen === self::QUYEN_NHANVIEN;
+        return (int) $this->MaQuyen === self::QUYEN_NHANVIEN;
     }
 
     public function isCustomer(): bool
     {
-        return (int)$this->MaQuyen === self::QUYEN_KHACHHANG;
+        return (int) $this->MaQuyen === self::QUYEN_KHACHHANG;
     }
 
     public function hasAdminAccess(): bool
     {
-        return in_array((int)$this->MaQuyen, [self::QUYEN_ADMIN, self::QUYEN_NHANVIEN], true);
+        return in_array((int) $this->MaQuyen, [self::QUYEN_ADMIN, self::QUYEN_NHANVIEN], true);
     }
 }

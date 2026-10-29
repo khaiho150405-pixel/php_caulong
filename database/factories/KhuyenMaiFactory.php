@@ -17,7 +17,7 @@ class KhuyenMaiFactory extends Factory
         $batDau = fake()->dateTimeBetween('-1 month', 'now');
 
         return [
-            'TenChuongTrinh' => 'Khuyến mãi ' . fake()->unique()->words(2, true),
+            'TenChuongTrinh' => 'Khuyến mãi '.fake()->unique()->words(2, true),
             'MoTa' => fake()->sentence(),
             'NgayBatDau' => $batDau->format('Y-m-d'),
             'NgayKetThuc' => fake()->dateTimeBetween('+1 week', '+3 months')->format('Y-m-d'),

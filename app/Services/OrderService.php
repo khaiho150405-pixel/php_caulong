@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\DonHang;
 use App\Models\ChiTietDonHang;
 use App\Models\ChiTietSanPham;
+use App\Models\DonHang;
 use App\Models\GioHang;
-use Illuminate\Support\Facades\DB;
 use Exception;
+use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
@@ -26,7 +26,7 @@ class OrderService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$ctsp) {
+                if (! $ctsp) {
                     throw new Exception("Sản phẩm biến thể ID: {$item->MaChiTietSanPham} không tồn tại.");
                 }
 
@@ -102,18 +102,18 @@ class OrderService
     {
         return DB::transaction(function () use ($maDonHang, $maKhachHang, $isAdmin) {
             $query = DonHang::with('chiTietDonHangs')->where('MaDonHang', $maDonHang)->lockForUpdate();
-            if (!$isAdmin && $maKhachHang !== null) {
+            if (! $isAdmin && $maKhachHang !== null) {
                 $query->where('MaKhachHang', $maKhachHang);
             }
 
             $order = $query->first();
-            if (!$order) {
-                throw new Exception("Không tìm thấy đơn hàng.");
+            if (! $order) {
+                throw new Exception('Không tìm thấy đơn hàng.');
             }
 
             $choPhep = $isAdmin ? array_keys(self::CHUYEN_TRANG_THAI) : self::KHACH_DUOC_HUY;
-            if (!in_array($order->TrangThai, $choPhep, true)) {
-                throw new Exception("Đơn hàng đang giao, đã hoàn tất hoặc đã hủy, không thể hủy.");
+            if (! in_array($order->TrangThai, $choPhep, true)) {
+                throw new Exception('Đơn hàng đang giao, đã hoàn tất hoặc đã hủy, không thể hủy.');
             }
 
             $this->hoanKho($order);
@@ -131,7 +131,7 @@ class OrderService
     {
         DB::transaction(function () use ($maDonHang) {
             $order = DonHang::with('chiTietDonHangs')->lockForUpdate()->find($maDonHang);
-            if (!$order || $order->TrangThai !== 'Chờ thanh toán MoMo') {
+            if (! $order || $order->TrangThai !== 'Chờ thanh toán MoMo') {
                 return;
             }
 
@@ -148,14 +148,14 @@ class OrderService
     {
         return DB::transaction(function () use ($maDonHang, $trangThaiMoi) {
             $order = DonHang::with('chiTietDonHangs')->lockForUpdate()->find($maDonHang);
-            if (!$order) {
-                throw new Exception("Không tìm thấy đơn hàng.");
+            if (! $order) {
+                throw new Exception('Không tìm thấy đơn hàng.');
             }
 
             $trangThaiCu = $order->TrangThai;
             $hopLe = self::CHUYEN_TRANG_THAI[$trangThaiCu] ?? [];
 
-            if (!in_array($trangThaiMoi, $hopLe, true)) {
+            if (! in_array($trangThaiMoi, $hopLe, true)) {
                 throw new Exception("Không thể chuyển đơn hàng từ '{$trangThaiCu}' sang '{$trangThaiMoi}'.");
             }
 

@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hang;
 use App\Models\SanPham;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -68,7 +69,7 @@ class BadmintonShopTest extends TestCase
 
         // Ảnh hero và ưu đãi là sản phẩm thật từ CSDL, có liên kết sang trang chi tiết
         $sp = $res->viewData('heroSp')->first();
-        $res->assertSee($sp->TenSanPham)->assertSee('/Home/ChiTietSanPham/' . $sp->MaSanPham, false);
+        $res->assertSee($sp->TenSanPham)->assertSee('/Home/ChiTietSanPham/'.$sp->MaSanPham, false);
 
         // Đã bỏ hiệu ứng 3D: không nạp Three.js/canvas, menu không còn mục "Khám phá 3D"
         $res->assertDontSee('three.module', false)
@@ -88,12 +89,12 @@ class BadmintonShopTest extends TestCase
         $this->assertGreaterThanOrEqual(3, $pk->count(), 'Nhóm Phụ kiện cần có dữ liệu mẫu');
 
         foreach ($pk as $sp) {
-            $this->assertFileExists(public_path('images/' . $sp->HinhAnhDaiDien), 'Thiếu ảnh của ' . $sp->TenSanPham);
+            $this->assertFileExists(public_path('images/'.$sp->HinhAnhDaiDien), 'Thiếu ảnh của '.$sp->TenSanPham);
             $this->assertGreaterThan(0, $sp->chiTietSanPhams()->where('SoLuongTon', '>', 0)->count());
         }
 
         $this->get('/SanPham/Index?loai=4')->assertStatus(200)->assertSee($pk->first()->TenSanPham);
-        $this->get('/Home/ChiTietSanPham/' . $pk->first()->MaSanPham)->assertStatus(200)->assertSee($pk->first()->TenSanPham);
+        $this->get('/Home/ChiTietSanPham/'.$pk->first()->MaSanPham)->assertStatus(200)->assertSee($pk->first()->TenSanPham);
     }
 
     public function test_promotion_page_shows_programs_with_discounted_products(): void
@@ -132,7 +133,7 @@ class BadmintonShopTest extends TestCase
 
     public function test_brand_and_discount_filters(): void
     {
-        $hang = \App\Models\Hang::where('TenHang', 'LIKE', '%Yonex%')->first();
+        $hang = Hang::where('TenHang', 'LIKE', '%Yonex%')->first();
 
         $res = $this->get("/SanPham/Index?hangs[]={$hang->MaHang}&giam_gia=1&con_hang=1");
         $res->assertStatus(200);

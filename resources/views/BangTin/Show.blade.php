@@ -25,9 +25,13 @@
                 @if ($tin->tacGia)<span><i class="fa-regular fa-user"></i> {{ $tin->tacGia->TenDangNhap }}</span>@endif
             </div>
 
-            @unless ($tin->sanPham)
+            @if ($tin->HinhAnh)
+                <figure class="bt-article-cover rounded-3 overflow-hidden shadow-sm mb-4">
+                    <img src="{{ $tin->hinh_anh_url }}" alt="{{ $tin->TieuDe }}" width="1600" height="667" decoding="async" style="max-height: 460px; object-fit: cover;">
+                </figure>
+            @elseif (!$tin->sanPham)
                 <figure class="bt-article-cover"><img src="{{ asset('images/news/court-journal-1600.webp') }}" alt="Ảnh minh họa sân cầu lông" width="1600" height="667" decoding="async"><figcaption>Ảnh minh họa chuyên mục cầu lông.</figcaption></figure>
-            @endunless
+            @endif
 
             @if ($tin->TomTat)<p class="bt-lead-text">{{ $tin->TomTat }}</p>@endif
 
@@ -36,9 +40,13 @@
             @endif
 
             <div class="bt-content">
-                @foreach (preg_split('/\R{2,}/', trim($tin->NoiDung)) as $doan)
-                    <p>{!! nl2br(e($doan)) !!}</p>
-                @endforeach
+                @if (str_contains($tin->NoiDung, '<p') || str_contains($tin->NoiDung, '<div') || str_contains($tin->NoiDung, '<h') || str_contains($tin->NoiDung, '<ul') || str_contains($tin->NoiDung, '<table'))
+                    {!! $tin->NoiDung !!}
+                @else
+                    @foreach (preg_split('/\R{2,}/', trim($tin->NoiDung)) as $doan)
+                        <p>{!! nl2br(e($doan)) !!}</p>
+                    @endforeach
+                @endif
             </div>
 
             @if ($tin->sanPham)

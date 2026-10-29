@@ -3,14 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Admin\TaiKhoanRequest;
-use App\Models\TaiKhoan;
 use App\Models\KhachHang;
 use App\Models\PhanQuyen;
+use App\Models\TaiKhoan;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use Illuminate\Support\Facades\Hash;
 
 class QuanLyTaiKhoanController extends Controller
 {
@@ -44,6 +44,7 @@ class QuanLyTaiKhoanController extends Controller
     public function create()
     {
         $phanQuyens = PhanQuyen::all();
+
         return view('QuanLyTaiKhoan.Create', compact('phanQuyens'));
     }
 
@@ -71,7 +72,7 @@ class QuanLyTaiKhoanController extends Controller
 
             return redirect()->route('quanlytaikhoan.index')->with('message', 'Tạo tài khoản thành công!');
         } catch (Exception $e) {
-            return back()->withInput()->withErrors(['error' => 'Lỗi khi tạo tài khoản: ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Lỗi khi tạo tài khoản: '.$e->getMessage()]);
         }
     }
 
@@ -79,6 +80,7 @@ class QuanLyTaiKhoanController extends Controller
     {
         $taiKhoan = TaiKhoan::with('khachHang')->findOrFail($id);
         $phanQuyens = PhanQuyen::all();
+
         return view('QuanLyTaiKhoan.Edit', compact('taiKhoan', 'phanQuyens'));
     }
 
@@ -113,13 +115,14 @@ class QuanLyTaiKhoanController extends Controller
 
             return redirect()->route('quanlytaikhoan.index')->with('message', 'Cập nhật tài khoản thành công!');
         } catch (Exception $e) {
-            return back()->withInput()->withErrors(['error' => 'Lỗi khi cập nhật tài khoản: ' . $e->getMessage()]);
+            return back()->withInput()->withErrors(['error' => 'Lỗi khi cập nhật tài khoản: '.$e->getMessage()]);
         }
     }
 
     public function delete($id)
     {
         $taiKhoan = TaiKhoan::with(['phanQuyen', 'khachHang'])->findOrFail($id);
+
         return view('QuanLyTaiKhoan.Delete', compact('taiKhoan'));
     }
 
@@ -132,6 +135,7 @@ class QuanLyTaiKhoanController extends Controller
         }
 
         $taiKhoan->delete();
+
         return redirect()->route('quanlytaikhoan.index')->with('message', 'Xóa tài khoản thành công!');
     }
 }

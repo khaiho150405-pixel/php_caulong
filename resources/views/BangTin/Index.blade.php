@@ -38,12 +38,14 @@
                 </p>
             @endif
 
-            @if ($noiBat)
-                @include('BangTin._noibat', ['t' => $noiBat])
+            @if (isset($dsNoiBat) && $dsNoiBat->isNotEmpty())
+                @include('BangTin._noibat', ['dsNoiBat' => $dsNoiBat, 't' => $noiBat])
+            @elseif ($noiBat)
+                @include('BangTin._noibat', ['dsNoiBat' => collect([$noiBat]), 't' => $noiBat])
             @endif
 
             {{-- Dòng thời gian theo tháng --}}
-            @if ($tins->isEmpty() && !$noiBat)
+            @if ($tins->isEmpty() && (!isset($dsNoiBat) || $dsNoiBat->isEmpty()) && !$noiBat)
                 @include('partials._empty', [
                     'message' => $keyword !== '' ? 'Không có tin nào khớp "' . $keyword . '".' : 'Chưa có tin nào trong mục này.',
                     'linkUrl' => route('bangtin.index'), 'linkText' => 'Xem tất cả tin', 'compact' => false,

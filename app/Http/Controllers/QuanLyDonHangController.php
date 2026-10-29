@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\DonHang;
 use App\Services\OrderService;
-use Illuminate\Http\Request;
 use Exception;
+use Illuminate\Http\Request;
 
 class QuanLyDonHangController extends Controller
 {
@@ -62,12 +62,13 @@ class QuanLyDonHangController extends Controller
         $trangThaiMoi = $request->input('trangThaiMoi');
 
         try {
-            $orderService->setTrangThai((int)$id, $trangThaiMoi);
+            $orderService->setTrangThai((int) $id, $trangThaiMoi);
+
             return redirect()->route('quanlydonhang.details', ['id' => $id])
                 ->with('message', "Cập nhật trạng thái đơn hàng sang '{$trangThaiMoi}' thành công!");
         } catch (Exception $e) {
             return redirect()->route('quanlydonhang.details', ['id' => $id])
-                ->with('error', 'Lỗi khi cập nhật trạng thái: ' . $e->getMessage());
+                ->with('error', 'Lỗi khi cập nhật trạng thái: '.$e->getMessage());
         }
     }
 }

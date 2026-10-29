@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\DB;
 class BanTinSeeder extends Seeder
 {
     private const WIKI_2026 = 'https://en.wikipedia.org/wiki/2026_BWF_World_Championships';
+
     private const WIKI_2025 = 'https://en.wikipedia.org/wiki/2025_BWF_World_Championships';
+
     private const WIKI_PARIS = 'https://en.wikipedia.org/wiki/Badminton_at_the_2024_Summer_Olympics';
 
     public function run(): void
@@ -110,7 +112,7 @@ class BanTinSeeder extends Seeder
             [
                 'tieu_de' => 'Viktor Axelsen bảo vệ thành công huy chương vàng Olympic đơn nam',
                 'tom_tat' => 'Tay vợt Đan Mạch thắng Kunlavut Vitidsarn 21-11, 21-11 và không thua ván nào suốt giải.',
-                'noi_dung' => "Tại Paris 2024, Viktor Axelsen (Đan Mạch) giữ vững ngôi vô địch Olympic đơn nam sau khi thắng Kunlavut Vitidsarn (Thái Lan) 21-11, 21-11 ở trận chung kết. Anh không để thua ván nào trong cả giải đấu. Huy chương đồng thuộc về Lee Zii Jia (Malaysia).",
+                'noi_dung' => 'Tại Paris 2024, Viktor Axelsen (Đan Mạch) giữ vững ngôi vô địch Olympic đơn nam sau khi thắng Kunlavut Vitidsarn (Thái Lan) 21-11, 21-11 ở trận chung kết. Anh không để thua ván nào trong cả giải đấu. Huy chương đồng thuộc về Lee Zii Jia (Malaysia).',
                 'loai' => 'tuyen-thu', 'tran' => 'ms24', 'ngay' => '2024-08-06 09:00:00', 'noi_bat' => false,
                 'nguon' => 'Wikipedia', 'link' => 'https://en.wikipedia.org/wiki/Badminton_at_the_2024_Summer_Olympics_%E2%80%93_Men%27s_singles',
             ],
@@ -124,21 +126,21 @@ class BanTinSeeder extends Seeder
             [
                 'tieu_de' => 'Yonex Nanoflare 1000Z: nhẹ đầu, tốc độ cao cho các pha phản tạt',
                 'tom_tat' => 'Dòng vợt nhẹ đầu tập trung vào tốc độ vung vợt, hợp với lối chơi nhanh ở lưới.',
-                'noi_dung' => "Nanoflare 1000Z thuộc nhóm vợt nhẹ đầu, cho tốc độ vung nhanh và phản tạt linh hoạt. Đây là lựa chọn quen thuộc với người chơi đôi, hay đứng gần lưới và thích đổi nhịp liên tục.",
+                'noi_dung' => 'Nanoflare 1000Z thuộc nhóm vợt nhẹ đầu, cho tốc độ vung nhanh và phản tạt linh hoạt. Đây là lựa chọn quen thuộc với người chơi đôi, hay đứng gần lưới và thích đổi nhịp liên tục.',
                 'loai' => 'san-pham-hot', 'tran' => null, 'sp' => 'Vợt Cầu Lông Yonex Nanoflare 1000Z', 'ngay' => '2026-10-15 08:00:00', 'noi_bat' => false,
                 'nguon' => 'Cửa Hàng Cầu Lông', 'link' => null,
             ],
             [
                 'tieu_de' => 'Phụ kiện mới về: cầu lông lông vịt thi đấu (ống 12 quả)',
                 'tom_tat' => 'Quả cầu lông vịt đầu cork bọc da, quỹ đạo bay ổn định cho thi đấu và tập luyện thường xuyên.',
-                'noi_dung' => "Cửa hàng vừa bổ sung nhóm Phụ kiện cầu lông. Cầu lông lông vịt thi đấu (ống 12 quả) có đầu cork bọc da, quỹ đạo bay ổn định, phù hợp thi đấu và tập luyện thường xuyên. Đang áp dụng khuyến mãi theo chương trình hiện hành.",
+                'noi_dung' => 'Cửa hàng vừa bổ sung nhóm Phụ kiện cầu lông. Cầu lông lông vịt thi đấu (ống 12 quả) có đầu cork bọc da, quỹ đạo bay ổn định, phù hợp thi đấu và tập luyện thường xuyên. Đang áp dụng khuyến mãi theo chương trình hiện hành.',
                 'loai' => 'san-pham-moi', 'tran' => null, 'sp' => 'Cầu Lông Lông Vịt Thi Đấu (Ống 12 Quả)', 'ngay' => '2026-10-24 08:00:00', 'noi_bat' => false,
                 'nguon' => 'Cửa Hàng Cầu Lông', 'link' => null,
             ],
             [
                 'tieu_de' => 'Giày Yonex Eclipsion Z3: ổn định và chống lật cổ chân',
                 'tom_tat' => 'Mẫu giày thiên về độ ổn định, phù hợp người hay di chuyển nhanh và đổi hướng liên tục.',
-                'noi_dung' => "Giày cầu lông Yonex Eclipsion Z3 tăng cường độ ổn định và hạn chế lật cổ chân khi di chuyển, phù hợp với người chơi cần cảm giác chắc chân trong các pha đổi hướng. Sản phẩm đang có ưu đãi theo chương trình khuyến mãi của cửa hàng.",
+                'noi_dung' => 'Giày cầu lông Yonex Eclipsion Z3 tăng cường độ ổn định và hạn chế lật cổ chân khi di chuyển, phù hợp với người chơi cần cảm giác chắc chân trong các pha đổi hướng. Sản phẩm đang có ưu đãi theo chương trình khuyến mãi của cửa hàng.',
                 'loai' => 'san-pham-moi', 'tran' => null, 'sp' => 'Giày Cầu Lông Yonex Eclipsion Z3', 'ngay' => '2026-10-18 08:00:00', 'noi_bat' => false,
                 'nguon' => 'Cửa Hàng Cầu Lông', 'link' => null,
             ],

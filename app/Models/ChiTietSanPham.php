@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class ChiTietSanPham extends Model
 {
     protected $table = 'ChiTietSanPham';
+
     protected $primaryKey = 'MaChiTiet';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -66,14 +68,16 @@ class ChiTietSanPham extends Model
         if ($this->sanPham) {
             return $this->sanPham->gia_sau_khuyen_mai;
         }
-        return (float)($this->GiaBan ?? 0);
+
+        return (float) ($this->GiaBan ?? 0);
     }
 
     public function getDisplayImageAttribute()
     {
-        if (!empty($this->HinhAnh)) {
+        if (! empty($this->HinhAnh)) {
             return $this->HinhAnh;
         }
+
         return $this->sanPham ? $this->sanPham->HinhAnhDaiDien : 'default-product.jpg';
     }
 }

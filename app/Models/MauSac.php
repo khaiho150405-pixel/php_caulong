@@ -7,7 +7,9 @@ use Illuminate\Database\Eloquent\Model;
 class MauSac extends Model
 {
     protected $table = 'MauSac';
+
     protected $primaryKey = 'MaMau';
+
     public $timestamps = false;
 
     protected $fillable = [

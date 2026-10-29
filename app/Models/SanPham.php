@@ -15,7 +15,9 @@ class SanPham extends Model
     use HasFactory, SoftDeletes;
 
     protected $table = 'SanPham';
+
     protected $primaryKey = 'MaSanPham';
+
     public $timestamps = false;
 
     protected $fillable = [
@@ -80,10 +82,10 @@ class SanPham extends Model
         $today = now()->toDateString();
 
         if ($min !== null && $min > 0) {
-            $query->whereRaw(self::GIA_BAN_SQL . ' >= CAST(? AS DECIMAL(15,2))', [$today, $today, $min]);
+            $query->whereRaw(self::GIA_BAN_SQL.' >= CAST(? AS DECIMAL(15,2))', [$today, $today, $min]);
         }
         if ($max !== null && $max > 0) {
-            $query->whereRaw(self::GIA_BAN_SQL . ' <= CAST(? AS DECIMAL(15,2))', [$today, $today, $max]);
+            $query->whereRaw(self::GIA_BAN_SQL.' <= CAST(? AS DECIMAL(15,2))', [$today, $today, $max]);
         }
 
         return $query;
@@ -119,8 +121,8 @@ class SanPham extends Model
         $today = now()->toDateString();
 
         return match ($kieu) {
-            'gia_tang' => $query->orderByRaw(self::GIA_BAN_SQL . ' asc', [$today, $today])->orderByDesc('MaSanPham'),
-            'gia_giam' => $query->orderByRaw(self::GIA_BAN_SQL . ' desc', [$today, $today])->orderByDesc('MaSanPham'),
+            'gia_tang' => $query->orderByRaw(self::GIA_BAN_SQL.' asc', [$today, $today])->orderByDesc('MaSanPham'),
+            'gia_giam' => $query->orderByRaw(self::GIA_BAN_SQL.' desc', [$today, $today])->orderByDesc('MaSanPham'),
             'ten' => $query->orderBy('TenSanPham'),
             default => $query->orderByDesc('NgayTao')->orderByDesc('MaSanPham'),
         };
@@ -161,17 +163,17 @@ class SanPham extends Model
      */
     public function getGiaSauKhuyenMaiAttribute()
     {
-        $giaGoc = (float)($this->GiaGoc ?? 0);
+        $giaGoc = (float) ($this->GiaGoc ?? 0);
         if ($giaGoc <= 0) {
             return 0;
         }
 
         if ($this->khuyenMai && $this->khuyenMai->isEffective()) {
-            $phanTram = (float)$this->khuyenMai->PhanTramGiam;
+            $phanTram = (float) $this->khuyenMai->PhanTramGiam;
             $giam = ($giaGoc * $phanTram) / 100;
 
-            if ($this->khuyenMai->GiamToiDa && $giam > (float)$this->khuyenMai->GiamToiDa) {
-                $giam = (float)$this->khuyenMai->GiamToiDa;
+            if ($this->khuyenMai->GiamToiDa && $giam > (float) $this->khuyenMai->GiamToiDa) {
+                $giam = (float) $this->khuyenMai->GiamToiDa;
             }
 
             return max(0, $giaGoc - $giam);
@@ -186,9 +188,9 @@ class SanPham extends Model
     public function getAnhThumbAttribute(): string
     {
         $goc = $this->HinhAnhDaiDien ?: 'default-product.jpg';
-        $thumb = 'thumbs/' . pathinfo($goc, PATHINFO_FILENAME) . '.webp';
+        $thumb = 'thumbs/'.pathinfo($goc, PATHINFO_FILENAME).'.webp';
 
-        return is_file(public_path('images/' . $thumb)) ? $thumb : $goc;
+        return is_file(public_path('images/'.$thumb)) ? $thumb : $goc;
     }
 
     /**
@@ -197,6 +199,7 @@ class SanPham extends Model
     public function getTrungBinhDanhGiaAttribute(): float
     {
         $avg = $this->phanHois()->avg('DanhGia');
-        return $avg ? round((float)$avg, 1) : 5.0;
+
+        return $avg ? round((float) $avg, 1) : 5.0;
     }
 }

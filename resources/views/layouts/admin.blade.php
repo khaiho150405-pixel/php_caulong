@@ -27,6 +27,7 @@
             request()->is('admin/ban-tin*') => 'Quản lý bảng tin',
             request()->is('admin/tran-dau*') => 'Kết quả trận đấu',
             request()->is('admin/tai-khoan*') => 'Quản lý tài khoản',
+            request()->is('admin/logo*') => 'Quản lý Logo',
             request()->is('admin/thong-bao*') => 'Cảnh báo đánh giá',
             request()->routeIs('taikhoan.doimatkhau') => 'Đổi mật khẩu',
             default => 'Bảng điều khiển',
@@ -35,7 +36,7 @@
 
     <aside class="admin-sidebar" id="adminSidebar">
         <a href="{{ route('quanlysanpham.dashboard') }}" class="admin-brand">
-            <img src="{{ asset('images/HUIT.jpg') }}" alt="Logo">
+            <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo">
             <span>
                 <span class="brand-name d-block">Shop Cầu Lông</span>
                 <span class="brand-sub d-block">Trang quản trị</span>
@@ -49,9 +50,11 @@
             </a>
 
             <div class="admin-nav-label">Bán hàng</div>
-            <a href="{{ route('quanlysanpham.index') }}" class="admin-link {{ request()->is('admin/san-pham*', 'admin/bien-the*') ? 'active' : '' }}">
-                <i class="fa-solid fa-box-archive"></i> Sản phẩm
-            </a>
+            @if (Auth::user()?->isAdmin())
+                <a href="{{ route('quanlysanpham.index') }}" class="admin-link {{ request()->is('admin/san-pham*', 'admin/bien-the*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-box-archive"></i> Sản phẩm
+                </a>
+            @endif
             <a href="{{ route('quanlydonhang.index') }}" class="admin-link {{ request()->is('admin/don-hang*') ? 'active' : '' }}">
                 <i class="fa-solid fa-file-invoice-dollar"></i> Đơn hàng
             </a>
@@ -73,6 +76,9 @@
             @if (Auth::user()?->isAdmin())
                 <a href="{{ route('quanlytaikhoan.index') }}" class="admin-link {{ request()->is('admin/tai-khoan*') ? 'active' : '' }}">
                     <i class="fa-solid fa-users-gear"></i> Tài khoản
+                </a>
+                <a href="{{ route('admin.logo.index') }}" class="admin-link {{ request()->is('admin/logo*') ? 'active' : '' }}">
+                    <i class="fa-solid fa-image"></i> Logo hệ thống
                 </a>
             @endif
             <a href="{{ route('quanlythongbao.thongbao') }}" class="admin-link {{ request()->is('admin/thong-bao*') ? 'active' : '' }}">
@@ -141,5 +147,6 @@
         })();
     </script>
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>
