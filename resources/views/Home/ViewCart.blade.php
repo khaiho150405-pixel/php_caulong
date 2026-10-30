@@ -139,8 +139,9 @@
                             $sp = $variant ? $variant->sanPham : null;
                             $tenSP = $sp ? $sp->TenSanPham : 'Sản phẩm';
                             $img = $variant->HinhAnh ?: ($sp->HinhAnhDaiDien ?: 'default-product.jpg');
-                            $giaBan = (float)($variant->GiaBan ?? $sp->GiaGoc ?? 0);
-                            $thanhTien = $giaBan * (int)$item->SoLuong;
+                            $giaGoc = (float)($variant->GiaBan ?? $sp->GiaGoc ?? 0);
+                            $donGia = (float)($variant->effective_price ?? $giaGoc);
+                            $thanhTien = $donGia * (int)$item->SoLuong;
                             $total += $thanhTien;
                             $tonKho = (int)($variant->SoLuongTon ?? 999);
                         @endphp
@@ -165,11 +166,16 @@
                                 Màu: {{ $variant->mauSac->TenMau ?? 'Mặc định' }} <br />
                                 Size: {{ $variant->size->TenSize ?? 'Tiêu chuẩn' }}
                             </td>
-                            <td>{{ number_format($giaBan, 0, ',', '.') }} đ</td>
+                            <td>
+                                <div style="font-weight: 600; color: var(--price);">{{ number_format($donGia, 0, ',', '.') }} đ</div>
+                                @if ($donGia < $giaGoc)
+                                    <div style="font-size: 12px; color: #888; text-decoration: line-through;">{{ number_format($giaGoc, 0, ',', '.') }} đ</div>
+                                @endif
+                            </td>
                             <td>
                                 <form class="cart-qty-form" action="{{ route('home.updatecartquantity', ['maGioHang' => $item->MaGioHang]) }}" method="POST">
                                     @csrf
-                                    <div class="cart-qty-wrapper" data-cart-id="{{ $item->MaGioHang }}" data-unit-price="{{ $giaBan }}" data-max-stock="{{ $tonKho }}">
+                                    <div class="cart-qty-wrapper" data-cart-id="{{ $item->MaGioHang }}" data-unit-price="{{ $donGia }}" data-max-stock="{{ $tonKho }}">
                                         <button type="button" class="btn-qty btn-qty-dec" title="Giảm số lượng" @disabled($item->SoLuong <= 1)>-</button>
                                         <input type="number" name="quantity" class="input-qty" value="{{ $item->SoLuong }}" min="1" max="{{ $tonKho }}" aria-label="Số lượng" />
                                         <button type="button" class="btn-qty btn-qty-inc" title="Tăng số lượng" @disabled($item->SoLuong >= $tonKho)>+</button>

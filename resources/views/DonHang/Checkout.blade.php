@@ -75,8 +75,9 @@
                     $sp = $variant ? $variant->sanPham : null;
                     $tenSP = $sp ? $sp->TenSanPham : 'Sản phẩm';
                     $img = $variant->HinhAnh ?: ($sp->HinhAnhDaiDien ?: 'default-product.jpg');
-                    $giaBan = (float)($variant->GiaBan ?? $sp->GiaGoc ?? 0);
-                    $thanhTien = $giaBan * (int)$item->SoLuong;
+                    $giaGoc = (float)($variant->GiaBan ?? $sp->GiaGoc ?? 0);
+                    $donGia = (float)($variant->effective_price ?? $giaGoc);
+                    $thanhTien = $donGia * (int)$item->SoLuong;
                 @endphp
                 <div style="display: flex; margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #eee; align-items: center;">
                     <img src="{{ asset('images/' . $img) }}" style="width: 60px; height: 60px; object-fit: contain; margin-right: 12px; border-radius: 4px; border: 1px solid #ddd;" onerror="this.src='{{ asset('images/default-product.jpg') }}'" />
@@ -86,8 +87,15 @@
                             Màu: {{ $variant->mauSac->TenMau ?? 'N/A' }} | Size: {{ $variant->size->TenSize ?? 'N/A' }} | SL: {{ $item->SoLuong }}
                         </span>
                     </div>
-                    <div style="font-weight: bold; color: var(--price);">
-                        {{ number_format($thanhTien, 0, ',', '.') }}đ
+                    <div style="text-align: right;">
+                        <div style="font-weight: bold; color: var(--price);">
+                            {{ number_format($thanhTien, 0, ',', '.') }}đ
+                        </div>
+                        @if ($donGia < $giaGoc)
+                            <div style="font-size: 0.8em; color: #888; text-decoration: line-through;">
+                                {{ number_format($giaGoc * (int)$item->SoLuong, 0, ',', '.') }}đ
+                            </div>
+                        @endif
                     </div>
                 </div>
             @endforeach

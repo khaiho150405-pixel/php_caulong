@@ -185,7 +185,7 @@ class HomeController extends Controller
             return back()->with('error', 'Không tìm thấy thông tin khách hàng.');
         }
 
-        $cartItem = GioHang::with(['chiTietSanPham.sanPham'])
+        $cartItem = GioHang::with(['chiTietSanPham.sanPham.khuyenMai'])
             ->where('MaGioHang', $maGioHang)
             ->where('MaKhachHang', $khachHang->MaKhachHang)
             ->first();
@@ -223,15 +223,15 @@ class HomeController extends Controller
         $this->updateCartCountInSession($khachHang->MaKhachHang);
 
         if ($request->expectsJson() || $request->ajax()) {
-            $allCartItems = GioHang::with(['chiTietSanPham.sanPham'])
+            $allCartItems = GioHang::with(['chiTietSanPham.sanPham.khuyenMai'])
                 ->where('MaKhachHang', $khachHang->MaKhachHang)
                 ->get();
 
-            $giaBan = (float) ($productVariant->GiaBan ?? $productVariant->sanPham->GiaGoc ?? 0);
-            $itemTotal = $giaBan * $quantity;
+            $donGia = (float) ($productVariant->effective_price ?? ($productVariant->GiaBan ?? $productVariant->sanPham->GiaGoc ?? 0));
+            $itemTotal = $donGia * $quantity;
 
             $cartTotal = $allCartItems->sum(function ($it) {
-                $p = (float) ($it->chiTietSanPham->GiaBan ?? $it->chiTietSanPham->sanPham->GiaGoc ?? 0);
+                $p = (float) ($it->chiTietSanPham->effective_price ?? ($it->chiTietSanPham->GiaBan ?? $it->chiTietSanPham->sanPham->GiaGoc ?? 0));
 
                 return $p * (int) $it->SoLuong;
             });

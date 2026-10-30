@@ -65,11 +65,25 @@ class ChiTietSanPham extends Model
 
     public function getEffectivePriceAttribute()
     {
-        if ($this->sanPham) {
-            return $this->sanPham->gia_sau_khuyen_mai;
+        $basePrice = (float) ($this->GiaBan ?? ($this->sanPham ? $this->sanPham->GiaGoc : 0) ?? 0);
+        if ($basePrice <= 0) {
+            return 0;
         }
 
-        return (float) ($this->GiaBan ?? 0);
+        $sp = $this->sanPham;
+        if ($sp && $sp->khuyenMai && $sp->khuyenMai->isEffective()) {
+            $km = $sp->khuyenMai;
+            $phanTram = (float) ($km->PhanTramGiam ?? 0);
+            $giam = ($basePrice * $phanTram) / 100;
+
+            if ($km->GiamToiDa && $giam > (float) $km->GiamToiDa) {
+                $giam = (float) $km->GiamToiDa;
+            }
+
+            return max(0, $basePrice - $giam);
+        }
+
+        return $basePrice;
     }
 
     public function getDisplayImageAttribute()

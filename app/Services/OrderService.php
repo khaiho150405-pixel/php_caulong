@@ -18,7 +18,8 @@ class OrderService
             $orderDetails = [];
 
             foreach ($cartItems as $item) {
-                $ctsp = ChiTietSanPham::where('MaChiTiet', $item->MaChiTietSanPham)
+                $ctsp = ChiTietSanPham::with(['sanPham.khuyenMai'])
+                    ->where('MaChiTiet', $item->MaChiTietSanPham)
                     ->lockForUpdate()
                     ->first();
 
@@ -34,7 +35,7 @@ class OrderService
                 $ctsp->SoLuongTon = max(0, $ctsp->SoLuongTon - $item->SoLuong);
                 $ctsp->save();
 
-                $donGia = $ctsp->effective_price;
+                $donGia = (float) $ctsp->effective_price;
                 $thanhTien = $donGia * $item->SoLuong;
                 $tongTien += $thanhTien;
 
