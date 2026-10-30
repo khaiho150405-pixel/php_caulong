@@ -6,9 +6,6 @@ use App\Http\Requests\Admin\TranDauRequest;
 use App\Models\TranDau;
 use Illuminate\Http\Request;
 
-/**
- * Quản trị kết quả trận đấu: CRUD + tìm kiếm + phân trang giữ từ khóa.
- */
 class QuanLyTranDauController extends Controller
 {
     public function index(Request $request)
@@ -58,7 +55,7 @@ class QuanLyTranDauController extends Controller
 
     public function deleteConfirmed($id)
     {
-        // Khóa ngoại nullOnDelete: các bài viết gắn với trận này vẫn giữ lại, chỉ mất liên kết
+
         TranDau::findOrFail($id)->delete();
 
         return redirect()->route('quanlytrandau.index')->with('message', 'Đã xóa trận đấu.');

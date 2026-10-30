@@ -30,19 +30,23 @@ class MomoPaymentService
         $this->notifyUrl = config('services.momo.notify_url', url('/DonHang/SavePayment'));
     }
 
-    /**
-     * Tạo yêu cầu thanh toán MoMo và trả về payUrl để chuyển hướng
-     */
     public function createPayment(int $maDonHang, float $amount, string $orderInfo = ''): string
     {
         $orderId = (string) $maDonHang;
+
+        if (config('services.momo.mock', true)) {
+            return route('donhang.momo_mock_gateway', [
+                'orderId' => $orderId,
+            ]);
+        }
+
         $requestId = (string) Str::uuid();
-        $amountStr = (string) ((int) $amount);
+        $amountInt = (int) $amount;
+        $amountStr = (string) $amountInt;
         $orderInfoStr = ! empty($orderInfo) ? $orderInfo : "Thanh toan don hang #{$maDonHang}";
         $extraData = '';
         $requestType = 'captureWallet';
 
-        // Tạo chữ ký HMAC-SHA256 theo chuẩn MoMo v2
         $rawHash = "accessKey={$this->accessKey}".
             "&amount={$amountStr}".
             "&extraData={$extraData}".
@@ -61,7 +65,7 @@ class MomoPaymentService
             'partnerName' => 'Shop Cầu Lông',
             'storeId' => 'MomoTestStore',
             'requestId' => $requestId,
-            'amount' => $amountStr,
+            'amount' => $amountInt,
             'orderId' => $orderId,
             'orderInfo' => $orderInfoStr,
             'redirectUrl' => $this->returnUrl,
@@ -85,12 +89,14 @@ class MomoPaymentService
             return $resJson['payUrl'];
         }
 
-        throw new Exception('MoMo không trả về đường dẫn thanh toán: '.($resJson['message'] ?? 'Lỗi không xác định'));
+        $message = $resJson['message'] ?? 'Lỗi không xác định';
+        if (($resJson['resultCode'] ?? null) === 99) {
+            $message .= ' (Tài khoản test mặc định của MoMo bị từ chối. Bạn hãy bật MOMO_MOCK=true trong file .env để chạy chế độ giả lập MoMo Sandbox, hoặc đăng ký Merchant riêng tại business.momo.vn)';
+        }
+
+        throw new Exception('MoMo không trả về đường dẫn thanh toán: '.$message);
     }
 
-    /**
-     * Xác thực chữ ký phản hồi từ MoMo
-     */
     public function verifySignature(array $data): bool
     {
         if (! isset($data['signature'])) {
@@ -114,5 +120,24 @@ class MomoPaymentService
         $expectedSignature = hash_hmac('sha256', $rawHash, $this->secretKey);
 
         return hash_equals($expectedSignature, $data['signature']);
+    }
+
+    public function generateResponseSignature(array $data): string
+    {
+        $rawHash = "accessKey={$this->accessKey}".
+            "&amount={$data['amount']}".
+            "&extraData={$data['extraData']}".
+            "&message={$data['message']}".
+            "&orderId={$data['orderId']}".
+            "&orderInfo={$data['orderInfo']}".
+            "&orderType={$data['orderType']}".
+            "&partnerCode={$data['partnerCode']}".
+            "&payType={$data['payType']}".
+            "&requestId={$data['requestId']}".
+            "&responseTime={$data['responseTime']}".
+            "&resultCode={$data['resultCode']}".
+            "&transId={$data['transId']}";
+
+        return hash_hmac('sha256', $rawHash, $this->secretKey);
     }
 }

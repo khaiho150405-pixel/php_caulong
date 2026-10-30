@@ -1,4 +1,4 @@
-{{-- Kết quả trận đấu theo từng ván, dùng chung trên landing và bảng tin. --}}
+
 <section class="bt-scoreboard" aria-label="Kết quả trận đấu">
     <header class="bt-scoreboard-heading">
         <div><span class="bt-scoreboard-kicker">TRÊN SÂN CẦU</span><h2>{{ $tieuDe ?? 'Kết quả thi đấu' }}</h2></div>

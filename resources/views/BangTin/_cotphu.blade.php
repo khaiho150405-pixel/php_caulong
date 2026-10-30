@@ -1,4 +1,4 @@
-{{-- Cột bên: bảng điểm, sản phẩm hot (xếp hạng), sản phẩm mới. Dữ liệu: $tranDauMoi, $spHot, $spMoi --}}
+
 @php $hamTien = fn ($v) => number_format((float) $v, 0, ',', '.') . '₫'; @endphp
 
 @include('BangTin._bangdiem', ['ds' => $tranDauMoi, 'tieuDe' => 'Kết quả thi đấu'])

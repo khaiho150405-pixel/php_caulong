@@ -128,7 +128,7 @@
         </div>
     </div>
 
-    {{-- Form thêm biến thể mới --}}
+    
     <div class="mt-3 p-3 border rounded bg-light">
         <h6 class="fw-bold mb-3"><i class="fa-solid fa-plus text-primary"></i> Thêm biến thể mới</h6>
 

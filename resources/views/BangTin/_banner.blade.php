@@ -1,4 +1,4 @@
-{{-- Banner minh họa cho chuyên mục; không mô tả một giải đấu cụ thể. --}}
+
 <header class="bt-editorial-banner {{ ($trangTin ?? false) ? 'bt-masthead' : '' }}">
     <picture class="bt-banner-picture">
         <source type="image/webp" srcset="{{ asset('images/news/court-journal-800.webp') }} 800w, {{ asset('images/news/court-journal-1600.webp') }} 1600w" sizes="(max-width: 767px) 100vw, 1140px">

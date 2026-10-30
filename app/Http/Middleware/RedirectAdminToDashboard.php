@@ -8,11 +8,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class RedirectAdminToDashboard
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if ($request->user()?->isAdmin()

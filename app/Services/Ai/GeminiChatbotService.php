@@ -19,22 +19,17 @@ class GeminiChatbotService
         $this->model = (string) config('services.gemini.model', 'gemini-2.5-flash');
     }
 
-    /**
-     * Xử lý tin nhắn hỏi đáp tư vấn từ khách hàng
-     */
     public function ask(string $message): array
     {
         try {
             $messageLower = mb_strtolower(trim($message), 'UTF-8');
             $maxPrice = null;
 
-            // BƯỚC 1: PHÂN TÍCH GIÁ BẰNG REGEX (ví dụ: "dưới 3 triệu", "tầm 2tr")
             if (preg_match('/(dưới|tầm|khoảng)\s*(\d+(?:\.\d+)?)\s*(triệu|tr)/iu', $messageLower, $matches)) {
                 $priceNumber = (float) $matches[2];
                 $maxPrice = $priceNumber * 1000000;
             }
 
-            // BƯỚC 2: TÌM KIẾM SẢN PHẨM TRONG DATABASE
             $query = SanPham::with(['chiTietSanPhams', 'khuyenMai']);
 
             if ($maxPrice !== null) {
@@ -57,7 +52,6 @@ class GeminiChatbotService
 
             $products = $query->take(5)->get();
 
-            // Lấy thông tin khuyến mãi đang diễn ra
             $promos = KhuyenMai::where(function ($q) {
                 $q->whereNull('NgayKetThuc')->orWhere('NgayKetThuc', '>=', now()->toDateString());
             })->get();
@@ -73,7 +67,6 @@ class GeminiChatbotService
                 }
             }
 
-            // BƯỚC 3: XÂY DỰNG NGỮ CẢNH (CONTEXT)
             $contextData = 'Hệ thống không tìm thấy sản phẩm nào khớp hoàn toàn với tiêu chí lọc.';
             if ($products->count() > 0) {
                 $contextData = 'Dữ liệu sản phẩm '.($maxPrice ? 'dưới '.number_format($maxPrice, 0, ',', '.').' VNĐ' : '')." tìm thấy trong kho:\n";
@@ -87,8 +80,6 @@ class GeminiChatbotService
                 $contextData .= "\n".$promoInfo;
             }
 
-            // BƯỚC 4: GỌI GOOGLE GEMINI API
-            // Chưa cấu hình API key -> trả lời bằng dữ liệu tra cứu trong kho
             if ($this->apiKey === '') {
                 return [
                     'success' => true,
@@ -122,7 +113,6 @@ class GeminiChatbotService
                 return ['success' => true, 'reply' => $replyText];
             }
 
-            // Fallback nếu API lỗi
             return [
                 'success' => true,
                 'reply' => "Dưới đây là một số gợi ý cho bạn:\n".$contextData,
@@ -135,9 +125,6 @@ class GeminiChatbotService
         }
     }
 
-    /**
-     * Tự động sinh nội dung bài viết tin tức / review bằng Google Gemini AI
-     */
     public function generateArticle(string $topic, ?string $summary = null): array
     {
         try {
@@ -146,7 +133,6 @@ class GeminiChatbotService
                 $topic = 'Kỹ thuật chơi cầu lông và hướng dẫn chọn vợt phù hợp';
             }
 
-            // Nếu chưa cấu hình Gemini API key -> sinh nội dung mẫu chuyên nghiệp
             if ($this->apiKey === '') {
                 return [
                     'success' => true,

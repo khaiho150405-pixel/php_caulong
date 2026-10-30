@@ -9,12 +9,9 @@ use Illuminate\Support\Facades\Schema;
 
 class BadmintonSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        // Tắt kiểm tra khóa ngoại để seed dữ liệu ban đầu
+
         Schema::disableForeignKeyConstraints();
 
         DB::table('PhanHoi')->truncate();
@@ -34,14 +31,12 @@ class BadmintonSeeder extends Seeder
         DB::table('NhaCungCap')->truncate();
         DB::table('LoaiSanPham')->truncate();
 
-        // 1. PhanQuyen
         DB::table('PhanQuyen')->insert([
             ['MaQuyen' => 1, 'TenQuyen' => 'Quản trị'],
             ['MaQuyen' => 2, 'TenQuyen' => 'Nhân viên'],
             ['MaQuyen' => 3, 'TenQuyen' => 'Khách hàng'],
         ]);
 
-        // 2. LoaiSanPham
         DB::table('LoaiSanPham')->insert([
             ['MaLoai' => 1, 'TenLoai' => 'Vợt cầu lông', 'MoTa' => 'Dành cho người chơi chuyên nghiệp và phong trào'],
             ['MaLoai' => 2, 'TenLoai' => 'Giày cầu lông', 'MoTa' => 'Giày thi đấu và tập luyện'],
@@ -49,7 +44,6 @@ class BadmintonSeeder extends Seeder
             ['MaLoai' => 4, 'TenLoai' => 'Phụ kiện cầu lông', 'MoTa' => 'Túi, băng tay, quấn cán...'],
         ]);
 
-        // 3. NhaCungCap
         DB::table('NhaCungCap')->insert([
             ['MaNhaCungCap' => 1, 'TenNhaCungCap' => 'Công ty TNHH Thể thao Đức Phát', 'DiaChi' => '25 Hoàng Hoa Thám, Q.Tân Bình, TP.HCM', 'SoDienThoai' => '0905123456', 'Email' => 'sales@ducphat.vn'],
             ['MaNhaCungCap' => 2, 'TenNhaCungCap' => 'Công ty TNHH Cầu Lông Sunrise Việt Nam', 'DiaChi' => '22 Nguyễn Văn Trỗi, Q.Phú Nhuận, TP.HCM', 'SoDienThoai' => '0908789123', 'Email' => 'info@sunrisevn.com'],
@@ -58,7 +52,6 @@ class BadmintonSeeder extends Seeder
             ['MaNhaCungCap' => 5, 'TenNhaCungCap' => 'Công ty TNHH Thể thao Phúc Gia', 'DiaChi' => '12 Cầu Giấy, Hà Nội', 'SoDienThoai' => '0934556677', 'Email' => 'info@phucgiasport.vn'],
         ]);
 
-        // 4. Hang
         DB::table('Hang')->insert([
             ['MaHang' => 1, 'TenHang' => 'Yonex', 'QuocGia' => 'Nhật Bản'],
             ['MaHang' => 2, 'TenHang' => 'Lining', 'QuocGia' => 'Trung Quốc'],
@@ -66,7 +59,6 @@ class BadmintonSeeder extends Seeder
             ['MaHang' => 4, 'TenHang' => 'Mizuno', 'QuocGia' => 'Nhật Bản'],
         ]);
 
-        // 5. KhuyenMai
         DB::table('KhuyenMai')->insert([
             ['MaKhuyenMai' => 1, 'TenChuongTrinh' => 'Đại lễ 30/4 - 1/5', 'MoTa' => 'Mừng ngày giải phóng miền Nam và Quốc tế lao động', 'NgayBatDau' => '2025-04-25', 'NgayKetThuc' => '2027-05-05', 'PhanTramGiam' => 10, 'GiamToiDa' => 150000, 'SoLuongSuDung' => 200],
             ['MaKhuyenMai' => 2, 'TenChuongTrinh' => 'Chào Hè Sôi Động', 'MoTa' => 'Giảm giá dụng cụ thể thao mùa hè', 'NgayBatDau' => '2025-06-01', 'NgayKetThuc' => '2027-06-30', 'PhanTramGiam' => 12, 'GiamToiDa' => 200000, 'SoLuongSuDung' => 150],
@@ -78,7 +70,6 @@ class BadmintonSeeder extends Seeder
             ['MaKhuyenMai' => 8, 'TenChuongTrinh' => 'Khách hàng thân thiết', 'MoTa' => 'Tri ân khách hàng đã mua trên 5 triệu', 'NgayBatDau' => '2025-01-01', 'NgayKetThuc' => '2027-12-31', 'PhanTramGiam' => 5, 'GiamToiDa' => 500000, 'SoLuongSuDung' => null],
         ]);
 
-        // 6. MauSac
         DB::table('MauSac')->insert([
             ['MaMau' => 1, 'TenMau' => 'Đen'],
             ['MaMau' => 2, 'TenMau' => 'Xanh dương'],
@@ -92,7 +83,6 @@ class BadmintonSeeder extends Seeder
             ['MaMau' => 10, 'TenMau' => 'Hồng'],
         ]);
 
-        // 7. Size
         $sizes = [
             ['MaSize' => 1, 'TenSize' => '3U', 'LoaiSize' => 'Vot'],
             ['MaSize' => 2, 'TenSize' => '4U', 'LoaiSize' => 'Vot'],
@@ -112,7 +102,6 @@ class BadmintonSeeder extends Seeder
         }
         DB::table('Size')->insert($sizes);
 
-        // 8. TaiKhoan (Khởi tạo tài khoản mẫu mã hóa bcrypt)
         DB::table('TaiKhoan')->insert([
             ['MaTaiKhoan' => 1, 'TenDangNhap' => 'admin', 'MatKhau' => Hash::make('admin@123'), 'Email' => 'admin@shopcaulong.com', 'MaQuyen' => 1, 'NgayTao' => now()],
             ['MaTaiKhoan' => 2, 'TenDangNhap' => 'nhanvien_banhang', 'MatKhau' => Hash::make('nv@123'), 'Email' => 'nhanvien1@shopcaulong.com', 'MaQuyen' => 2, 'NgayTao' => now()],
@@ -120,7 +109,6 @@ class BadmintonSeeder extends Seeder
             ['MaTaiKhoan' => 4, 'TenDangNhap' => 'tranthib', 'MatKhau' => Hash::make('thib@123'), 'Email' => 'tranthib@gmail.com', 'MaQuyen' => 3, 'NgayTao' => now()],
         ]);
 
-        // 9. KhachHang
         DB::table('KhachHang')->insert([
             ['MaKhachHang' => 1, 'HoTen' => 'Admin Quản Trị', 'Email' => 'admin@shopcaulong.com', 'SoDienThoai' => '0901000001', 'DiaChi' => 'Tại cửa hàng', 'MaTaiKhoan' => 1, 'NgayTao' => now()],
             ['MaKhachHang' => 2, 'HoTen' => 'Nhân Viên Bán Hàng', 'Email' => 'nhanvien1@shopcaulong.com', 'SoDienThoai' => '0901000002', 'DiaChi' => 'Tại cửa hàng', 'MaTaiKhoan' => 2, 'NgayTao' => now()],
@@ -128,9 +116,8 @@ class BadmintonSeeder extends Seeder
             ['MaKhachHang' => 4, 'HoTen' => 'Trần Thị B', 'Email' => 'tranthib@gmail.com', 'SoDienThoai' => '0909876543', 'DiaChi' => '456 Lê Lợi, Q.3, TP.HCM', 'MaTaiKhoan' => 4, 'NgayTao' => now()],
         ]);
 
-        // 10. SanPham (43 sản phẩm)
         $products = [
-            // Vợt (1-27)
+
             ['MaSanPham' => 1, 'TenSanPham' => 'Vợt Cầu Lông Yonex Astrox 100ZZ', 'MoTa' => 'Yonex Astrox 100ZZ Kurenai là phiên bản nâng cấp của Astrox 100ZZ, nổi bật với màu đỏ thẫm và công nghệ cải tiến cho lối chơi tấn công mạnh mẽ. Được nhiều vận động viên hàng đầu như Viktor Axelsen sử dụng.', 'GiaGoc' => 4500000, 'HinhAnhDaiDien' => 'astrox100zz.jpg', 'MaLoai' => 1, 'MaNhaCungCap' => 2, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 2, 'TenSanPham' => 'Vợt Cầu Lông Yonex Astrox 88D Pro 2024', 'MoTa' => 'Chuyên dụng cho đánh đôi, vị trí cầu sau, thiên về tấn công.', 'GiaGoc' => 4799000, 'HinhAnhDaiDien' => 'astrox88dpro.jpg', 'MaLoai' => 1, 'MaNhaCungCap' => 2, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 3, 'TenSanPham' => 'Vợt Cầu Lông Yonex Astrox 88S Pro 2024', 'MoTa' => 'Chuyên dụng cho đánh đôi, vị trí cầu trước, thiên về tốc độ và kiểm soát.', 'GiaGoc' => 4799000, 'HinhAnhDaiDien' => 'astrox88spro.jpg', 'MaLoai' => 1, 'MaNhaCungCap' => 2, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
@@ -159,7 +146,6 @@ class BadmintonSeeder extends Seeder
             ['MaSanPham' => 26, 'TenSanPham' => 'Vợt Cầu Lông Mizuno Fortius 70', 'MoTa' => 'Vợt tầm trung, nặng đầu, hỗ trợ tấn công.', 'GiaGoc' => 3599000, 'HinhAnhDaiDien' => 'mizuno_fortius70.jpg', 'MaLoai' => 1, 'MaNhaCungCap' => 4, 'MaHang' => 4, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 27, 'TenSanPham' => 'Vợt Cầu Lông Mizuno Altius 01 Speed Limited', 'MoTa' => 'Vợt cân bằng, linh hoạt, dễ điều khiển.', 'GiaGoc' => 4500000, 'HinhAnhDaiDien' => 'mizuno_altius01speedlimited.jpg', 'MaLoai' => 1, 'MaNhaCungCap' => 4, 'MaHang' => 4, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
 
-            // Giày (28-37)
             ['MaSanPham' => 28, 'TenSanPham' => 'Giày Cầu Lông Yonex SHB 65Z4', 'MoTa' => 'Dòng giày toàn diện, êm ái, bám sân.', 'GiaGoc' => 2800000, 'HinhAnhDaiDien' => 'yonex_65z4.jpg', 'MaLoai' => 2, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 29, 'TenSanPham' => 'Giày Cầu Lông Yonex Eclipsion Z3', 'MoTa' => 'Tăng cường độ ổn định, chống lật cổ chân.', 'GiaGoc' => 3100000, 'HinhAnhDaiDien' => 'yonex_eclipsion_trang_z3.jpg', 'MaLoai' => 2, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => 1, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 30, 'TenSanPham' => 'Giày Cầu Lông Yonex Aerus Z2', 'MoTa' => 'Siêu nhẹ, tăng tốc độ di chuyển.', 'GiaGoc' => 3000000, 'HinhAnhDaiDien' => 'yonex_aerus_z2_den.jpg', 'MaLoai' => 2, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
@@ -171,7 +157,6 @@ class BadmintonSeeder extends Seeder
             ['MaSanPham' => 36, 'TenSanPham' => 'Giày Cầu Lông Mizuno Wave Claw Neo 2', 'MoTa' => 'Tốc độ, êm ái, công nghệ Enerzy.', 'GiaGoc' => 2750000, 'HinhAnhDaiDien' => 'mizuno_waveclaw_neo2_xanh.jpg', 'MaLoai' => 2, 'MaNhaCungCap' => 4, 'MaHang' => 4, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 37, 'TenSanPham' => 'Giày Cầu Lông Mizuno Wave Fang Pro', 'MoTa' => 'Dòng giày ổn định, da thật, sản xuất tại Nhật.', 'GiaGoc' => 3900000, 'HinhAnhDaiDien' => 'mizuno_fangpro.jpg', 'MaLoai' => 2, 'MaNhaCungCap' => 4, 'MaHang' => 4, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
 
-            // Áo / Quần (38-43)
             ['MaSanPham' => 38, 'TenSanPham' => 'Áo Cầu Lông Yonex TRM3089', 'MoTa' => 'Áo thi đấu đội tuyển, chất liệu poly thoáng mát.', 'GiaGoc' => 119000, 'HinhAnhDaiDien' => 'yonex_trm3089.jpg', 'MaLoai' => 3, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => 2, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 39, 'TenSanPham' => 'Áo Cầu Lông Yonex TRM3053', 'MoTa' => 'Áo thi đấu đội tuyển, chất liệu poly cao cấp.', 'GiaGoc' => 169000, 'HinhAnhDaiDien' => 'yonex_trm3053.jpg', 'MaLoai' => 3, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
             ['MaSanPham' => 40, 'TenSanPham' => 'Quần Cầu Lông Yonex TSM3085', 'MoTa' => 'Quần short thể thao, co giãn 4 chiều.', 'GiaGoc' => 139000, 'HinhAnhDaiDien' => 'yonex_tsm3085.jpg', 'MaLoai' => 3, 'MaNhaCungCap' => 1, 'MaHang' => 1, 'MaKhuyenMai' => null, 'CoSize' => 1, 'CoMau' => 1],
@@ -181,9 +166,8 @@ class BadmintonSeeder extends Seeder
         ];
         DB::table('SanPham')->insert($products);
 
-        // 11. ChiTietSanPham (Biến thể mẫu chính)
         $variants = [
-            // Vợt
+
             ['MaChiTiet' => 1, 'MaSanPham' => 1, 'MaMau' => 1, 'MaSize' => 1, 'GiaBan' => 4500000, 'SoLuongTon' => 50, 'SKU' => 'YN-AX100ZZ-3U', 'HinhAnh' => 'astrox100zz.jpg'],
             ['MaChiTiet' => 2, 'MaSanPham' => 1, 'MaMau' => 1, 'MaSize' => 2, 'GiaBan' => 4500000, 'SoLuongTon' => 100, 'SKU' => 'YN-AX100ZZ-4U', 'HinhAnh' => 'astrox100zz.jpg'],
             ['MaChiTiet' => 3, 'MaSanPham' => 2, 'MaMau' => 2, 'MaSize' => 1, 'GiaBan' => 4799000, 'SoLuongTon' => 100, 'SKU' => 'YN-AX88DPRO2024-3U', 'HinhAnh' => 'astrox88dpro.jpg'],
@@ -210,14 +194,12 @@ class BadmintonSeeder extends Seeder
             ['MaChiTiet' => 24, 'MaSanPham' => 13, 'MaMau' => 1, 'MaSize' => 2, 'GiaBan' => 3900000, 'SoLuongTon' => 40, 'SKU' => 'LN-AX80-DEN-4U', 'HinhAnh' => 'lining_axforce80.jpg'],
             ['MaChiTiet' => 25, 'MaSanPham' => 13, 'MaMau' => 1, 'MaSize' => 3, 'GiaBan' => 3900000, 'SoLuongTon' => 40, 'SKU' => 'LN-AX80-DEN-5U', 'HinhAnh' => 'lining_axforce80.jpg'],
 
-            // Giày
             ['MaChiTiet' => 26, 'MaSanPham' => 28, 'MaMau' => 6, 'MaSize' => 19, 'GiaBan' => 2800000, 'SoLuongTon' => 30, 'SKU' => 'YN-SHB65Z4-TRANG-40', 'HinhAnh' => 'yonex_65z4.jpg'],
             ['MaChiTiet' => 27, 'MaSanPham' => 28, 'MaMau' => 6, 'MaSize' => 20, 'GiaBan' => 2800000, 'SoLuongTon' => 30, 'SKU' => 'YN-SHB65Z4-TRANG-41', 'HinhAnh' => 'yonex_65z4.jpg'],
             ['MaChiTiet' => 28, 'MaSanPham' => 28, 'MaMau' => 6, 'MaSize' => 21, 'GiaBan' => 2800000, 'SoLuongTon' => 30, 'SKU' => 'YN-SHB65Z4-TRANG-42', 'HinhAnh' => 'yonex_65z4.jpg'],
             ['MaChiTiet' => 29, 'MaSanPham' => 29, 'MaMau' => 6, 'MaSize' => 20, 'GiaBan' => 3100000, 'SoLuongTon' => 30, 'SKU' => 'YN-ECLIPSONZ3-TRANG-41', 'HinhAnh' => 'yonex_eclipsion_trang_z3.jpg'],
             ['MaChiTiet' => 30, 'MaSanPham' => 30, 'MaMau' => 1, 'MaSize' => 21, 'GiaBan' => 3000000, 'SoLuongTon' => 30, 'SKU' => 'YN-AERUSZ2-DEN-42', 'HinhAnh' => 'yonex_aerus_z2_den.jpg'],
 
-            // Áo / Quần
             ['MaChiTiet' => 31, 'MaSanPham' => 38, 'MaMau' => 6, 'MaSize' => 5, 'GiaBan' => 119000, 'SoLuongTon' => 25, 'SKU' => 'YN-TRM3089-TRANG-M', 'HinhAnh' => 'yonex_trm3089.jpg'],
             ['MaChiTiet' => 32, 'MaSanPham' => 38, 'MaMau' => 6, 'MaSize' => 6, 'GiaBan' => 119000, 'SoLuongTon' => 25, 'SKU' => 'YN-TRM3089-TRANG-L', 'HinhAnh' => 'yonex_trm3089.jpg'],
             ['MaChiTiet' => 33, 'MaSanPham' => 39, 'MaMau' => 8, 'MaSize' => 6, 'GiaBan' => 169000, 'SoLuongTon' => 20, 'SKU' => 'YN-TRM3053-XANHLA-L', 'HinhAnh' => 'yonex_trm3053.jpg'],
@@ -225,7 +207,6 @@ class BadmintonSeeder extends Seeder
         ];
         DB::table('ChiTietSanPham')->insert($variants);
 
-        // 12. ThongSoVot
         $specs = [
             ['MaThongSo' => 1, 'MaChiTiet' => 1, 'DoCanBang' => 'Nặng đầu', 'TrongLuong' => '3U (85-89g)', 'DoCung' => 'Cứng', 'ChieuDai' => '675mm', 'SucCang' => '21-29 lbs'],
             ['MaThongSo' => 2, 'MaChiTiet' => 2, 'DoCanBang' => 'Nặng đầu', 'TrongLuong' => '4U (80-84g)', 'DoCung' => 'Cứng', 'ChieuDai' => '675mm', 'SucCang' => '20-28 lbs'],
@@ -247,7 +228,6 @@ class BadmintonSeeder extends Seeder
         ];
         DB::table('ThongSoVot')->insert($specs);
 
-        // 13. PhanHoi mẫu
         DB::table('PhanHoi')->insert([
             ['NoiDung' => 'Vợt đánh rất đầm tay, đập cầu uy lực, chính hãng 100%!', 'NgayPhanHoi' => now(), 'DanhGia' => 5, 'MaKhachHang' => 3, 'MaSanPham' => 1],
             ['NoiDung' => 'Giao hàng nhanh, vợt rất đẹp và vừa tay.', 'NgayPhanHoi' => now(), 'DanhGia' => 5, 'MaKhachHang' => 4, 'MaSanPham' => 2],

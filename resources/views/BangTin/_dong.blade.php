@@ -1,4 +1,4 @@
-{{-- Một bài viết trong danh sách tin tức. --}}
+
 @php $nho = $nho ?? false; @endphp
 <article class="bt-item loai-{{ $t->LoaiTin }} {{ $nho ? 'is-small' : '' }}">
     @unless ($nho)<div class="bt-when" aria-hidden="true"><b>{{ $t->NgayDang->format('d') }}</b><span>Tháng {{ $t->NgayDang->format('m') }}</span></div>@endunless

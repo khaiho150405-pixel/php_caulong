@@ -5,12 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Dữ liệu mẫu nhóm "Phụ kiện cầu lông" (MaLoai = 4).
- * Chạy lại nhiều lần không bị trùng (updateOrInsert theo tên sản phẩm / SKU).
- *   php artisan db:seed --class=PhuKienSeeder
- * Ảnh thật nằm ở public/images (nguồn và giấy phép ghi trong public/images/CREDITS.txt).
- */
 class PhuKienSeeder extends Seeder
 {
     public function run(): void

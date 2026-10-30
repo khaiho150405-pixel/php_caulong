@@ -4,9 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Validation thông tin giao hàng khi đặt hàng (COD hoặc MoMo).
- */
 class CheckoutRequest extends FormRequest
 {
     public function authorize(): bool

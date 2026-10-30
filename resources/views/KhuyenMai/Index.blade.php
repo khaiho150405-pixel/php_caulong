@@ -13,10 +13,8 @@
     $phanTramGiam = fn ($sp) => ($sp->GiaGoc > 0 && $sp->gia_sau_khuyen_mai < $sp->GiaGoc)
         ? max(1, round((1 - $sp->gia_sau_khuyen_mai / $sp->GiaGoc) * 100)) : 0;
 
-    // Chỉ hiện các chương trình đang có sản phẩm
     $cacCt = $promotions->filter(fn ($km) => ($promoProducts[$km->MaKhuyenMai] ?? collect())->isNotEmpty())->values();
 
-    // Ảnh hero: 3 sản phẩm thật giảm sâu nhất, ưu tiên khác nhóm hàng
     $noiBat = $products->sortByDesc($phanTramGiam)->unique('MaLoai')->take(3);
     if ($noiBat->count() < 3) {
         $noiBat = $noiBat->concat($products->sortByDesc($phanTramGiam)->whereNotIn('MaSanPham', $noiBat->pluck('MaSanPham')))->take(3);
@@ -25,7 +23,7 @@
     $giamCaoNhat = (int) $products->map($phanTramGiam)->max();
 @endphp
 
-{{-- ===== Hero ===== --}}
+
 <section class="l-hero promo-hero bg-court">
     <div class="container l-hero-inner">
         <div class="l-hero-copy">
@@ -64,7 +62,7 @@
         @include('partials._empty', ['message' => 'Hiện chưa có chương trình khuyến mãi nào đang diễn ra.', 'linkUrl' => route('sanpham.index'), 'linkText' => 'Xem tất cả sản phẩm', 'compact' => false])
     </div>
 @else
-    {{-- ===== Điều hướng nhanh giữa các chương trình ===== --}}
+    
     <nav class="promo-nav" aria-label="Chương trình khuyến mãi">
         <div class="container">
             @foreach ($cacCt as $km)
@@ -73,7 +71,7 @@
         </div>
     </nav>
 
-    {{-- ===== Từng chương trình ===== --}}
+    
     @foreach ($cacCt as $km)
         @php
             $sps = $promoProducts[$km->MaKhuyenMai];
@@ -188,71 +186,4 @@
     </section>
 @endif
 
-@push('scripts')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.promo-slider-container').forEach(function (container) {
-        var wrap = container.querySelector('.promo-slider-track-wrap');
-        var prevBtn = container.querySelector('.promo-slider-btn.prev');
-        var nextBtn = container.querySelector('.promo-slider-btn.next');
-        if (!wrap) return;
-
-        function getStep() {
-            var card = wrap.querySelector('.product-card');
-            return card ? (card.offsetWidth + 20) : 280;
-        }
-
-        if (nextBtn) {
-            nextBtn.addEventListener('click', function () {
-                var step = getStep();
-                if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
-                    wrap.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    wrap.scrollBy({ left: step, behavior: 'smooth' });
-                }
-            });
-        }
-
-        if (prevBtn) {
-            prevBtn.addEventListener('click', function () {
-                var step = getStep();
-                if (wrap.scrollLeft <= 20) {
-                    wrap.scrollTo({ left: wrap.scrollWidth, behavior: 'smooth' });
-                } else {
-                    wrap.scrollBy({ left: -step, behavior: 'smooth' });
-                }
-            });
-        }
-
-        // Tự động chạy ngang qua các sản phẩm
-        var autoTimer = null;
-        function startAuto() {
-            stopAuto();
-            autoTimer = setInterval(function () {
-                var step = getStep();
-                if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
-                    wrap.scrollTo({ left: 0, behavior: 'smooth' });
-                } else {
-                    wrap.scrollBy({ left: step, behavior: 'smooth' });
-                }
-            }, 4000);
-        }
-
-        function stopAuto() {
-            if (autoTimer) {
-                clearInterval(autoTimer);
-                autoTimer = null;
-            }
-        }
-
-        container.addEventListener('mouseenter', stopAuto);
-        container.addEventListener('mouseleave', startAuto);
-        container.addEventListener('touchstart', stopAuto, { passive: true });
-        container.addEventListener('touchend', startAuto, { passive: true });
-
-        startAuto();
-    });
-});
-</script>
-@endpush
 @endsection

@@ -4,9 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Validation cho form Thêm / Sửa kết quả trận đấu.
- */
 class TranDauRequest extends FormRequest
 {
     public function authorize(): bool
@@ -30,7 +27,7 @@ class TranDauRequest extends FormRequest
             'NoiDung' => ['required', 'string', 'max:60'],
             'DoiA' => ['required', 'string', 'max:150'],
             'DoiB' => ['required', 'string', 'max:150', 'different:DoiA'],
-            // Ví dụ hợp lệ: 21-11, 21-11  hoặc  22-20, 19-21, 21-15
+
             'TiSo' => ['nullable', 'regex:/^\d{1,2}-\d{1,2}(,\s*\d{1,2}-\d{1,2}){0,2}$/'],
             'DoiThang' => ['nullable', 'in:A,B', 'required_with:TiSo'],
             'NgayThiDau' => ['required', 'date'],

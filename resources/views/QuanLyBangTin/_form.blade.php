@@ -1,4 +1,4 @@
-{{-- Form dùng chung cho Thêm / Sửa bài viết (Word-like Rich Text Editor chuẩn UI/UX) --}}
+
 @php
     $gt = fn ($truong, $macDinh = null) => old($truong, $tin?->{$truong} ?? $macDinh);
     $ngayDang = old('NgayDang', optional($tin?->NgayDang)->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i'));
@@ -27,7 +27,7 @@
 <form action="{{ $action }}" method="POST" enctype="multipart/form-data" id="articleForm">
     @csrf
 
-    {{-- Thanh thao tác: chỉ giữ [Lưu] và [Thoát], bỏ Làm lại và Lưu tại trang theo yêu cầu --}}
+    
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
@@ -47,7 +47,7 @@
     </div>
 
     <div class="row g-4">
-        {{-- Cột chính bên trái: Tiêu đề, Tóm tắt, Nội dung Word-like CKEditor --}}
+        
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm p-4 mb-4">
                 <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">Thông tin bài viết</h5>
@@ -69,11 +69,11 @@
                         Nội dung chi tiết : <span class="text-danger">*</span>
                     </label>
 
-                    {{-- Trình soạn thảo Word-like (CKEditor 4 Full Toolbar) --}}
+                    
                     <textarea class="form-control" id="NoiDung" name="NoiDung" rows="18" required>{{ $gt('NoiDung') }}</textarea>
                 </div>
 
-                {{-- Cài đặt mở rộng (Loại tin, Gắn sản phẩm, Trận đấu, Nguồn tin) --}}
+                
                 <div class="accordion" id="accordionExtra">
                     <div class="accordion-item border rounded-3">
                         <h2 class="accordion-header">
@@ -128,9 +128,9 @@
             </div>
         </div>
 
-        {{-- Cột bên phải: Tải ảnh đại diện & Tình trạng bài viết chuẩn UI/UX --}}
+        
         <div class="col-lg-4">
-            {{-- Khung hình ảnh đại diện --}}
+            
             <div class="card border-0 shadow-sm p-3 mb-4">
                 <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Ảnh đại diện bài viết</h6>
                 <div class="mb-3 text-center">
@@ -140,7 +140,7 @@
                     </div>
                 </div>
 
-                {{-- Khung Drag & Drop Upload dùng label for="hinhAnhInput" để click tự mở file picker --}}
+                
                 <label for="hinhAnhInput" id="articleDropZone" class="border border-2 border-dashed rounded-3 p-3 text-center bg-light w-100 mb-0"
                        style="border-color: #cbd5e1 !important; cursor: pointer; transition: all 0.2s ease;">
                     <div class="text-secondary mb-1">
@@ -151,7 +151,7 @@
                     <div id="selectedArticleFileName" class="text-primary small fw-semibold d-none mt-2"></div>
                 </label>
 
-                {{-- Các nút thao tác ảnh sắp xếp gọn gàng, không bị rớt dòng --}}
+                
                 <div class="d-flex gap-2 mt-2">
                     <label for="hinhAnhInput" class="btn btn-outline-danger btn-sm flex-fill fw-semibold mb-0" style="cursor: pointer;">
                         <i class="fa-regular fa-image me-1"></i> Chọn hình
@@ -169,7 +169,7 @@
                 </div>
             </div>
 
-            {{-- Khung Tình trạng bài viết --}}
+            
             <div class="card border-0 shadow-sm p-4">
                 <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Tình trạng hiển thị</h6>
 
@@ -207,11 +207,10 @@
 </form>
 
 @push('scripts')
-{{-- Nạp CKEditor 4 Full Toolbar CDN --}}
+
 <script src="https://cdn.ckeditor.com/4.22.1/full/ckeditor.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // 1. KHỞI TẠO CKEDITOR 4 WORD-LIKE VỚI FULL TOOLBAR
     if (document.getElementById('NoiDung')) {
         CKEDITOR.replace('NoiDung', {
             height: 440,
@@ -236,7 +235,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 2. XỬ LÝ ẢNH ĐẠI DIỆN BÀI VIẾT (DRAG & DROP, PREVIEW)
     const dropZone = document.getElementById('articleDropZone');
     const fileInput = document.getElementById('hinhAnhInput');
     const hiddenVal = document.getElementById('hinhAnhVal');

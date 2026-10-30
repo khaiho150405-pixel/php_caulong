@@ -110,7 +110,7 @@
                 <p>Trạng thái hiện tại: <strong class="text-primary">{{ $order->TrangThai }}</strong></p>
                 <hr />
 
-                {{-- Nút chuyển sang "Đang xử lý" --}}
+                
                 @if ($order->TrangThai == 'Chờ xác nhận' || $order->TrangThai == 'Chờ thanh toán MoMo')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
@@ -121,7 +121,7 @@
                     </form>
                 @endif
 
-                {{-- Nút chuyển sang "Đang giao hàng" --}}
+                
                 @if ($order->TrangThai == 'Đang xử lý' || $order->TrangThai == 'Đã thanh toán bằng MoMo')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
@@ -132,7 +132,7 @@
                     </form>
                 @endif
 
-                {{-- Nút chuyển sang "Đã hoàn thành" --}}
+                
                 @if ($order->TrangThai == 'Đang giao hàng')
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mb-2">
                         @csrf
@@ -143,7 +143,7 @@
                     </form>
                 @endif
 
-                {{-- Nút Hủy đơn --}}
+                
                 @if ($order->TrangThai != 'Đã hoàn thành' && !str_contains($order->TrangThai, 'hủy') && !str_contains($order->TrangThai, 'Hủy'))
                     <form action="{{ route('quanlydonhang.settrangthai', ['id' => $order->MaDonHang]) }}" method="POST" class="mt-3">
                         @csrf

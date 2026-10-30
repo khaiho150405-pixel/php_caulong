@@ -1,11 +1,7 @@
-/* ==========================================================================
-   Theme dùng chung cho trang khách hàng và trang quản trị
-   - Design tokens (màu, bo góc, đổ bóng)
-   - Ghi đè các thành phần Bootstrap 5.2 để cả hệ thống đồng bộ một tông màu
-   ========================================================================== */
+
 
 :root {
-    /* Màu thương hiệu: xanh lục dịu, đồng bộ với logo/cửa hàng */
+    
     --brand-50: #eef8f3;
     --brand-100: #d6efe3;
     --brand-200: #aee0c8;
@@ -14,7 +10,7 @@
     --brand-700: #0f7550;
     --brand-900: #0b3b2b;
 
-    /* Màu trung tính */
+    
     --ink: #17211c;
     --ink-soft: #3b4943;
     --muted: #66756e;
@@ -23,14 +19,14 @@
     --bg: #f5f7f6;
     --surface: #ffffff;
 
-    /* Màu nhấn (cam): chỉ dùng cho giá và khuyến mãi */
+    
     --accent: #e25d0f;
     --accent-700: #bf4a08;
     --accent-50: #fff2e8;
     --accent-100: #ffe0c8;
     --price: #c94c07;
 
-    /* Màu trạng thái */
+    
     --danger: #d2403f;
     --danger-50: #fdeeee;
     --warn: #c9830f;
@@ -49,7 +45,7 @@
 
     --font: 'Inter', 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
 
-    /* Đưa token vào Bootstrap */
+    
     --bs-primary: #148f5f;
     --bs-primary-rgb: 20, 143, 95;
     --bs-success: #148f5f;
@@ -90,7 +86,7 @@ hr { border-color: var(--line); opacity: 1; }
 .text-muted { color: var(--muted) !important; }
 .text-price { color: var(--price) !important; }
 
-/* ---------- Buttons ---------- */
+
 .btn {
     --bs-btn-border-radius: var(--radius-sm);
     --bs-btn-font-weight: 600;
@@ -204,7 +200,7 @@ hr { border-color: var(--line); opacity: 1; }
     --bs-btn-hover-color: #fff;
 }
 
-/* ---------- Forms ---------- */
+
 input, select, textarea { max-width: none; }
 
 .form-control, .form-select {
@@ -243,7 +239,7 @@ label.form-check-label { font-weight: 400; }
 .text-danger.field-validation-error,
 .invalid-feedback { font-size: .85rem; }
 
-/* ---------- Cards ---------- */
+
 .card {
     --bs-card-border-color: var(--line);
     --bs-card-border-radius: var(--radius);
@@ -255,7 +251,7 @@ label.form-check-label { font-weight: 400; }
 
 .card-header { font-weight: 600; }
 
-/* ---------- Tables ---------- */
+
 .table {
     --bs-table-color: var(--ink);
     --bs-table-border-color: var(--line);
@@ -297,7 +293,7 @@ label.form-check-label { font-weight: 400; }
 
 .table-responsive { border-radius: var(--radius-sm); }
 
-/* ---------- Badges (dạng nhạt, dễ nhìn) ---------- */
+
 .badge {
     font-weight: 600;
     letter-spacing: .01em;
@@ -312,7 +308,7 @@ label.form-check-label { font-weight: 400; }
 .badge.bg-primary   { background-color: var(--brand-900) !important; color: #fff !important; }
 .badge.bg-secondary { background-color: #edf1ef !important; color: var(--ink-soft) !important; }
 
-/* ---------- Alerts ---------- */
+
 .alert {
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
@@ -325,7 +321,7 @@ label.form-check-label { font-weight: 400; }
 
 .alert-link { color: inherit; text-decoration: underline; }
 
-/* ---------- Pagination ---------- */
+
 .pagination {
     --bs-pagination-color: var(--ink-soft);
     --bs-pagination-border-color: var(--line);
@@ -342,7 +338,7 @@ label.form-check-label { font-weight: 400; }
 
 .pagination .page-link { border-radius: var(--radius-sm); }
 
-/* ---------- Khác ---------- */
+
 .breadcrumb a { color: var(--muted); }
 
 .dropdown-menu {
@@ -363,7 +359,7 @@ label.form-check-label { font-weight: 400; }
 .carousel-indicators [data-bs-target] { border-radius: 999px; width: 8px; height: 8px; border: 0; }
 .carousel-indicators .active { width: 24px; }
 
-/* Trạng thái trống */
+
 .empty-state {
     display: flex;
     flex-direction: column;

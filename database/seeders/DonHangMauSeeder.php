@@ -7,10 +7,6 @@ use App\Models\KhachHang;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Tạo một số đơn hàng mẫu rải đều trong năm hiện tại để Dashboard thống kê có dữ liệu.
- * (Không trừ tồn kho vì đây là dữ liệu lịch sử minh họa.)
- */
 class DonHangMauSeeder extends Seeder
 {
     public function run(): void

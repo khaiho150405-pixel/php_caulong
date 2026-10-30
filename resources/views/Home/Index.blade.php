@@ -4,7 +4,7 @@
 
 @section('styles')
 <style>
-    /* ----- Tiêu đề mục ----- */
+    
     .section-head { margin: 0 0 22px; }
     .section-eyebrow {
         display: inline-block;
@@ -17,7 +17,7 @@
     }
     .section-head h2 { font-size: 1.5rem; font-weight: 700; margin: 0; }
 
-    /* ----- 4 ô danh mục ----- */
+    
     .cat-tiles {
         display: grid;
         grid-template-columns: repeat(var(--cols, 4), 1fr);
@@ -82,7 +82,7 @@
         opacity: .35;
     }
 
-    /* ----- Dải thương hiệu ----- */
+    
     .brand-strip {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -113,7 +113,7 @@
     .brand-chip .brand-text { color: #8a9892; font-weight: 800; font-size: 1.4rem; letter-spacing: .06em; text-transform: uppercase; }
     .brand-chip:hover .brand-text { color: var(--brand-700); }
 
-    /* ----- Nhóm sản phẩm theo danh mục ----- */
+    
     .category {
         display: flex;
         gap: 32px;
@@ -189,7 +189,7 @@
         $index = 0;
     @endphp
 
-    {{-- 1. Banner + cam kết --}}
+    
     <section class="band">
         <div class="container">
             @include('partials._banner')
@@ -201,7 +201,7 @@
             @include('partials._empty', ['message' => 'Chưa có sản phẩm nào để hiển thị.', 'compact' => false])
         </div>
     @else
-        {{-- 2. Bốn ô danh mục --}}
+        
         <section class="band band-tint bg-court">
             <div class="container">
                 <div class="section-head">
@@ -233,7 +233,7 @@
             </div>
         </section>
 
-        {{-- 3. Dải thương hiệu --}}
+        
         <section class="band">
             <div class="container">
                 <div class="section-head text-center">
@@ -259,7 +259,7 @@
             </div>
         </section>
 
-        {{-- 4. Từng nhóm sản phẩm, nền xen kẽ trắng / xanh rất nhạt --}}
+        
         @foreach ($groups as $maLoai => $productsInCat)
             @php
                 $loai = $productsInCat->first()->loaiSanPham;

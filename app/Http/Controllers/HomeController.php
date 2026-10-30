@@ -32,25 +32,20 @@ class HomeController extends Controller
             ->where('MaSanPham', $id)
             ->firstOrFail();
 
-        // Lấy tất cả biến thể chi tiết (Màu, Size, Thông số vợt)
         $variants = ChiTietSanPham::where('MaSanPham', $id)
             ->with(['mauSac', 'size', 'thongSoVots'])
             ->get();
 
-        // Lấy danh sách đánh giá
         $reviews = PhanHoi::where('MaSanPham', $id)
             ->with('khachHang')
             ->orderByDesc('NgayPhanHoi')
             ->get();
 
-        // Lọc Màu và Size duy nhất
         $availableColors = $variants->whereNotNull('mauSac')->map->mauSac->unique('MaMau')->values();
         $availableSizes = $variants->whereNotNull('size')->map->size->unique('MaSize')->values();
 
-        // Lấy thông số vợt đại diện
         $thongSoVot = $variants->flatMap->thongSoVots->first();
 
-        // Đánh giá trung bình
         $averageRating = $sanPham->trung_binh_danh_gia;
         $reviewCount = $reviews->count();
         $giaBanThucTe = $sanPham->gia_sau_khuyen_mai;
@@ -74,7 +69,6 @@ class HomeController extends Controller
             return redirect()->route('taikhoan.dangnhap', ['returnUrl' => url()->previous()]);
         }
 
-        // Trang chi tiết sản phẩm hiển thị lỗi qua flash message 'error'
         $validator = Validator::make($request->all(), [
             'chiTietId' => ['required', 'integer', 'exists:ChiTietSanPham,MaChiTiet'],
             'quantity' => ['nullable', 'integer', 'min:1', 'max:100'],
@@ -128,7 +122,7 @@ class HomeController extends Controller
 
         $this->updateCartCountInSession($khachHang->MaKhachHang);
 
-        return back()->with('message', 'Thêm vào giỏ hàng thành công!');
+        return redirect()->route('home.viewcart')->with('message', 'Đã thêm sản phẩm vào giỏ hàng thành công!');
     }
 
     public function viewCart()
@@ -150,6 +144,113 @@ class HomeController extends Controller
             ->get();
 
         return view('Home.ViewCart', compact('cartItems'));
+    }
+
+    public function updateCartQuantity(Request $request, $maGioHang)
+    {
+        if (! Auth::check()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Vui lòng đăng nhập.'], 401);
+            }
+
+            return redirect()->route('taikhoan.dangnhap', ['returnUrl' => route('home.viewcart')]);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'quantity' => ['required', 'integer', 'min:1', 'max:100'],
+        ], [
+            'quantity.required' => 'Vui lòng nhập số lượng.',
+            'quantity.integer' => 'Số lượng phải là số nguyên.',
+            'quantity.min' => 'Số lượng sản phẩm trong giỏ hàng phải lớn hơn 0.',
+            'quantity.max' => 'Mỗi sản phẩm chỉ được đặt tối đa 100.',
+        ]);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $validator->errors()->first()], 422);
+            }
+
+            return back()->with('error', $validator->errors()->first());
+        }
+
+        $quantity = (int) $request->input('quantity');
+        $user = Auth::user();
+        $khachHang = $user->khachHang;
+
+        if (! $khachHang) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Không tìm thấy thông tin khách hàng.'], 404);
+            }
+
+            return back()->with('error', 'Không tìm thấy thông tin khách hàng.');
+        }
+
+        $cartItem = GioHang::with(['chiTietSanPham.sanPham'])
+            ->where('MaGioHang', $maGioHang)
+            ->where('MaKhachHang', $khachHang->MaKhachHang)
+            ->first();
+
+        if (! $cartItem) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Sản phẩm không có trong giỏ hàng.'], 404);
+            }
+
+            return back()->with('error', 'Sản phẩm không có trong giỏ hàng.');
+        }
+
+        $productVariant = $cartItem->chiTietSanPham;
+        if (! $productVariant || ! $productVariant->sanPham || $productVariant->sanPham->trashed()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Sản phẩm không còn kinh doanh.'], 400);
+            }
+
+            return back()->with('error', 'Sản phẩm không còn kinh doanh.');
+        }
+
+        $tonKho = (int) ($productVariant->SoLuongTon ?? 0);
+        if ($quantity > $tonKho) {
+            $msg = "Số lượng trong kho chỉ còn {$tonKho} sản phẩm.";
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg, 'maxStock' => $tonKho], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
+        $cartItem->SoLuong = $quantity;
+        $cartItem->save();
+
+        $this->updateCartCountInSession($khachHang->MaKhachHang);
+
+        if ($request->expectsJson() || $request->ajax()) {
+            $allCartItems = GioHang::with(['chiTietSanPham.sanPham'])
+                ->where('MaKhachHang', $khachHang->MaKhachHang)
+                ->get();
+
+            $giaBan = (float) ($productVariant->GiaBan ?? $productVariant->sanPham->GiaGoc ?? 0);
+            $itemTotal = $giaBan * $quantity;
+
+            $cartTotal = $allCartItems->sum(function ($it) {
+                $p = (float) ($it->chiTietSanPham->GiaBan ?? $it->chiTietSanPham->sanPham->GiaGoc ?? 0);
+
+                return $p * (int) $it->SoLuong;
+            });
+
+            $cartCount = (int) $allCartItems->sum('SoLuong');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã cập nhật số lượng.',
+                'quantity' => $quantity,
+                'itemTotal' => $itemTotal,
+                'itemTotalFormatted' => number_format($itemTotal, 0, ',', '.').' đ',
+                'cartTotal' => $cartTotal,
+                'cartTotalFormatted' => number_format($cartTotal, 0, ',', '.').' đ',
+                'cartCount' => $cartCount,
+            ]);
+        }
+
+        return redirect()->route('home.viewcart')->with('message', 'Đã cập nhật số lượng sản phẩm.');
     }
 
     public function removeFromCart($maGioHang)

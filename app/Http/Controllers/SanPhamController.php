@@ -18,7 +18,6 @@ class SanPhamController extends Controller
         $hang = $request->query('hang');
         $ten = $request->query('ten');
 
-        // Lọc theo loại sản phẩm
         if (! empty($loai)) {
             if (is_numeric($loai)) {
                 $query->where('MaLoai', (int) $loai);
@@ -48,7 +47,6 @@ class SanPhamController extends Controller
             }
         }
 
-        // Lọc theo Hãng
         if (! empty($hang)) {
             $hangKey = trim($hang);
             $query->whereHas('hang', function ($q) use ($hangKey) {
@@ -56,16 +54,13 @@ class SanPhamController extends Controller
             });
         }
 
-        // Lọc theo Tên
         if (! empty($ten)) {
             $tenKey = trim($ten);
             $query->where('TenSanPham', 'LIKE', "%{$tenKey}%");
         }
 
-        // Bộ lọc nâng cao (giá, hãng, giảm giá, còn hàng) + sắp xếp
         $this->apDungBoLoc($query, $request);
 
-        // Phân trang 12 sản phẩm/trang, giữ nguyên bộ lọc khi chuyển trang
         $result = $query->paginate(12)->withQueryString();
 
         return view('SanPham.Index', [
@@ -81,7 +76,6 @@ class SanPhamController extends Controller
             return redirect()->route('sanpham.index');
         }
 
-        // Tìm theo tên sản phẩm / hãng / loại + phân trang, giữ từ khóa khi chuyển trang
         $query = SanPham::with(['loaiSanPham', 'hang', 'khuyenMai'])->timKiem($keyword);
         $this->apDungBoLoc($query, $request);
         $results = $query->paginate(12)->withQueryString();
@@ -93,7 +87,6 @@ class SanPhamController extends Controller
         ] + $this->duLieuBoLoc($request));
     }
 
-    /** Các khoảng giá gợi ý: khóa => [từ, đến]. */
     private const KHOANG_GIA = [
         '0-1000000' => [0, 1000000],
         '1000000-2000000' => [1000000, 2000000],
@@ -102,11 +95,6 @@ class SanPhamController extends Controller
         '5000000-' => [5000000, null],
     ];
 
-    /**
-     * Đọc khoảng giá từ request: ô nhập tay ưu tiên hơn khoảng gợi ý.
-     *
-     * @return array{0: ?float, 1: ?float}
-     */
     private function khoangGia(Request $request): array
     {
         $tu = $request->query('gia_tu');
@@ -121,7 +109,6 @@ class SanPhamController extends Controller
             }
         }
 
-        // Người dùng nhập ngược (từ > đến) thì đổi chỗ cho hợp lý
         if ($tu !== null && $den !== null && $tu > $den) {
             [$tu, $den] = [$den, $tu];
         }
@@ -149,7 +136,6 @@ class SanPhamController extends Controller
         $query->sapXep($request->query('sap_xep'));
     }
 
-    /** Dữ liệu hiển thị khung bộ lọc. */
     private function duLieuBoLoc(Request $request): array
     {
         [$tu, $den] = $this->khoangGia($request);
@@ -157,7 +143,7 @@ class SanPhamController extends Controller
         $hangTheoTen = trim((string) $request->query('hang', ''));
 
         $dsHang = Hang::orderBy('TenHang')->get();
-        // Hỗ trợ lọc theo query param dạng ?hang=Yonex: tự động chọn hãng tương ứng
+
         if (! $hangDangChon && $hangTheoTen !== '') {
             $hangDangChon = $dsHang->filter(fn ($h) => stripos($h->TenHang, $hangTheoTen) !== false)->pluck('MaHang')->all();
         }

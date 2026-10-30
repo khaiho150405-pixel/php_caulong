@@ -5,9 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Kết quả một trận đấu cầu lông thực tế (có nguồn tham khảo).
- */
 class TranDau extends Model
 {
     protected $table = 'TranDau';
@@ -30,7 +27,6 @@ class TranDau extends Model
         return $this->hasMany(TinTuc::class, 'MaTranDau', 'MaTranDau');
     }
 
-    /** Tìm theo giải đấu, nội dung hoặc tên hai bên. */
     public function scopeTimKiem(Builder $query, ?string $keyword): Builder
     {
         $keyword = trim((string) $keyword);

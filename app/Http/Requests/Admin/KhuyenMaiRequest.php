@@ -4,9 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Validation cho form Thêm / Sửa chương trình khuyến mãi.
- */
 class KhuyenMaiRequest extends FormRequest
 {
     public function authorize(): bool

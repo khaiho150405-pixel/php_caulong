@@ -6,7 +6,6 @@
 <link href="{{ asset('css/landing.css') }}" rel="stylesheet" />
 <link href="{{ asset('css/bangtin.css') }}" rel="stylesheet" />
 <script>
-    // Chỉ ẩn nội dung chờ hiệu ứng khi JS chạy; nếu script lỗi thì tự hiện lại sau 2,5 giây
     document.documentElement.classList.add('l-js');
     setTimeout(function () { document.documentElement.classList.remove('l-js'); }, 2500);
 </script>
@@ -24,7 +23,7 @@
     ];
 @endphp
 
-{{-- ===== 1. HERO: ảnh sản phẩm thật lấy từ CSDL ===== --}}
+
 <section class="l-hero bg-court" id="lHero">
     <div class="container l-hero-inner">
         <div class="l-hero-copy">
@@ -69,7 +68,7 @@
     </div>
 </section>
 
-{{-- ===== 2. Chọn theo ngân sách (dùng bộ lọc giá của trang sản phẩm) ===== --}}
+
 <section class="l-section">
     <div class="container">
         <div class="l-head l-reveal">
@@ -90,7 +89,7 @@
     </div>
 </section>
 
-{{-- ===== 3. Danh mục ===== --}}
+
 <section class="l-section l-tint">
     <div class="container">
         <div class="l-head l-reveal">
@@ -118,7 +117,7 @@
     </div>
 </section>
 
-{{-- ===== 4. Ưu đãi nổi bật (CSDL) ===== --}}
+
 <section class="l-section">
     <div class="container">
         <div class="l-head l-head-row l-reveal">
@@ -197,7 +196,7 @@
     </div>
 </section>
 
-{{-- ===== 5. Hướng dẫn chọn vợt theo lối chơi ===== --}}
+
 <section class="l-section l-tint">
     <div class="container">
         <div class="l-head l-reveal">
@@ -229,7 +228,7 @@
     </div>
 </section>
 
-{{-- Tin tức và kết quả từ bảng tin cửa hàng. --}}
+
 @if (($dsNoiBat && $dsNoiBat->isNotEmpty()) || $tinMoi->isNotEmpty() || $tranMoi->isNotEmpty())
 <section class="l-section l-news-sec" id="tin-tuc" aria-label="Tin tức và sự kiện cầu lông">
     <div class="container">
@@ -266,7 +265,7 @@
 </section>
 @endif
 
-{{-- ===== 6. Đánh giá của khách hàng (CSDL) ===== --}}
+
 @if ($danhGia->isNotEmpty())
 <section class="l-section">
     <div class="container">
@@ -295,7 +294,7 @@
 </section>
 @endif
 
-{{-- ===== 7. Thương hiệu ===== --}}
+
 <section class="l-section {{ $danhGia->isNotEmpty() ? 'l-tint' : '' }}">
     <div class="container">
         <div class="l-head text-center l-reveal">
@@ -319,7 +318,7 @@
     </div>
 </section>
 
-{{-- ===== 8. Kêu gọi hành động ===== --}}
+
 <section class="l-final bg-court">
     <div class="container text-center l-reveal">
         <h2>Sẵn sàng ra sân?</h2>

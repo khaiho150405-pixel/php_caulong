@@ -9,9 +9,6 @@ use Illuminate\Http\Request;
 
 class QuanLyDonHangController extends Controller
 {
-    /**
-     * Danh sách đơn hàng: tìm theo mã đơn / tên khách / SĐT, lọc trạng thái, phân trang.
-     */
     public function index(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));

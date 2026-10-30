@@ -1,7 +1,4 @@
-/**
- * Landing page: chỉ một IntersectionObserver để hiện dần các khối khi cuộn tới
- * (opacity + transform). Không dùng thư viện, không WebGL, không bắt sự kiện cuộn.
- */
+
 (function () {
     var html = document.documentElement;
     var els = document.querySelectorAll('.l-reveal');

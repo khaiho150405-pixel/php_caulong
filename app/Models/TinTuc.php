@@ -6,9 +6,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-/**
- * Bài đăng trên bảng tin cầu lông. Xóa mềm để không mất lịch sử.
- */
 class TinTuc extends Model
 {
     use SoftDeletes;
@@ -19,7 +16,6 @@ class TinTuc extends Model
 
     public $timestamps = false;
 
-    /** Các loại tin: khóa => [nhãn, biểu tượng Font Awesome] */
     public const LOAI = [
         'san-pham-hot' => ['Sản phẩm hot', 'fa-fire'],
         'san-pham-moi' => ['Sản phẩm mới', 'fa-star'],
@@ -56,7 +52,6 @@ class TinTuc extends Model
         return $this->belongsTo(TaiKhoan::class, 'MaTaiKhoan', 'MaTaiKhoan');
     }
 
-    /** Chỉ lấy các bài đã được bật hiển thị và đã đến giờ đăng. */
     public function scopeDaDang(Builder $query): Builder
     {
         return $query->where(function (Builder $q) {
@@ -69,7 +64,6 @@ class TinTuc extends Model
         return array_key_exists((string) $loai, self::LOAI) ? $query->where('LoaiTin', $loai) : $query;
     }
 
-    /** Tìm theo tiêu đề, tóm tắt hoặc nội dung. */
     public function scopeTimKiem(Builder $query, ?string $keyword): Builder
     {
         $keyword = trim((string) $keyword);
@@ -94,7 +88,6 @@ class TinTuc extends Model
         return self::LOAI[$this->LoaiTin][1] ?? 'fa-newspaper';
     }
 
-    /** Ảnh minh họa: ưu tiên HinhAnh của bài viết, rồi đến ảnh sản phẩm gắn kèm. */
     public function getAnhAttribute(): ?string
     {
         if (! empty($this->HinhAnh)) {
@@ -104,7 +97,6 @@ class TinTuc extends Model
         return $this->sanPham ? 'images/'.$this->sanPham->anh_thumb : null;
     }
 
-    /** Trả về URL hình ảnh đầy đủ để hiển thị. */
     public function getHinhAnhUrlAttribute(): string
     {
         if (! empty($this->HinhAnh)) {

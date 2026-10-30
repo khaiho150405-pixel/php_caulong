@@ -5,9 +5,6 @@ namespace Database\Factories;
 use App\Models\KhuyenMai;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<KhuyenMai>
- */
 class KhuyenMaiFactory extends Factory
 {
     protected $model = KhuyenMai::class;
@@ -27,7 +24,6 @@ class KhuyenMaiFactory extends Factory
         ];
     }
 
-    /** Chương trình đã hết hạn */
     public function hetHan(): static
     {
         return $this->state(fn () => [

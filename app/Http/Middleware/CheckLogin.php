@@ -9,9 +9,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckLogin
 {
-    /**
-     * Handle an incoming request.
-     */
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check()) {

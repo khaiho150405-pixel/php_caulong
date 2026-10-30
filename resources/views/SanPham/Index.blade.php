@@ -21,7 +21,7 @@
     .sort-box { display: flex; align-items: center; gap: 8px; font-size: .88rem; color: var(--muted); }
     .sort-box .form-select { width: auto; min-width: 170px; }
 
-    /* ----- Khung bộ lọc cố định & tinh chỉnh nhỏ gọn không cần scroll ----- */
+    
     @media (min-width: 992px) {
         aside.col-lg-3 {
             position: relative;
@@ -29,7 +29,7 @@
         #filterCollapse {
             position: -webkit-sticky;
             position: sticky;
-            top: 145px; /* Giữ khoảng cách thoáng 20-24px so với Header, không bị chạm */
+            top: 145px; 
             z-index: 90;
             display: block !important;
             height: auto;
@@ -187,7 +187,7 @@
     </div>
 
     <div class="row g-4">
-        {{-- Cột bộ lọc --}}
+        
         <aside class="col-lg-3">
             <div class="collapse d-lg-block" id="filterCollapse">
                 <form id="filterForm" class="filter-panel" action="{{ url()->current() }}" method="GET">
@@ -198,7 +198,7 @@
                         <input type="hidden" name="ten" value="{{ request('ten') }}">
                     @endif
 
-                    {{-- Tiêu đề bộ lọc tinh chỉnh --}}
+                    
                     <div class="filter-header d-flex align-items-center justify-content-between pb-2 mb-1 border-bottom">
                         <div class="d-flex align-items-center gap-2">
                             <i class="fa-solid fa-sliders text-danger"></i>
@@ -282,7 +282,7 @@
             </div>
         </aside>
 
-        {{-- Cột sản phẩm --}}
+        
         <div class="col-lg-9">
             @if ($dangLoc)
                 <div class="active-filters">

@@ -37,19 +37,16 @@ class TaiKhoanController extends Controller
         if ($user) {
             $isPasswordValid = false;
 
-            // 1. Kiểm tra bằng Bcrypt
             if (Hash::check($password, $user->MatKhau)) {
                 $isPasswordValid = true;
-            }
-            // 2. Kiểm tra mật khẩu plain-text và tự động mã hóa Bcrypt
-            elseif ($user->MatKhau === $password) {
+            } elseif ($user->MatKhau === $password) {
                 $isPasswordValid = true;
                 $user->MatKhau = Hash::make($password);
                 $user->save();
             }
 
             if ($isPasswordValid) {
-                // Chặn tài khoản Quản trị viên đăng nhập ở đường link chung, bắt buộc qua /admin
+
                 if ($user->isAdmin()) {
                     return back()->withInput($request->only('TenDangNhap'))->withErrors([
                         'login' => 'Tài khoản Quản trị viên vui lòng đăng nhập tại trang quản trị (/admin).',
@@ -57,10 +54,9 @@ class TaiKhoanController extends Controller
                 }
 
                 Auth::login($user);
-                // Chống tấn công Session Fixation
+
                 $request->session()->regenerate();
 
-                // Lưu thông tin người dùng vào session
                 session([
                     'MaTaiKhoan' => $user->MaTaiKhoan,
                     'TenDangNhap' => $user->TenDangNhap,
@@ -68,7 +64,6 @@ class TaiKhoanController extends Controller
                     'HoTen' => $user->khachHang ? $user->khachHang->HoTen : $user->TenDangNhap,
                 ]);
 
-                // Đếm số lượng giỏ hàng
                 $cartCount = 0;
                 if ($user->khachHang) {
                     $cartCount = GioHang::where('MaKhachHang', $user->khachHang->MaKhachHang)->sum('SoLuong');
@@ -79,7 +74,6 @@ class TaiKhoanController extends Controller
                     return redirect()->route('quanlysanpham.dashboard');
                 }
 
-                // Chỉ chuyển hướng về URL nội bộ (chặn open-redirect kiểu //trang-la.com)
                 if (! empty($returnUrl)) {
                     $laUrlNoiBo = (str_starts_with($returnUrl, '/') && ! str_starts_with($returnUrl, '//'))
                         || str_starts_with($returnUrl, url('/').'/');
@@ -88,7 +82,6 @@ class TaiKhoanController extends Controller
                     }
                 }
 
-                // Admin / Nhân viên vào thẳng khu vực quản trị /admin
                 if ($user->hasAdminAccess()) {
                     return redirect()->route('quanlysanpham.dashboard');
                 }
@@ -223,7 +216,6 @@ class TaiKhoanController extends Controller
     {
         $user = Auth::user();
 
-        // Kiểm tra mật khẩu cũ
         $isOldValid = Hash::check($request->input('matKhauCu'), $user->MatKhau) || ($user->MatKhau === $request->input('matKhauCu'));
 
         if (! $isOldValid) {

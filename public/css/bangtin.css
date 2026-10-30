@@ -1,10 +1,10 @@
-/* News uses the shared typography and color tokens from theme.css. */
+
 :is(.bt-page,.l-news-sec) { font-family:var(--font); color:var(--ink); }
 .bt-page { padding-bottom:32px; min-width:0; }
 :is(.bt-page,.l-news-sec) :is(a,button,input):focus-visible { outline:3px solid var(--brand); outline-offset:4px; }
 .loai-san-pham-hot,.loai-san-pham-moi,.loai-tran-dau,.loai-tuyen-thu,.loai-giai-dau { --lc:var(--brand-700); --lc-bg:var(--brand-50); }
 
-/* Photo banner. The image is illustrative, rather than a photograph of a named event. */
+
 .bt-editorial-banner { position:relative; isolation:isolate; overflow:hidden; min-height:280px; display:flex; align-items:center; margin:0 0 36px; padding:38px 42px; color:#fff; background:var(--brand-900); border-radius:var(--radius-lg); }
 .bt-banner-picture { position:absolute; inset:0; z-index:-2; }
 .bt-banner-picture img { width:100%; height:100%; object-fit:cover; object-position:center 58%; }
@@ -19,7 +19,7 @@
 .bt-banner-copy>a>span { font-size:20px; }
 .bt-banner-credit { position:absolute; bottom:12px; right:16px; font-size:9px; color:rgba(255,255,255,.82); text-shadow:0 1px 3px #000; }
 
-/* Section headings and the filter toolbar. */
+
 .bt-column-heading { display:flex; align-items:center; justify-content:space-between; gap:16px; padding:17px 0 23px; border-top:2px solid var(--line-strong); }
 .bt-column-heading h3 { font-size:18px; font-weight:600; margin:0; letter-spacing:-.3px; color:var(--ink); }
 .bt-column-heading>a { display:inline-flex; align-items:center; gap:14px; color:var(--muted); font-size:11px; min-height:30px; }
@@ -36,7 +36,7 @@
 .bt-search .btn { min-width:44px; border-radius:var(--radius-sm); }
 .bt-result-note { margin:0 0 24px; font-size:13px; color:var(--muted); }
 
-/* A featured article has an image, a real publication date and one clear link. */
+
 .bt-lead { display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr); gap:24px; margin:0 0 12px; padding-bottom:28px; border-bottom:1px solid var(--line); }
 .bt-lead-media,.bt-thumb,.bt-media { position:relative; display:block; overflow:hidden; background:var(--bg); border-radius:var(--radius-sm); }
 .bt-lead-media { aspect-ratio:4/5; max-height:330px; }
@@ -58,7 +58,7 @@
 .bt-more { display:inline-flex; align-items:center; gap:22px; min-height:44px; font-size:11px; font-weight:600; color:var(--brand); }
 .bt-more>span { font-size:18px; }
 
-/* Vertical Featured Slider: Tự động trượt lên từng bài khi có nhiều bài nổi bật */
+
 .bt-featured-slider-box {
     margin: 0 0 16px;
     padding-bottom: 20px;
@@ -186,7 +186,7 @@
     width: 34px;
 }
 
-/* Article lists: simple rules replace the old colored timeline cards. */
+
 .bt-month { margin-top:24px; }
 .bt-month>h2 { display:flex; align-items:baseline; justify-content:space-between; gap:16px; font-size:13px; font-weight:600; color:var(--ink-soft); margin:0 0 8px; padding-bottom:12px; border-bottom:1px solid var(--line-strong); }
 .bt-month>h2 em { font-style:normal; font-weight:400; color:var(--muted); font-size:11px; }
@@ -205,7 +205,7 @@
 .bt-item.is-small .bt-item-main { grid-template-columns:140px minmax(0,1fr); }
 .bt-empty-feed { padding:32px 0; color:var(--muted); }
 
-/* Match results: aligned set columns, no live styling or filled number chips. */
+
 .bt-scoreboard { border-top:2px solid var(--line-strong); color:var(--ink); margin:0 0 28px; }
 .bt-scoreboard-heading { display:flex; justify-content:space-between; align-items:center; gap:18px; padding:17px 0 22px; }
 .bt-scoreboard-kicker { color:var(--muted); font-size:8px; font-weight:500; letter-spacing:1.5px; display:block; margin-bottom:6px; }
@@ -233,7 +233,7 @@
 .bt-sb-report:hover { color:var(--brand-700); text-decoration:underline; }
 .bt-sb-empty { padding:20px 0; color:var(--muted); font-size:12px; }
 
-/* Supporting shop links and the article body. */
+
 .bt-panel { padding:20px 0; margin-bottom:20px; border-top:1px solid var(--line-strong); }
 .bt-panel h2 { font-size:14px; font-weight:600; color:var(--ink); margin:0 0 14px; }
 .bt-panel h2 i { display:none; }

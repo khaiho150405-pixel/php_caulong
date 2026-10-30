@@ -1,4 +1,4 @@
-{{-- Các trường nhập của biến thể sản phẩm. Tham số: $bienThe (null khi thêm mới), $mauSacs, $sizes --}}
+
 <div class="row g-3">
     <div class="col-md-4">
         <label for="SKU" class="form-label fw-semibold">Mã SKU *</label>

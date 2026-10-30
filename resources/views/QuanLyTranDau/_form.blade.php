@@ -1,4 +1,4 @@
-{{-- Form dùng chung cho Thêm / Sửa kết quả trận đấu (chuẩn UI/UX đồng bộ với Bảng tin) --}}
+
 @php
     $gt = fn ($truong, $macDinh = null) => old($truong, $tran->{$truong} ?? $macDinh);
     $ngay = old('NgayThiDau', optional($tran?->NgayThiDau)->format('Y-m-d') ?? date('Y-m-d'));
@@ -26,7 +26,7 @@
 <form action="{{ $action }}" method="POST" id="matchForm">
     @csrf
 
-    {{-- Thanh thao tác trên cùng chuẩn UI/UX --}}
+    
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
@@ -46,7 +46,7 @@
     </div>
 
     <div class="row g-4">
-        {{-- Cột chính bên trái: Thông tin thi đấu --}}
+        
         <div class="col-lg-8">
             <div class="card border-0 shadow-sm p-4 mb-4">
                 <h5 class="fw-bold mb-3 text-dark border-bottom pb-2">Thông tin trận đấu</h5>
@@ -81,7 +81,7 @@
                     </div>
                 </div>
 
-                {{-- Khung so tài 2 bên A vs B --}}
+                
                 <div class="p-3 bg-light rounded-3 border mb-3">
                     <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-people-arrows me-1"></i> Hai bên đối đầu</h6>
                     <div class="row g-3 align-items-center">
@@ -140,7 +140,7 @@
             </div>
         </div>
 
-        {{-- Cột bên phải: Thời gian & Trạng thái --}}
+        
         <div class="col-lg-4">
             <div class="card border-0 shadow-sm p-4 mb-4">
                 <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Thời gian thi đấu</h6>

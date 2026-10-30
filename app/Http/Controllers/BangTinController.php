@@ -8,9 +8,6 @@ use App\Models\TranDau;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Bảng tin cầu lông (phía khách hàng): tin sản phẩm hot/mới, kết quả trận đấu, tuyển thủ, giải đấu.
- */
 class BangTinController extends Controller
 {
     public function index(Request $request)
@@ -20,7 +17,6 @@ class BangTinController extends Controller
 
         $query = TinTuc::with(['sanPham', 'tranDau'])->daDang()->loai($loai)->timKiem($keyword);
 
-        // Tin nổi bật chỉ hiện ở trang đầu khi chưa lọc/tìm kiếm: lấy toàn bộ danh sách bài được gạt nổi bật
         $dsNoiBat = collect();
         if (! $loai && $keyword === '' && (int) $request->query('page', 1) === 1) {
             $dsNoiBat = TinTuc::with(['sanPham', 'tranDau'])
@@ -62,7 +58,6 @@ class BangTinController extends Controller
     {
         $tin = TinTuc::with(['sanPham.hang', 'sanPham.khuyenMai', 'tranDau', 'tacGia'])->daDang()->findOrFail($id);
 
-        // Tăng lượt xem (không cập nhật nếu người dùng vừa xem bài này trong phiên)
         $key = 'da_xem_tin_'.$tin->MaTin;
         if (! session()->has($key)) {
             TinTuc::whereKey($tin->MaTin)->increment('LuotXem');
@@ -77,7 +72,6 @@ class BangTinController extends Controller
         return view('BangTin.Show', compact('tin', 'lienQuan') + $this->cotPhu());
     }
 
-    /** Dữ liệu cột bên: kết quả trận mới, sản phẩm bán chạy, sản phẩm mới. */
     private function cotPhu(): array
     {
         return [
@@ -87,17 +81,12 @@ class BangTinController extends Controller
         ];
     }
 
-    /** Trận đấu mới nhất, kèm bài viết liên quan (để bảng điểm dẫn sang bài). */
     private function tranDauMoi(int $soLuong)
     {
         return TranDau::with(['tinTucs' => fn ($q) => $q->daDang()->orderByDesc('NgayDang')])
             ->orderByDesc('NgayThiDau')->orderByDesc('MaTranDau')->take($soLuong)->get();
     }
 
-    /**
-     * Sản phẩm hot = bán chạy nhất theo số lượng trong các đơn hàng không bị hủy;
-     * thiếu dữ liệu bán hàng thì bổ sung bằng sản phẩm đang giảm giá.
-     */
     private function sanPhamHot(int $soLuong)
     {
         $ids = DB::table('ChiTietDonHang')

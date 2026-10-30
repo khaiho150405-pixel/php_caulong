@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class KhuyenMai extends Model
 {
-    /** @use HasFactory<KhuyenMaiFactory> */
     use HasFactory;
 
     protected $table = 'KhuyenMai';

@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Hash;
 
 class QuanLyTaiKhoanController extends Controller
 {
-    /**
-     * Danh sách tài khoản: tìm theo tên đăng nhập / email / họ tên, lọc theo quyền, phân trang.
-     */
     public function index(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
@@ -88,7 +85,6 @@ class QuanLyTaiKhoanController extends Controller
     {
         $taiKhoan = TaiKhoan::with('khachHang')->findOrFail($id);
 
-        // Không cho Admin tự hạ quyền của chính mình (tránh mất quyền quản trị)
         if ((int) $taiKhoan->MaTaiKhoan === (int) Auth::id() && (int) $request->input('MaQuyen') !== TaiKhoan::QUYEN_ADMIN) {
             return back()->withInput()->with('error', 'Bạn không thể tự thay đổi quyền Quản trị của chính mình.');
         }

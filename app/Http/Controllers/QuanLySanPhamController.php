@@ -25,15 +25,10 @@ use Illuminate\Support\Facades\Storage;
 
 class QuanLySanPhamController extends Controller
 {
-    /** Ảnh mặc định khi sản phẩm chưa có hình */
     private const ANH_MAC_DINH = 'default-product.jpg';
 
-    /** Thư mục con (trong disk "images") chứa ảnh upload */
-    private const THU_MUC_UPLOAD = 'uploads';
+    private const THU_MUC_UPLOAD = 'uploads/sanpham';
 
-    /**
-     * Danh sách sản phẩm: tìm kiếm theo từ khóa + lọc theo loại/hãng + phân trang (giữ query string).
-     */
     public function index(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
@@ -122,15 +117,12 @@ class QuanLySanPhamController extends Controller
         return view('QuanLySanPham.Delete', compact('sanPham'));
     }
 
-    /**
-     * Xóa mềm (Soft Delete): sản phẩm ẩn khỏi cửa hàng nhưng đơn hàng cũ vẫn giữ nguyên thông tin.
-     */
     public function deleteConfirmed($id)
     {
         $sanPham = SanPham::findOrFail($id);
 
         DB::transaction(function () use ($sanPham) {
-            // Bỏ sản phẩm khỏi giỏ hàng của khách
+
             GioHang::whereIn('MaChiTietSanPham', $sanPham->chiTietSanPhams()->pluck('MaChiTiet'))->delete();
             $sanPham->delete();
         });
@@ -138,8 +130,6 @@ class QuanLySanPhamController extends Controller
         return redirect()->route('quanlysanpham.index')
             ->with('message', "Đã xóa sản phẩm \"{$sanPham->TenSanPham}\" thành công!");
     }
-
-    /* ==================== BIẾN THỂ SẢN PHẨM (ChiTietSanPham) ==================== */
 
     public function bienTheStore(ChiTietSanPhamRequest $request, $id)
     {
@@ -186,7 +176,6 @@ class QuanLySanPhamController extends Controller
     {
         $bienThe = ChiTietSanPham::findOrFail($maChiTiet);
 
-        // Biến thể đã có trong đơn hàng thì không xóa để giữ lịch sử, chỉ cho phép đặt tồn kho = 0
         if (ChiTietDonHang::where('MaChiTietSanPham', $bienThe->MaChiTiet)->exists()) {
             return redirect()->route('quanlysanpham.details', ['id' => $bienThe->MaSanPham])
                 ->with('error', "Biến thể SKU \"{$bienThe->SKU}\" đã phát sinh đơn hàng nên không thể xóa. Hãy sửa tồn kho về 0 để ngừng bán.");
@@ -201,8 +190,6 @@ class QuanLySanPhamController extends Controller
         return redirect()->route('quanlysanpham.details', ['id' => $maSanPham])
             ->with('message', "Đã xóa biến thể SKU \"{$sku}\".");
     }
-
-    /* ==================== DASHBOARD THỐNG KÊ ==================== */
 
     public function dashboard(Request $request)
     {
@@ -231,13 +218,11 @@ class QuanLySanPhamController extends Controller
                 ->first();
         };
 
-        // 1. Doanh thu theo năm
         $dauNam = Carbon::create($namHienTai, 1, 1)->startOfDay();
         $doanhThuNamData = $thongKe($dauNam, $dauNam->copy()->endOfYear());
         $tongDoanhThuNam = (float) ($doanhThuNamData->TongDoanhThu ?? 0);
         $soLuongDonNam = (int) ($doanhThuNamData->SoLuongDon ?? 0);
 
-        // 2. Doanh thu theo quý
         $doanhThuQuy = [];
         for ($q = 1; $q <= 4; $q++) {
             $tu = Carbon::create($namHienTai, ($q - 1) * 3 + 1, 1)->startOfDay();
@@ -250,7 +235,6 @@ class QuanLySanPhamController extends Controller
             ];
         }
 
-        // 3. Doanh thu theo tháng
         $doanhThuThang = [];
         for ($m = 1; $m <= 12; $m++) {
             $tu = Carbon::create($namHienTai, $m, 1)->startOfDay();
@@ -263,7 +247,6 @@ class QuanLySanPhamController extends Controller
             ];
         }
 
-        // 4. Sản phẩm bán chạy (Top 10) trong năm, không tính đơn đã hủy
         $sanPhamBanChay = ChiTietDonHang::join('DonHang', 'ChiTietDonHang.MaDonHang', '=', 'DonHang.MaDonHang')
             ->join('ChiTietSanPham', 'ChiTietDonHang.MaChiTietSanPham', '=', 'ChiTietSanPham.MaChiTiet')
             ->join('SanPham', 'ChiTietSanPham.MaSanPham', '=', 'SanPham.MaSanPham')
@@ -296,8 +279,6 @@ class QuanLySanPhamController extends Controller
         ));
     }
 
-    /* ==================== HÀM HỖ TRỢ ==================== */
-
     private function duLieuForm(): array
     {
         return [
@@ -320,17 +301,11 @@ class QuanLySanPhamController extends Controller
         return $data;
     }
 
-    /**
-     * Lưu ảnh qua Laravel Storage (disk "images" = public/images), trả về đường dẫn tương đối.
-     */
     private function luuAnh(UploadedFile $file): string
     {
         return $file->store(self::THU_MUC_UPLOAD, 'images');
     }
 
-    /**
-     * Chỉ xóa ảnh do Admin upload (thư mục uploads/), không xóa ảnh mẫu của dự án.
-     */
     private function xoaAnhUpload(?string $duongDan): void
     {
         if ($duongDan && str_starts_with($duongDan, self::THU_MUC_UPLOAD.'/')) {

@@ -1,12 +1,9 @@
-/* ==========================================================================
-   Landing page: giao diện sáng, thực tế, nhẹ (nạp sau theme.css và Site.css)
-   Quy tắc hiệu năng: không backdrop-filter / filter blur, hiệu ứng chỉ dùng opacity + transform.
-   ========================================================================== */
+
 
 .l-section {
     padding: clamp(56px, 8vw, 104px) 0;
     background: var(--surface);
-    /* Trình duyệt bỏ qua việc vẽ các phần chưa cuộn tới */
+    
     content-visibility: auto;
     contain-intrinsic-size: auto 640px;
 }
@@ -29,7 +26,7 @@
 .l-head p { color: var(--muted); font-size: 1.05rem; line-height: 1.6; margin: 0; }
 .l-head-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; max-width: none; }
 
-/* ----- Hero ----- */
+
 .l-hero {
     position: relative;
     isolation: isolate;
@@ -68,7 +65,7 @@
 .l-stats dt { font-size: 1.9rem; font-weight: 700; line-height: 1; letter-spacing: -.02em; }
 .l-stats dd { margin: 6px 0 0; font-size: .82rem; color: rgba(255, 255, 255, .7); }
 
-/* Bộ ảnh sản phẩm thật: ba thẻ xếp chồng nhẹ */
+
 .l-hero-visual { position: relative; height: clamp(470px, 40vw, 540px); }
 .l-hero-card {
     position: absolute;
@@ -114,7 +111,7 @@
 .l-hero-chip.chip-a i { color: #fff; }
 .l-hero-chip.chip-b { left: 4%; bottom: 2%; }
 
-/* ----- Ngân sách ----- */
+
 .l-budgets { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; }
 .l-budget {
     position: relative;
@@ -134,7 +131,7 @@
 .l-budget:hover { transform: translateY(-3px); border-color: var(--brand-200); box-shadow: var(--shadow-sm); color: var(--ink); }
 .l-budget:hover i { transform: translateX(3px); }
 
-/* ----- Danh mục ----- */
+
 .l-cats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
 .l-cat {
     position: relative;
@@ -156,10 +153,10 @@
 .l-cat-info span { font-size: .8rem; color: rgba(255, 255, 255, .75); }
 .l-cat-info p { margin: 8px 0 0; font-size: .86rem; line-height: 1.5; color: rgba(255, 255, 255, .85); }
 
-/* ----- Sản phẩm ----- */
+
 .l-products { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 
-/* ----- Hướng dẫn ----- */
+
 .l-guides { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .l-guide { padding: 28px 26px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); }
 .l-guide-icon { display: grid; place-items: center; width: 48px; height: 48px; margin-bottom: 18px; border-radius: 14px; background: var(--brand-50); color: var(--brand); font-size: 1.2rem; }
@@ -169,7 +166,7 @@
 .l-guide a i { font-size: .75rem; margin-left: 4px; transition: margin .2s; }
 .l-guide a:hover i { margin-left: 8px; }
 
-/* ----- Đánh giá ----- */
+
 .l-reviews { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .l-review { margin: 0; padding: 26px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius-lg); display: flex; flex-direction: column; gap: 14px; }
 .l-stars { color: var(--star); font-size: .9rem; letter-spacing: 2px; }
@@ -179,7 +176,7 @@
 .l-review figcaption a { color: var(--muted); }
 .l-review figcaption a:hover { color: var(--brand-700); }
 
-/* ----- Thương hiệu + kêu gọi ----- */
+
 .l-brands { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
 .l-brand {
     display: grid;
@@ -205,7 +202,7 @@
 .l-final .btn-light { color: var(--brand-900); }
 .l-final .btn-outline-light:hover { color: var(--brand-900); }
 
-/* ----- Hiện dần khi cuộn (chỉ khi JS đang chạy) ----- */
+
 .l-js .l-reveal { opacity: 0; transform: translateY(18px); transition: opacity .55s ease, transform .55s ease; transition-delay: var(--d, 0ms); }
 .l-js .l-reveal.is-in { opacity: 1; transform: none; }
 
@@ -214,7 +211,7 @@
     .l-cat:hover img, .l-budget:hover, .l-brand:hover { transform: none; }
 }
 
-/* ----- Responsive ----- */
+
 @media (max-width: 1100px) {
     .l-budgets { grid-template-columns: repeat(3, 1fr); }
     .l-cats, .l-products { grid-template-columns: repeat(2, 1fr); }
@@ -238,7 +235,7 @@
     .l-hero-chip.chip-a { left: 2%; bottom: 4%; }
 }
 
-/* ----- Editorial news section ----- */
+
 .l-news-sec { background:var(--surface); scroll-margin-top:145px; }
 .l-board { display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:36px; align-items:start; }
 .l-board-feed,.l-board-score { min-width:0; }
@@ -246,7 +243,7 @@
 .l-board .bt-lead { margin-bottom:0; }
 @media(max-width:991px) { .l-board { grid-template-columns:1fr; gap:24px; } }
 
-/* Khung trượt ngang sản phẩm giảm giá: giữ đúng kích thước 4 sản phẩm ban đầu */
+
 .promo-slider-container {
     position: relative;
     width: 100%;
@@ -274,7 +271,7 @@
     align-items: stretch;
 }
 
-/* Chuẩn kích thước 4 sản phẩm như lưới ban đầu: (100% container - 3 * 20px) / 4 */
+
 .promo-slider-track .product-card {
     flex: 0 0 calc((100cqw - 60px) / 4);
     width: calc((100cqw - 60px) / 4);
@@ -308,10 +305,10 @@
 @container promoSlider (max-width: 480px) {
     .promo-slider-track { gap: 10px; }
     .promo-slider-track .product-card {
-        flex: 0 0 85cqw;
-        width: 85cqw;
-        max-width: 85cqw;
-        min-width: 85cqw;
+        flex: 0 0 calc((100cqw - 10px) / 2);
+        width: calc((100cqw - 10px) / 2);
+        max-width: calc((100cqw - 10px) / 2);
+        min-width: calc((100cqw - 10px) / 2);
     }
 }
 
@@ -335,9 +332,9 @@
     opacity: 0.95;
 }
 .promo-slider-btn:hover {
-    background: var(--brand, #dc2626);
+    background: var(--brand, #148f5f);
     color: #ffffff;
-    border-color: var(--brand, #dc2626);
+    border-color: var(--brand, #148f5f);
     opacity: 1;
     transform: translateY(-50%) scale(1.1);
 }

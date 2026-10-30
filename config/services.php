@@ -36,6 +36,7 @@ return [
     ],
 
     'momo' => [
+        'mock' => env('MOMO_MOCK', true),
         'endpoint' => env('MOMO_ENDPOINT', 'https://test-payment.momo.vn/v2/gateway/api/create'),
         'partner_code' => env('MOMO_PARTNER_CODE', 'MOMO5RGX20191128'),
         'access_key' => env('MOMO_ACCESS_KEY', 'M8brj9K6E22vXoDB'),

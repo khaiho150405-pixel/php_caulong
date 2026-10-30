@@ -14,10 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Str;
 
-/**
- * Quản trị bảng tin: CRUD bài đăng (xóa mềm), tìm kiếm + lọc loại + phân trang giữ từ khóa,
- * upload ảnh rich text editor Word-like và tích hợp trợ lý AI viết bài.
- */
 class QuanLyBangTinController extends Controller
 {
     public function index(Request $request)
@@ -38,7 +34,7 @@ class QuanLyBangTinController extends Controller
                     $to = Carbon::parse(trim($parts[1]))->endOfDay();
                     $query->whereBetween('NgayDang', [$from, $to]);
                 } catch (Exception $e) {
-                    // Định dạng ngày không hợp lệ -> bỏ qua lọc ngày
+
                 }
             }
         }
@@ -132,9 +128,6 @@ class QuanLyBangTinController extends Controller
         return redirect()->route('quanlybantin.index')->with('message', 'Đã xóa bài viết khỏi bảng tin.');
     }
 
-    /**
-     * Bật/tắt nhanh trạng thái Nổi bật (NoiBat) hoặc Hiển thị (HienThi) từ bảng danh sách
-     */
     public function toggleStatus(Request $request, $id)
     {
         $tin = TinTuc::findOrFail($id);
@@ -158,9 +151,6 @@ class QuanLyBangTinController extends Controller
         ]);
     }
 
-    /**
-     * Endpoint upload hình ảnh cho trình soạn thảo Word-like (CKEditor 4)
-     */
     public function uploadImage(Request $request)
     {
         $file = $request->file('upload') ?? $request->file('upload_image');
@@ -195,9 +185,6 @@ class QuanLyBangTinController extends Controller
         ]);
     }
 
-    /**
-     * Endpoint trợ lý AI tạo bài viết bằng Google Gemini
-     */
     public function aiGenerate(Request $request, GeminiChatbotService $gemini)
     {
         $topic = (string) $request->input('topic', $request->input('title', ''));

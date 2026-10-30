@@ -8,11 +8,6 @@ use App\Models\NhaCungCap;
 use App\Models\SanPham;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * Factory tạo dữ liệu mẫu cho bảng SanPham (dùng trong Seeder và Test).
- *
- * @extends Factory<SanPham>
- */
 class SanPhamFactory extends Factory
 {
     protected $model = SanPham::class;

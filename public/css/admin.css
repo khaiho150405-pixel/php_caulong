@@ -1,12 +1,10 @@
-/* ==========================================================================
-   Giao diện trang quản trị (dùng cùng theme.css với trang khách hàng)
-   ========================================================================== */
+
 
 :root { --sidebar-w: 256px; --topbar-h: 64px; }
 
 body.admin-body { background: var(--bg); }
 
-/* ---------- Sidebar ---------- */
+
 .admin-sidebar {
     position: fixed;
     inset: 0 auto 0 0;
@@ -105,7 +103,7 @@ body.admin-body { background: var(--bg); }
     border-top: 1px solid var(--line);
 }
 
-/* ---------- Topbar & nội dung ---------- */
+
 .admin-main {
     margin-left: var(--sidebar-w);
     min-height: 100vh;
@@ -180,7 +178,7 @@ body.admin-body { background: var(--bg); }
     z-index: 1035;
 }
 
-/* ---------- Thành phần trang ---------- */
+
 .card-custom {
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -230,7 +228,7 @@ body.admin-body { background: var(--bg); }
 
 .admin-content h5 > i { margin-right: 6px; }
 
-/* Thanh tìm kiếm / bộ lọc */
+
 .card-custom form.row.g-2 {
     padding: 14px;
     margin: 0 0 1.25rem;
@@ -242,7 +240,7 @@ body.admin-body { background: var(--bg); }
 
 .card-custom form.row.g-2 .btn { height: 100%; }
 
-/* Nút thao tác trong bảng */
+
 .card-custom td .btn-sm {
     --bs-btn-padding-y: .3rem;
     --bs-btn-padding-x: .6rem;
@@ -258,7 +256,7 @@ body.admin-body { background: var(--bg); }
 
 .card-custom .alert { margin-bottom: 1.25rem; }
 
-/* Thẻ thống kê (dashboard) */
+
 .stat-card {
     display: flex;
     align-items: center;
@@ -315,12 +313,12 @@ a.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 
 .rank-badge.top { background: var(--brand-100); color: var(--brand-700); }
 
-/* Form quản trị */
+
 .card-custom form:not(.row) label.form-label,
 .card-custom .form-group > label,
 .card-custom .mb-3 > label { font-size: .88rem; }
 
-/* ---------- Responsive ---------- */
+
 @media (max-width: 991.98px) {
     .admin-sidebar { transform: translateX(-100%); }
     .admin-sidebar.open { transform: translateX(0); box-shadow: var(--shadow-lg); }
@@ -334,7 +332,7 @@ a.stat-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
 
 .admin-content td .btn { white-space: nowrap; }
 
-/* Dải gradient mỏng dưới tiêu đề trang */
+
 .admin-topbar { border-bottom-color: transparent; }
 .admin-topbar::after {
     content: '';

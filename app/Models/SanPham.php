@@ -10,8 +10,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SanPham extends Model
 {
-    /** @use HasFactory<SanPhamFactory> */
-    // SoftDeletes: xóa mềm sản phẩm (cột deleted_at) để giữ lại lịch sử đơn hàng
     use HasFactory, SoftDeletes;
 
     protected $table = 'SanPham';
@@ -45,9 +43,6 @@ class SanPham extends Model
         return SanPhamFactory::new();
     }
 
-    /**
-     * Scope tìm kiếm theo từ khóa: tên sản phẩm, tên hãng hoặc tên loại.
-     */
     public function scopeTimKiem(Builder $query, ?string $keyword): Builder
     {
         $keyword = trim((string) $keyword);
@@ -62,10 +57,6 @@ class SanPham extends Model
         });
     }
 
-    /**
-     * Biểu thức SQL tính giá bán sau khuyến mãi (khớp với accessor gia_sau_khuyen_mai).
-     * Có 2 tham số ràng buộc (ngày hôm nay) cho điều kiện khuyến mãi còn hiệu lực.
-     */
     private const GIA_BAN_SQL = '(SanPham.GiaGoc - COALESCE((SELECT CASE
             WHEN k.GiamToiDa IS NOT NULL AND k.GiamToiDa > 0 AND SanPham.GiaGoc * k.PhanTramGiam / 100 > k.GiamToiDa THEN k.GiamToiDa
             ELSE SanPham.GiaGoc * k.PhanTramGiam / 100 END
@@ -74,9 +65,6 @@ class SanPham extends Model
           AND (k.NgayBatDau IS NULL OR k.NgayBatDau <= ?)
           AND (k.NgayKetThuc IS NULL OR k.NgayKetThuc >= ?)), 0))';
 
-    /**
-     * Lọc theo khoảng giá bán thực tế (đã trừ khuyến mãi).
-     */
     public function scopeLocTheoGia(Builder $query, ?float $min, ?float $max): Builder
     {
         $today = now()->toDateString();
@@ -91,9 +79,6 @@ class SanPham extends Model
         return $query;
     }
 
-    /**
-     * Chỉ lấy sản phẩm đang có khuyến mãi còn hiệu lực.
-     */
     public function scopeDangGiamGia(Builder $query): Builder
     {
         $today = now()->toDateString();
@@ -105,17 +90,11 @@ class SanPham extends Model
         });
     }
 
-    /**
-     * Chỉ lấy sản phẩm còn ít nhất một biến thể còn tồn kho.
-     */
     public function scopeConHang(Builder $query): Builder
     {
         return $query->whereHas('chiTietSanPhams', fn (Builder $c) => $c->where('SoLuongTon', '>', 0));
     }
 
-    /**
-     * Sắp xếp: moi (mặc định), gia_tang, gia_giam, ten.
-     */
     public function scopeSapXep(Builder $query, ?string $kieu): Builder
     {
         $today = now()->toDateString();
@@ -158,9 +137,6 @@ class SanPham extends Model
         return $this->hasMany(PhanHoi::class, 'MaSanPham', 'MaSanPham');
     }
 
-    /**
-     * Tính giá bán sau khuyến mãi
-     */
     public function getGiaSauKhuyenMaiAttribute()
     {
         $giaGoc = (float) ($this->GiaGoc ?? 0);
@@ -182,9 +158,6 @@ class SanPham extends Model
         return $giaGoc;
     }
 
-    /**
-     * Ảnh đại diện dạng thu nhỏ (WebP) để danh sách tải nhanh; không có bản thu nhỏ thì dùng ảnh gốc.
-     */
     public function getAnhThumbAttribute(): string
     {
         $goc = $this->HinhAnhDaiDien ?: 'default-product.jpg';
@@ -193,9 +166,6 @@ class SanPham extends Model
         return is_file(public_path('images/'.$thumb)) ? $thumb : $goc;
     }
 
-    /**
-     * Tính điểm đánh giá trung bình
-     */
     public function getTrungBinhDanhGiaAttribute(): float
     {
         $avg = $this->phanHois()->avg('DanhGia');

@@ -11,16 +11,12 @@ use Illuminate\Support\Facades\DB;
 
 class OrderService
 {
-    /**
-     * Tạo đơn hàng mới từ giỏ hàng (chống Deadlock và tranh chấp kho bằng Pessimistic Lock)
-     */
     public function createOrder(int $maKhachHang, array $orderData, $cartItems, string $initialStatus = 'Đang xử lý', bool $xoaGioHang = true): DonHang
     {
         return DB::transaction(function () use ($maKhachHang, $orderData, $cartItems, $initialStatus, $xoaGioHang) {
             $tongTien = 0;
             $orderDetails = [];
 
-            // 1. Kiểm tra tồn kho và khóa hàng với lockForUpdate()
             foreach ($cartItems as $item) {
                 $ctsp = ChiTietSanPham::where('MaChiTiet', $item->MaChiTietSanPham)
                     ->lockForUpdate()
@@ -35,11 +31,9 @@ class OrderService
                     throw new Exception("Sản phẩm '{$tenSp}' vừa hết hàng hoặc không đủ số lượng tồn kho.");
                 }
 
-                // Trừ tồn kho
                 $ctsp->SoLuongTon = max(0, $ctsp->SoLuongTon - $item->SoLuong);
                 $ctsp->save();
 
-                // Tính giá bán thực tế (có trừ khuyến mãi)
                 $donGia = $ctsp->effective_price;
                 $thanhTien = $donGia * $item->SoLuong;
                 $tongTien += $thanhTien;
@@ -52,7 +46,6 @@ class OrderService
                 ];
             }
 
-            // 2. Tạo bản ghi đơn hàng
             $donHang = DonHang::create([
                 'NgayDat' => now(),
                 'TrangThai' => $initialStatus,
@@ -65,25 +58,19 @@ class OrderService
                 'GhiChu' => $orderData['GhiChu'] ?? '',
             ]);
 
-            // 3. Lưu chi tiết đơn hàng
             foreach ($orderDetails as $detail) {
                 $detail['MaDonHang'] = $donHang->MaDonHang;
                 ChiTietDonHang::create($detail);
             }
 
-            // 4. Xóa giỏ hàng (với MoMo: chỉ xóa sau khi thanh toán thành công)
             if ($xoaGioHang) {
                 GioHang::where('MaKhachHang', $maKhachHang)->delete();
             }
 
             return $donHang;
-        }, 3); // Tự động retry tối đa 3 lần nếu gặp deadlock (mã lỗi 1205)
+        }, 3);
     }
 
-    /**
-     * Các bước chuyển trạng thái hợp lệ của đơn hàng.
-     * Lưu ý: tồn kho đã được trừ ngay khi tạo đơn, nên chỉ cần hoàn kho khi hủy.
-     */
     public const CHUYEN_TRANG_THAI = [
         'Chờ xác nhận' => ['Đang xử lý', 'Đã hủy'],
         'Chờ thanh toán MoMo' => ['Đang xử lý', 'Đã hủy'],
@@ -92,12 +79,8 @@ class OrderService
         'Đang giao hàng' => ['Đã hoàn thành', 'Đã hủy'],
     ];
 
-    /** Trạng thái khách hàng còn được phép tự hủy đơn */
     public const KHACH_DUOC_HUY = ['Chờ xác nhận', 'Chờ thanh toán MoMo', 'Đang xử lý'];
 
-    /**
-     * Hủy đơn hàng (khách hàng tự hủy) và hoàn trả số lượng vào kho
-     */
     public function cancelOrder(int $maDonHang, ?int $maKhachHang = null, bool $isAdmin = false): bool
     {
         return DB::transaction(function () use ($maDonHang, $maKhachHang, $isAdmin) {
@@ -124,9 +107,6 @@ class OrderService
         });
     }
 
-    /**
-     * Thanh toán MoMo thất bại/bị hủy: hủy đơn đang chờ thanh toán và hoàn kho.
-     */
     public function huyDoThanhToanThatBai(int $maDonHang): void
     {
         DB::transaction(function () use ($maDonHang) {
@@ -141,9 +121,6 @@ class OrderService
         });
     }
 
-    /**
-     * Cập nhật trạng thái đơn hàng từ trang Quản trị (kiểm tra bước chuyển hợp lệ)
-     */
     public function setTrangThai(int $maDonHang, string $trangThaiMoi): bool
     {
         return DB::transaction(function () use ($maDonHang, $trangThaiMoi) {
@@ -159,7 +136,6 @@ class OrderService
                 throw new Exception("Không thể chuyển đơn hàng từ '{$trangThaiCu}' sang '{$trangThaiMoi}'.");
             }
 
-            // Hủy đơn -> hoàn trả tồn kho đã trừ lúc đặt hàng
             if ($trangThaiMoi === 'Đã hủy') {
                 $this->hoanKho($order);
             }
@@ -171,9 +147,6 @@ class OrderService
         });
     }
 
-    /**
-     * Cộng lại số lượng tồn kho cho các sản phẩm trong đơn
-     */
     private function hoanKho(DonHang $order): void
     {
         foreach ($order->chiTietDonHangs as $item) {

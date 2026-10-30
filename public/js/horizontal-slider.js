@@ -1,6 +1,4 @@
-/**
- * Bộ trượt ngang sản phẩm: Giữ đúng kích thước của 4 sản phẩm ban đầu
- */
+
 (function () {
     function initHorizontalSliders() {
         var containers = document.querySelectorAll('.promo-slider-container');
@@ -18,7 +16,7 @@
                 var gap = 20;
 
                 if (window.innerWidth <= 480) {
-                    visibleCards = 1.25;
+                    visibleCards = 2;
                     gap = 10;
                 } else if (window.innerWidth <= 768) {
                     visibleCards = 2;
@@ -28,7 +26,7 @@
                     gap = 16;
                 }
 
-                var cardWidth = (containerWidth - (gap * (Math.floor(visibleCards) - 1 + (visibleCards % 1 > 0 ? 1 : 0)))) / visibleCards;
+                var cardWidth = (containerWidth - (gap * (visibleCards - 1))) / visibleCards;
                 var cards = wrap.querySelectorAll('.product-card');
                 cards.forEach(function (card) {
                     card.style.flex = '0 0 ' + cardWidth + 'px';
@@ -44,14 +42,23 @@
             container.dataset.sliderInitialized = 'true';
 
             function getStep() {
-                var card = wrap.querySelector('.product-card');
-                return card ? (card.offsetWidth + 20) : 280;
+                var cards = wrap.querySelectorAll('.product-card');
+                if (cards.length >= 2) {
+                    var diff = cards[1].offsetLeft - cards[0].offsetLeft;
+                    if (diff > 0) return diff;
+                }
+                var card = cards[0];
+                var gap = 20;
+                if (window.innerWidth <= 480) gap = 10;
+                else if (window.innerWidth <= 768) gap = 14;
+                else if (window.innerWidth <= 992) gap = 16;
+                return card ? (card.offsetWidth + gap) : 280;
             }
 
             if (nextBtn) {
                 nextBtn.addEventListener('click', function () {
                     var step = getStep();
-                    if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
+                    if (Math.ceil(wrap.scrollLeft + wrap.clientWidth) >= wrap.scrollWidth - 15) {
                         wrap.scrollTo({ left: 0, behavior: 'smooth' });
                     } else {
                         wrap.scrollBy({ left: step, behavior: 'smooth' });
@@ -62,7 +69,7 @@
             if (prevBtn) {
                 prevBtn.addEventListener('click', function () {
                     var step = getStep();
-                    if (wrap.scrollLeft <= 20) {
+                    if (wrap.scrollLeft <= 15) {
                         wrap.scrollTo({ left: wrap.scrollWidth, behavior: 'smooth' });
                     } else {
                         wrap.scrollBy({ left: -step, behavior: 'smooth' });
@@ -70,13 +77,12 @@
                 });
             }
 
-            // Tự động chạy ngang qua các sản phẩm
             var autoTimer = null;
             function startAuto() {
                 stopAuto();
                 autoTimer = setInterval(function () {
                     var step = getStep();
-                    if (wrap.scrollLeft + wrap.clientWidth >= wrap.scrollWidth - 20) {
+                    if (Math.ceil(wrap.scrollLeft + wrap.clientWidth) >= wrap.scrollWidth - 15) {
                         wrap.scrollTo({ left: 0, behavior: 'smooth' });
                     } else {
                         wrap.scrollBy({ left: step, behavior: 'smooth' });

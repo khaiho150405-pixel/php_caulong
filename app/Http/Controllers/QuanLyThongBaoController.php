@@ -8,7 +8,7 @@ class QuanLyThongBaoController extends Controller
 {
     public function thongBao()
     {
-        // Lấy danh sách phản hồi đánh giá thấp (<= 2 sao)
+
         $data = PhanHoi::with(['khachHang', 'sanPham'])
             ->where('DanhGia', '<=', 2)
             ->orderByDesc('NgayPhanHoi')

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="container-fluid px-0">
-    {{-- Thanh nút thao tác trên cùng khớp ảnh mẫu --}}
+    
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <div class="d-flex align-items-center gap-2">
             <a href="{{ route('quanlybantin.create') }}" class="btn btn-success px-3 fw-semibold d-inline-flex align-items-center gap-2">
@@ -31,7 +31,7 @@
         </div>
     @endif
 
-    {{-- Bộ lọc tìm kiếm khớp ảnh mẫu --}}
+    
     <div class="card border-0 shadow-sm p-3 mb-3">
         <form action="{{ route('quanlybantin.index') }}" method="GET" class="row g-2 align-items-end">
             <div class="col-md-4">
@@ -66,7 +66,7 @@
         </form>
     </div>
 
-    {{-- Bảng danh sách bài viết khớp ảnh mẫu --}}
+    
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="table-responsive mb-0">
             <table class="table table-hover align-middle mb-0">
@@ -161,7 +161,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Xử lý gạt switch Nổi bật & Hiển thị trực tiếp trên danh sách
     document.querySelectorAll('.js-switch-toggle').forEach(function (toggle) {
         toggle.addEventListener('change', function () {
             var url = this.getAttribute('data-url');

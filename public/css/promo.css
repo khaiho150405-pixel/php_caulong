@@ -1,12 +1,10 @@
-/* ==========================================================================
-   Trang Khuyến mãi: dùng chung ngôn ngữ thiết kế với landing (landing.css) và thẻ sản phẩm (Site.css)
-   ========================================================================== */
+
 
 .promo-hero { min-height: auto; }
 .promo-hero .l-hero-inner { padding-top: 48px; padding-bottom: 56px; }
 .promo-hero .l-hero-visual { height: clamp(440px, 38vw, 520px); }
 
-/* Thanh chuyển nhanh giữa các chương trình */
+
 .promo-nav { position: sticky; top: 0; z-index: 20; background: var(--surface); border-bottom: 1px solid var(--line); }
 .promo-nav .container { display: flex; gap: 10px; padding-top: 12px; padding-bottom: 12px; overflow-x: auto; scrollbar-width: none; }
 .promo-nav .container::-webkit-scrollbar { display: none; }
@@ -27,7 +25,7 @@
 .promo-nav a b { color: var(--accent); }
 .promo-nav a:hover { background: var(--brand-50); border-color: var(--brand); color: var(--brand-700); }
 
-/* Khối từng chương trình */
+
 .promo-block { padding: clamp(40px, 6vw, 72px) 0; background: var(--surface); scroll-margin-top: 56px; }
 .promo-block:nth-of-type(even) { background: var(--brand-50); }
 
@@ -72,12 +70,12 @@
 .promo-chips .is-hot { background: var(--accent-50); border-color: var(--accent-100); color: var(--accent-700); }
 .promo-chips .is-hot i { color: var(--accent); }
 
-/* Lưới sản phẩm: dùng chính .product-card của hệ thống */
+
 .promo-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
 .promo-save { margin-top: 8px; font-size: .78rem; font-weight: 600; color: var(--brand-700); }
 .promo-save i { margin-right: 5px; }
 
-/* Khung trượt ngang sản phẩm (chỉ hiện 4 sản phẩm, nếu nhiều hơn thì chạy ngang, giữ đúng kích thước 4 sản phẩm ban đầu) */
+
 .promo-slider-container {
     position: relative;
     width: 100%;
@@ -105,7 +103,7 @@
     align-items: stretch;
 }
 
-/* Chuẩn kích thước 4 sản phẩm như lưới ban đầu: (100% container - 3 * 20px) / 4 */
+
 .promo-slider-track .product-card {
     flex: 0 0 calc((100cqw - 60px) / 4);
     width: calc((100cqw - 60px) / 4);
@@ -139,10 +137,10 @@
 @container promoSlider (max-width: 480px) {
     .promo-slider-track { gap: 10px; }
     .promo-slider-track .product-card {
-        flex: 0 0 85cqw;
-        width: 85cqw;
-        max-width: 85cqw;
-        min-width: 85cqw;
+        flex: 0 0 calc((100cqw - 10px) / 2);
+        width: calc((100cqw - 10px) / 2);
+        max-width: calc((100cqw - 10px) / 2);
+        min-width: calc((100cqw - 10px) / 2);
     }
 }
 
@@ -166,9 +164,9 @@
     opacity: 0.95;
 }
 .promo-slider-btn:hover {
-    background: var(--brand, #dc2626);
+    background: var(--brand, #148f5f);
     color: #ffffff;
-    border-color: var(--brand, #dc2626);
+    border-color: var(--brand, #148f5f);
     opacity: 1;
     transform: translateY(-50%) scale(1.1);
 }

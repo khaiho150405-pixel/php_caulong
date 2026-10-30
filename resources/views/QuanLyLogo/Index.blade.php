@@ -7,7 +7,7 @@
     <form action="{{ route('admin.logo.update') }}" method="POST" enctype="multipart/form-data" id="logoForm">
         @csrf
 
-        {{-- Thanh thao tác: Lưu và Thoát --}}
+        
         <div class="card border-0 shadow-sm mb-4">
             <div class="card-body p-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
@@ -21,7 +21,7 @@
             </div>
         </div>
 
-        {{-- Khi lưu thành công: hiện đúng 1 dòng thông báo --}}
+        
         @if (session('message'))
             <div class="alert alert-success alert-dismissible fade show shadow-sm mb-4" role="alert">
                 <i class="fa-solid fa-circle-check me-2"></i> {{ session('message') }}
@@ -41,7 +41,7 @@
             </div>
         @endif
 
-        {{-- Khung cài đặt Logo & Tiêu đề hệ thống --}}
+        
         <div class="card border-0 shadow-sm p-4">
             <div class="mb-4">
                 <label for="site_name" class="form-label fw-bold text-dark">Tiêu đề hệ thống :</label>
@@ -49,12 +49,12 @@
                        value="{{ old('site_name', $siteName) }}" placeholder="Ví dụ: Shop Cầu Lông Nasani..." />
             </div>
 
-            {{-- Thẻ input file để nhận file ảnh upload --}}
+            
             <input type="file" name="logo_file" id="logoFileInput" class="d-none" accept="image/*" />
 
-            {{-- Khu vực tải & xem trước logo --}}
+            
             <div class="row g-4 align-items-center mt-1">
-                {{-- Cột bên trái: Drag & Drop và nút Chọn hình dùng label for="logoFileInput" --}}
+                
                 <div class="col-md-6 col-lg-5">
                     <label class="form-label fw-bold text-dark mb-2">Tải ảnh Logo mới :</label>
 
@@ -78,7 +78,7 @@
                     </div>
                 </div>
 
-                {{-- Cột bên phải: Xem trước logo hiện tại --}}
+                
                 <div class="col-md-6 col-lg-5 text-center">
                     <label class="form-label fw-bold text-dark mb-2 d-block">Xem trước Logo :</label>
                     <div class="d-inline-flex flex-column align-items-center">

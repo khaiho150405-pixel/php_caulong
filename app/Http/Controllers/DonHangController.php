@@ -98,17 +98,14 @@ class DonHangController extends Controller
                 'GhiChu' => $request->input('GhiChu', '').' (Thanh toán qua MoMo)',
             ];
 
-            // Tạo đơn hàng tạm thời ở trạng thái Chờ thanh toán MoMo
-            // Giỏ hàng chỉ bị xóa khi MoMo báo thanh toán thành công
             $order = $orderService->createOrder($khachHang->MaKhachHang, $orderData, $cartItems, 'Chờ thanh toán MoMo', false);
 
-            // Tạo link thanh toán MoMo
             $payUrl = $momoService->createPayment($order->MaDonHang, (float) $order->TongTien, "Thanh toan don hang #{$order->MaDonHang}");
 
             return redirect()->away($payUrl);
         } catch (Exception $e) {
             if (isset($order)) {
-                // Không tạo được link thanh toán -> hủy đơn tạm và hoàn kho
+
                 $orderService->huyDoThanhToanThatBai($order->MaDonHang);
             }
 
@@ -116,10 +113,6 @@ class DonHangController extends Controller
         }
     }
 
-    /**
-     * MoMo chuyển hướng người dùng về (redirectUrl). Chuẩn MoMo v2 trả về "resultCode" và "signature".
-     * Chỉ cập nhật đơn khi chữ ký hợp lệ để tránh giả mạo URL.
-     */
     public function thanhToanMomoSuccess(Request $request, MomoPaymentService $momoService, OrderService $orderService)
     {
         $data = $request->query();
@@ -147,9 +140,6 @@ class DonHangController extends Controller
         ]);
     }
 
-    /**
-     * IPN (MoMo gọi server-to-server). Phản hồi HTTP 204 theo tài liệu MoMo.
-     */
     public function savePayment(Request $request, MomoPaymentService $momoService, OrderService $orderService)
     {
         $data = $request->all();
@@ -179,7 +169,7 @@ class DonHangController extends Controller
 
     private function capNhatKetQuaMomo(DonHang $order, bool $isSuccess, OrderService $orderService): void
     {
-        // Chỉ xử lý đơn đang chờ thanh toán (tránh cập nhật lặp khi cả Return URL và IPN cùng gọi)
+
         if ($order->TrangThai !== 'Chờ thanh toán MoMo') {
             return;
         }
@@ -196,6 +186,52 @@ class DonHangController extends Controller
         } else {
             $orderService->huyDoThanhToanThatBai($order->MaDonHang);
         }
+    }
+
+    public function momoMockGateway(Request $request)
+    {
+        $orderId = (int) $request->query('orderId');
+        $order = DonHang::with('khachHang')->find($orderId);
+
+        if (! $order || $order->TrangThai !== 'Chờ thanh toán MoMo') {
+            return redirect()->route('donhang.checkout')->with('error', 'Đơn hàng không tồn tại hoặc đã được xử lý.');
+        }
+
+        return view('DonHang.MoMoMockGateway', [
+            'order' => $order,
+        ]);
+    }
+
+    public function momoMockProcess(Request $request, MomoPaymentService $momoService)
+    {
+        $orderId = (int) $request->input('orderId');
+        $action = (string) $request->input('action', 'success');
+        $order = DonHang::find($orderId);
+
+        if (! $order || $order->TrangThai !== 'Chờ thanh toán MoMo') {
+            return redirect()->route('donhang.checkout')->with('error', 'Đơn hàng không tồn tại hoặc đã được xử lý.');
+        }
+
+        $isSuccess = $action === 'success';
+
+        $data = [
+            'partnerCode' => config('services.momo.partner_code', 'MOMO5RGX20191128'),
+            'orderId' => (string) $order->MaDonHang,
+            'requestId' => 'MOCK_REQ_'.time().'_'.$order->MaDonHang,
+            'amount' => (string) ((int) $order->TongTien),
+            'orderInfo' => "Thanh toan don hang #{$order->MaDonHang}",
+            'orderType' => 'momo_wallet',
+            'transId' => (string) time(),
+            'resultCode' => $isSuccess ? '0' : '1006',
+            'message' => $isSuccess ? 'Giao dịch thành công.' : 'Giao dịch bị hủy bởi người dùng.',
+            'payType' => 'qr',
+            'responseTime' => (string) (time() * 1000),
+            'extraData' => '',
+        ];
+
+        $data['signature'] = $momoService->generateResponseSignature($data);
+
+        return redirect()->route('donhang.momosuccess', $data);
     }
 
     public function index()

@@ -7,11 +7,6 @@ use App\Models\TaiKhoan;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 
-/**
- * Factory tạo tài khoản mẫu. Mặc định là Khách hàng và tự tạo bản ghi KhachHang đi kèm.
- *
- * @extends Factory<TaiKhoan>
- */
 class TaiKhoanFactory extends Factory
 {
     protected $model = TaiKhoan::class;

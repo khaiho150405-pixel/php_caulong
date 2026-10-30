@@ -6,9 +6,6 @@ use App\Models\TinTuc;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Validation cho form Thêm / Sửa bài trên bảng tin.
- */
 class TinTucRequest extends FormRequest
 {
     public function authorize(): bool
@@ -18,7 +15,7 @@ class TinTucRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
-        // Ô chọn "Gắn sản phẩm/trận đấu" để trống => null; boolean switches; default LoaiTin
+
         $this->merge([
             'MaSanPham' => $this->input('MaSanPham') ?: null,
             'MaTranDau' => $this->input('MaTranDau') ?: null,

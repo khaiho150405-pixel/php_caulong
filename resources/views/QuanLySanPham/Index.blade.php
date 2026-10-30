@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    {{-- Tìm kiếm + lọc, kết hợp phân trang (giữ từ khóa khi chuyển trang) --}}
+    
     <form action="{{ route('quanlysanpham.index') }}" method="GET" class="row g-2 mb-3">
         <div class="col-md-4">
             <input type="text" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Tìm theo tên sản phẩm, hãng, loại..." />

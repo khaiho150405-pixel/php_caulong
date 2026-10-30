@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class QuanLyKhuyenMaiController extends Controller
 {
-    /**
-     * Danh sách khuyến mãi: tìm theo tên chương trình + phân trang (giữ từ khóa khi chuyển trang).
-     */
     public function index(Request $request)
     {
         $keyword = trim((string) $request->query('keyword', ''));
@@ -65,7 +62,7 @@ class QuanLyKhuyenMaiController extends Controller
         $km = KhuyenMai::findOrFail($id);
 
         DB::transaction(function () use ($id, $km) {
-            // Gỡ tham chiếu khuyến mãi từ các sản phẩm đang áp dụng
+
             SanPham::where('MaKhuyenMai', $id)->update(['MaKhuyenMai' => null]);
             $km->delete();
         });

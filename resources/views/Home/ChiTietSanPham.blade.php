@@ -262,7 +262,7 @@
     $originalPrice = $defaultVariant ? ($defaultVariant->GiaBan ?? $sanPham->GiaGoc ?? 0) : ($sanPham->GiaGoc ?? 0);
     $defaultChiTietId = $defaultVariant ? $defaultVariant->MaChiTiet : 0;
     $mainImageUrl = asset('images/' . ($sanPham->HinhAnhDaiDien ?: 'default-product.jpg'));
-    $isRacket = !empty($thongSoVot);
+    $isRacket = ($sanPham->MaLoai == 1) || (!empty($thongSoVot)) || (isset($sanPham->loaiSanPham) && str_contains(mb_strtolower($sanPham->loaiSanPham->TenLoai), 'vợt'));
 
     $discountPercent = 0;
     $maxDiscount = 0;
@@ -363,6 +363,12 @@
             @csrf
             <input type="hidden" id="selected-chitiet-id" name="chiTietId" value="{{ $defaultChiTietId }}">
 
+            @if ($variants->isEmpty())
+                <div style="margin: 15px 0; padding: 12px 16px; background-color: #fff3cd; color: #856404; border: 1px solid #ffeeba; border-radius: var(--radius-sm);">
+                    <i class="fa fa-info-circle"></i> Sản phẩm đang cập nhật thông tin phiên bản và số lượng tồn kho.
+                </div>
+            @endif
+
             @if ($availableColors->isNotEmpty())
                 <div class="option-selection">
                     <h4>Chọn Màu Sắc:</h4>
@@ -393,28 +399,28 @@
                 <span id="stock-status" style="margin-left: 15px; font-weight:bold;">Đang kiểm tra...</span>
             </div>
 
-            <div style="margin-top: 25px;">
+            <div class="product-actions-wrap" style="margin-top: 25px; display: flex; gap: 12px; flex-wrap: wrap;">
                 <button type="submit" class="btn-action btn-add-cart" id="btn-add-cart">
                     <i class="fas fa-shopping-cart"></i> Thêm vào giỏ
                 </button>
-                <button type="button" class="btn-action btn-buy-now" onclick="document.getElementById('addToCartForm').submit();">
-                    Mua ngay
+                <button type="submit" class="btn-action btn-buy-now" id="btn-buy-now">
+                    <i class="fa-solid fa-bolt"></i> Mua ngay
                 </button>
             </div>
         </form>
 
         <hr style="margin-top: 30px; margin-bottom: 30px;" />
 
-        @if ($isRacket && $thongSoVot)
+        @if ($isRacket && ($thongSoVot || $variants->isNotEmpty()))
             <h3>Thông số chi tiết Vợt</h3>
             <table class="racket-specs-table">
                 <tbody>
                     <tr><th>Hãng</th><td id="spec-hang">{{ $sanPham->hang->TenHang ?? 'N/A' }}</td></tr>
-                    <tr><th>Độ cứng</th><td id="spec-do-cung">{{ $thongSoVot->DoCung ?? 'N/A' }}</td></tr>
-                    <tr><th>Điểm cân bằng</th><td id="spec-diem-can-bang">{{ $thongSoVot->DoCanBang ?? 'N/A' }}</td></tr>
-                    <tr><th>Sức căng</th><td id="spec-suc-cang">{{ $thongSoVot->SucCang ?? 'N/A' }}</td></tr>
-                    <tr><th>Trọng lượng</th><td id="spec-trong-luong">{{ $thongSoVot->TrongLuong ?? 'N/A' }}</td></tr>
-                    <tr><th>Chiều dài</th><td id="spec-chieu-dai">{{ $thongSoVot->ChieuDai ?? 'N/A' }}</td></tr>
+                    <tr><th>Độ cứng</th><td id="spec-do-cung">{{ $thongSoVot->DoCung ?? 'Đang cập nhật' }}</td></tr>
+                    <tr><th>Điểm cân bằng</th><td id="spec-diem-can-bang">{{ $thongSoVot->DoCanBang ?? 'Đang cập nhật' }}</td></tr>
+                    <tr><th>Sức căng</th><td id="spec-suc-cang">{{ $thongSoVot->SucCang ?? 'Đang cập nhật' }}</td></tr>
+                    <tr><th>Trọng lượng</th><td id="spec-trong-luong">{{ $thongSoVot->TrongLuong ?? 'Đang cập nhật' }}</td></tr>
+                    <tr><th>Chiều dài</th><td id="spec-chieu-dai">{{ $thongSoVot->ChieuDai ?? 'Đang cập nhật' }}</td></tr>
                 </tbody>
             </table>
         @endif
@@ -480,18 +486,72 @@
     };
 
     function updateProductState() {
-        const variant = allVariants.find(v =>
-            (!selectedColorId || v.MaMau === selectedColorId) &&
-            (!selectedSizeId || v.MaSize === selectedSizeId)
-        );
-
         const stockElement = document.getElementById('stock-status');
         const hiddenIdInput = document.getElementById('selected-chitiet-id');
         const priceElement = document.getElementById('display-price');
         const mainProductImage = document.getElementById('main-product-image');
         const badgeElement = document.getElementById('discount-badge');
         const btnAddCart = document.getElementById('btn-add-cart');
+        const btnBuyNow = document.getElementById('btn-buy-now');
         const qtyInput = document.getElementById('quantity-input');
+
+        if (allVariants.length === 0) {
+            if (stockElement) {
+                stockElement.textContent = 'Sản phẩm tạm hết hàng / Đang cập nhật';
+                stockElement.style.color = '#c9830f';
+            }
+            if (btnAddCart) {
+                btnAddCart.disabled = true;
+                btnAddCart.innerHTML = '<i class="fas fa-box-open"></i> Tạm hết hàng';
+            }
+            if (btnBuyNow) {
+                btnBuyNow.disabled = true;
+                btnBuyNow.innerHTML = '<i class="fas fa-ban"></i> Chưa thể mua';
+            }
+            if (hiddenIdInput) {
+                hiddenIdInput.value = "";
+            }
+            return;
+        }
+
+        let variant = allVariants.find(v =>
+            (!selectedColorId || v.MaMau === selectedColorId) &&
+            (!selectedSizeId || v.MaSize === selectedSizeId)
+        );
+
+        if (!variant && selectedColorId) {
+            const alt = allVariants.find(v => v.MaMau === selectedColorId);
+            if (alt && alt.MaSize) {
+                selectedSizeId = alt.MaSize;
+                const sizeBtn = document.querySelector(`#weight-options button[data-size-id="${selectedSizeId}"]`);
+                if (sizeBtn) {
+                    document.querySelectorAll('#weight-options button').forEach(b => b.classList.remove('selected'));
+                    sizeBtn.classList.add('selected');
+                }
+                const inputSize = document.getElementById('input-size-id');
+                if (inputSize) inputSize.value = selectedSizeId;
+                variant = alt;
+            }
+        }
+
+        if (!variant && selectedSizeId) {
+            const alt = allVariants.find(v => v.MaSize === selectedSizeId);
+            if (alt && alt.MaMau) {
+                selectedColorId = alt.MaMau;
+                const colorBtn = document.querySelector(`#color-options button[data-color-id="${selectedColorId}"]`);
+                if (colorBtn) {
+                    document.querySelectorAll('#color-options button').forEach(b => b.classList.remove('selected'));
+                    colorBtn.classList.add('selected');
+                }
+                const inputColor = document.getElementById('input-color-id');
+                if (inputColor) inputColor.value = selectedColorId;
+                variant = alt;
+            }
+        }
+
+        if (!variant && allVariants.length > 0 && !selectedColorId && !selectedSizeId) {
+            variant = allVariants[0];
+        }
 
         if (variant) {
             if (variant.SoLuongTon > 0) {
@@ -499,12 +559,22 @@
                 stockElement.style.color = 'green';
                 btnAddCart.disabled = false;
                 btnAddCart.innerHTML = '<i class="fas fa-shopping-cart"></i> Thêm vào giỏ';
-                qtyInput.max = variant.SoLuongTon;
+                if (btnBuyNow) {
+                    btnBuyNow.disabled = false;
+                    btnBuyNow.innerHTML = '<i class="fa-solid fa-bolt"></i> Mua ngay';
+                }
+                if (qtyInput) {
+                    qtyInput.max = variant.SoLuongTon;
+                }
             } else {
                 stockElement.textContent = 'Hết hàng';
                 stockElement.style.color = 'red';
                 btnAddCart.disabled = true;
-                btnAddCart.textContent = 'Hết hàng';
+                btnAddCart.innerHTML = '<i class="fas fa-times-circle"></i> Hết hàng';
+                if (btnBuyNow) {
+                    btnBuyNow.disabled = true;
+                    btnBuyNow.innerHTML = '<i class="fas fa-times-circle"></i> Hết hàng';
+                }
             }
 
             hiddenIdInput.value = variant.MaChiTiet;
@@ -535,24 +605,42 @@
             } else {
                 if (badgeElement) badgeElement.style.display = 'none';
             }
-            priceElement.innerHTML = displayPriceHtml;
+
+            if (priceElement) {
+                priceElement.innerHTML = displayPriceHtml;
+            }
 
             if (variant.HinhAnh && mainProductImage) {
                 mainProductImage.src = "/images/" + variant.HinhAnh;
             }
 
             if (isRacket) {
-                if(document.getElementById('spec-do-cung')) document.getElementById('spec-do-cung').textContent = variant.DoCung || 'N/A';
-                if(document.getElementById('spec-diem-can-bang')) document.getElementById('spec-diem-can-bang').textContent = variant.DoCanBang || 'N/A';
-                if(document.getElementById('spec-suc-cang')) document.getElementById('spec-suc-cang').textContent = variant.SucCang || 'N/A';
-                if(document.getElementById('spec-trong-luong')) document.getElementById('spec-trong-luong').textContent = variant.TrongLuong || 'N/A';
-                if(document.getElementById('spec-chieu-dai')) document.getElementById('spec-chieu-dai').textContent = variant.ChieuDai || 'N/A';
+                if (document.getElementById('spec-do-cung') && variant.DoCung) {
+                    document.getElementById('spec-do-cung').textContent = variant.DoCung;
+                }
+                if (document.getElementById('spec-diem-can-bang') && variant.DoCanBang) {
+                    document.getElementById('spec-diem-can-bang').textContent = variant.DoCanBang;
+                }
+                if (document.getElementById('spec-suc-cang') && variant.SucCang) {
+                    document.getElementById('spec-suc-cang').textContent = variant.SucCang;
+                }
+                if (document.getElementById('spec-trong-luong') && variant.TrongLuong) {
+                    document.getElementById('spec-trong-luong').textContent = variant.TrongLuong;
+                }
+                if (document.getElementById('spec-chieu-dai') && variant.ChieuDai) {
+                    document.getElementById('spec-chieu-dai').textContent = variant.ChieuDai;
+                }
             }
 
         } else {
-            stockElement.textContent = 'Tùy chọn này không khả dụng';
+            stockElement.textContent = 'Tùy chọn này tạm thời không có sẵn';
             stockElement.style.color = '#c9830f';
             btnAddCart.disabled = true;
+            btnAddCart.innerHTML = '<i class="fas fa-ban"></i> Chưa có sẵn';
+            if (btnBuyNow) {
+                btnBuyNow.disabled = true;
+                btnBuyNow.innerHTML = '<i class="fas fa-ban"></i> Chưa thể mua';
+            }
             hiddenIdInput.value = "";
         }
     }
@@ -583,12 +671,26 @@
         const firstColor = document.querySelector('#color-options button');
         if (firstColor) {
             firstColor.classList.add('selected');
+            selectedColorId = parseInt(firstColor.dataset.colorId);
+            const el = document.getElementById('input-color-id');
+            if (el) el.value = selectedColorId;
         }
         const firstSize = document.querySelector('#weight-options button');
         if (firstSize) {
             firstSize.classList.add('selected');
+            selectedSizeId = parseInt(firstSize.dataset.sizeId);
+            const el = document.getElementById('input-size-id');
+            if (el) el.value = selectedSizeId;
         }
         updateProductState();
+    });
+
+    document.getElementById('addToCartForm')?.addEventListener('submit', function(e) {
+        const chiTietId = document.getElementById('selected-chitiet-id')?.value;
+        if (!chiTietId || chiTietId === '0') {
+            e.preventDefault();
+            alert('Vui lòng chọn đầy đủ phiên bản (màu sắc / kích cỡ) khả dụng trước khi đặt hàng.');
+        }
     });
 </script>
 @endsection

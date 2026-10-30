@@ -6,10 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Thêm cột deleted_at cho bảng SanPham để áp dụng Soft Delete:
-     * xóa sản phẩm không làm mất dữ liệu ở các đơn hàng đã đặt.
-     */
     public function up(): void
     {
         Schema::table('SanPham', function (Blueprint $table) {

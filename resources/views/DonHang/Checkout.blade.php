@@ -56,9 +56,9 @@
                             formaction="{{ route('donhang.payment.momo') }}"
                             class="btn btn-danger btn-lg"
                             style="background-color: #a50064; border-color: #a50064; color: white; display: inline-flex; align-items: center; font-weight: bold; border-radius: 6px; padding: 12px 25px;">
-                        <img src="https://upload.wikimedia.org/wikipedia/vi/f/fe/MoMo_Logo.png"
+                        <img src="{{ asset('images/momo-logo.png') }}"
                              alt="MoMo Logo"
-                             style="width: 25px; height: 25px; margin-right: 8px; background-color: white; border-radius: 4px; padding: 2px;" />
+                             style="width: 25px; height: 25px; margin-right: 8px; background-color: white; border-radius: 4px; padding: 2px; object-fit: contain;" />
                         Thanh toán qua MoMo
                     </button>
                 </div>

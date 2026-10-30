@@ -5,9 +5,6 @@ namespace App\Http\Requests\Admin;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Validation cho biến thể sản phẩm (bảng ChiTietSanPham: màu, size, giá bán, tồn kho, SKU).
- */
 class ChiTietSanPhamRequest extends FormRequest
 {
     public function authorize(): bool

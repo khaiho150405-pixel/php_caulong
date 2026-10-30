@@ -4,14 +4,11 @@ namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Validation cho form Thêm / Sửa sản phẩm (khu vực quản trị).
- */
 class SanPhamRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        // Quyền đã được kiểm tra bởi middleware role:admin,nhanvien
+
         return true;
     }
 

@@ -1,4 +1,4 @@
-{{-- Tin nổi bật: hỗ trợ 1 bài hoặc nhiều bài tự động trượt lên từng bài --}}
+
 @php
     $ds = isset($dsNoiBat) && $dsNoiBat instanceof \Illuminate\Support\Collection && $dsNoiBat->isNotEmpty()
         ? $dsNoiBat
@@ -71,7 +71,6 @@
             var total = originalSlides.length;
             if (total <= 1) return;
 
-            // Clone slide đầu tiên gắn vào cuối để tạo hiệu ứng trượt vô tận mượt mà
             var firstClone = originalSlides[0].cloneNode(true);
             firstClone.setAttribute('data-clone', 'true');
             firstClone.setAttribute('aria-hidden', 'true');
@@ -107,7 +106,6 @@
                 track.style.transform = 'translateY(-' + offset + 'px)';
                 updateViewportHeight();
 
-                // Cập nhật số đếm và dot chỉ mục (slide clone hiển thị là bài 1)
                 var displayIdx = (currentIndex >= total) ? 0 : currentIndex;
                 if (counter) counter.textContent = (displayIdx + 1);
                 dots.forEach(function (d, i) {
@@ -116,7 +114,6 @@
 
                 if (animate) {
                     setTimeout(function () {
-                        // Nếu vừa trượt lên slide clone, reset về slide 0 ngay lập tức mà không có hiệu ứng
                         if (currentIndex >= total) {
                             track.style.transition = 'none';
                             currentIndex = 0;
@@ -136,7 +133,6 @@
             function prevSlide() {
                 if (isTransitioning) return;
                 if (currentIndex === 0) {
-                    // Nhảy sang slide clone trước rồi trượt lên slide cuối
                     track.style.transition = 'none';
                     currentIndex = total;
                     var offset = allSlides[currentIndex].offsetTop;
@@ -178,7 +174,6 @@
                 startTimer();
             }
 
-            // Tạm dừng khi rê chuột vào bài để đọc hoặc click
             box.addEventListener('mouseenter', stopTimer);
             box.addEventListener('mouseleave', startTimer);
 
@@ -191,7 +186,6 @@
                 }
             });
 
-            // Khởi chạy ban đầu sau khi DOM và ảnh đã load
             setTimeout(function () {
                 updateViewportHeight();
                 startTimer();

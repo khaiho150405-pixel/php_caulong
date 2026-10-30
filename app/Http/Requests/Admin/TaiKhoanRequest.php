@@ -6,11 +6,6 @@ use App\Models\TaiKhoan;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-/**
- * Validation cho form Thêm / Sửa tài khoản (chỉ Quản trị viên).
- * - Thêm mới: bắt buộc tên đăng nhập + mật khẩu.
- * - Cập nhật: mật khẩu để trống = giữ nguyên.
- */
 class TaiKhoanRequest extends FormRequest
 {
     public function authorize(): bool

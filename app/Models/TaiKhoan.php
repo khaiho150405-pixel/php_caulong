@@ -9,17 +9,14 @@ use Illuminate\Notifications\Notifiable;
 
 class TaiKhoan extends Authenticatable
 {
-    /** @use HasFactory<TaiKhoanFactory> */
     use HasFactory, Notifiable;
 
-    // Mã quyền trong bảng PhanQuyen
     public const QUYEN_ADMIN = 1;
 
     public const QUYEN_NHANVIEN = 2;
 
     public const QUYEN_KHACHHANG = 3;
 
-    /** Tên vai trò dùng trong middleware `role:` => MaQuyen */
     public const ROLES = [
         'admin' => self::QUYEN_ADMIN,
         'nhanvien' => self::QUYEN_NHANVIEN,

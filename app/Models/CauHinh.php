@@ -15,9 +15,6 @@ class CauHinh extends Model
         'MoTa',
     ];
 
-    /**
-     * Lấy giá trị cấu hình theo khóa
-     */
     public static function get(string $key, ?string $default = null): ?string
     {
         return Cache::remember("cau_hinh_{$key}", 3600, function () use ($key, $default) {
@@ -27,9 +24,6 @@ class CauHinh extends Model
         });
     }
 
-    /**
-     * Cập nhật hoặc tạo mới cấu hình
-     */
     public static function set(string $key, ?string $value, ?string $mota = null): static
     {
         Cache::forget("cau_hinh_{$key}");
@@ -43,9 +37,6 @@ class CauHinh extends Model
         );
     }
 
-    /**
-     * Trả về URL logo hệ thống (nếu không tồn tại thì fallback về logo mặc định)
-     */
     public static function getLogoUrl(): string
     {
         $logo = static::get('logo_url', 'images/HUIT.jpg');

@@ -29,7 +29,7 @@ class ChiTietSanPham extends Model
 
     public function sanPham()
     {
-        // withTrashed: đơn hàng cũ vẫn hiển thị được tên sản phẩm dù sản phẩm đã bị xóa mềm
+
         return $this->belongsTo(SanPham::class, 'MaSanPham', 'MaSanPham')->withTrashed();
     }
 

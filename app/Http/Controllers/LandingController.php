@@ -10,13 +10,8 @@ use App\Models\SanPham;
 use App\Models\TinTuc;
 use App\Models\TranDau;
 
-/**
- * Landing page giới thiệu cửa hàng. Toàn bộ nội dung động (số liệu, ngân sách, danh mục,
- * ưu đãi, đánh giá) lấy từ CSDL qua Eloquent; phần 3D ở hero chỉ là lớp nâng cao phía trình duyệt.
- */
 class LandingController extends Controller
 {
-    /** Các mức ngân sách: khóa dùng chung với bộ lọc khoảng giá ở trang sản phẩm. */
     private const NGAN_SACH = [
         '0-1000000' => ['Dưới 1 triệu', 0, 1000000],
         '1000000-2000000' => ['1 – 2 triệu', 1000000, 2000000],
@@ -37,7 +32,6 @@ class LandingController extends Controller
                 ->count(),
         ];
 
-        // Số sản phẩm theo từng mức ngân sách (tính trên giá sau khuyến mãi)
         $nganSach = collect(self::NGAN_SACH)->map(fn ($m, $khoa) => [
             'khoa' => $khoa,
             'nhan' => $m[0],
@@ -46,7 +40,6 @@ class LandingController extends Controller
 
         $danhMuc = LoaiSanPham::withCount('sanPhams')->orderBy('MaLoai')->get();
 
-        // Ưu đãi: sản phẩm đang giảm giá, giảm nhiều nhất lên trước; thiếu thì bổ sung hàng mới
         $uuDai = SanPham::with(['hang', 'khuyenMai'])->dangGiamGia()->get()
             ->sortByDesc(fn ($sp) => $sp->GiaGoc > 0 ? 1 - ($sp->gia_sau_khuyen_mai / $sp->GiaGoc) : 0)
             ->take(8)
@@ -57,7 +50,6 @@ class LandingController extends Controller
             $uuDai = $uuDai->concat($them)->values();
         }
 
-        // Ảnh hero: 3 sản phẩm thật thuộc các nhóm khác nhau (vợt, giày, trang phục...) trong danh sách ưu đãi
         $heroSp = $uuDai->unique('MaLoai')->take(3);
         if ($heroSp->count() < 3) {
             $heroSp = $heroSp->concat($uuDai->whereNotIn('MaSanPham', $heroSp->pluck('MaSanPham')))->take(3);
@@ -65,7 +57,6 @@ class LandingController extends Controller
         $heroSp = $heroSp->values();
         $giamToiDa = (int) $uuDai->map(fn ($sp) => $sp->GiaGoc > 0 ? round((1 - $sp->gia_sau_khuyen_mai / $sp->GiaGoc) * 100) : 0)->max();
 
-        // Đánh giá tích cực gần đây
         $danhGia = PhanHoi::with(['khachHang', 'sanPham'])
             ->where('DanhGia', '>=', 4)
             ->whereNotNull('NoiDung')
@@ -73,7 +64,6 @@ class LandingController extends Controller
             ->take(3)
             ->get();
 
-        // Bảng tin: Danh sách tin nổi bật cho slider ngoài trang chủ
         $dsNoiBat = TinTuc::with(['sanPham', 'tranDau'])
             ->daDang()
             ->where('NoiBat', true)
@@ -82,7 +72,6 @@ class LandingController extends Controller
             ->orderByDesc('MaTin')
             ->get();
 
-        // 3 tin mới nhất khác không trùng với bài nổi bật (hoặc fallback nếu không có bài nổi bật)
         $tinMoiQuery = TinTuc::with(['sanPham', 'tranDau'])->daDang();
         if ($dsNoiBat->isNotEmpty()) {
             $tinMoiQuery->whereNotIn('MaTin', $dsNoiBat->pluck('MaTin'));

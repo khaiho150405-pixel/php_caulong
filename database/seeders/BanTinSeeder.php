@@ -5,13 +5,6 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Dữ liệu mẫu cho "Bảng tin cầu lông": kết quả trận đấu và bài viết có thật.
- *
- * Mọi kết quả/tỉ số dưới đây đã được đối chiếu với từ hai nguồn công khai trở lên (xem cột LienKetNguon
- * của từng trận); nội dung bài viết do nhóm tự diễn đạt lại, không sao chép nguyên văn.
- * Chạy lại nhiều lần không bị trùng:  php artisan db:seed --class=BanTinSeeder
- */
 class BanTinSeeder extends Seeder
 {
     private const WIKI_2026 = 'https://en.wikipedia.org/wiki/2026_BWF_World_Championships';
@@ -24,7 +17,6 @@ class BanTinSeeder extends Seeder
     {
         $tacGia = DB::table('TaiKhoan')->where('MaQuyen', 1)->value('MaTaiKhoan');
 
-        /* ---------------- Trận đấu ---------------- */
         $g26 = ['Giải vô địch thế giới BWF 2026', 'New Delhi (Ấn Độ)', '2026-08-23', 'Badminton Planet', 'https://www.badmintonplanet.com/?p=26517'];
         $g25 = ['Giải vô địch thế giới BWF 2025', 'Paris (Pháp)', '2025-08-31'];
         $og24 = ['Olympic Paris 2024', 'Paris (Pháp)'];
@@ -58,7 +50,6 @@ class BanTinSeeder extends Seeder
 
         $sp = fn (string $ten) => DB::table('SanPham')->where('TenSanPham', $ten)->value('MaSanPham');
 
-        /* ---------------- Bài viết ---------------- */
         $tin = [
             [
                 'tieu_de' => 'Alex Lanier viết nên lịch sử: tay vợt Pháp đầu tiên vô địch thế giới đơn nam',

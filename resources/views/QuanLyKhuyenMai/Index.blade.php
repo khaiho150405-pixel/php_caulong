@@ -11,7 +11,7 @@
         </a>
     </div>
 
-    {{-- Tìm kiếm (giữ từ khóa khi chuyển trang nhờ withQueryString) --}}
+    
     <form action="{{ route('quanlykhuyenmai.index') }}" method="GET" class="row g-2 mb-3">
         <div class="col-md-6">
             <input type="text" name="keyword" value="{{ $keyword }}" class="form-control" placeholder="Tìm theo tên chương trình..." />

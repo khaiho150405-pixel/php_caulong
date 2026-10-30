@@ -7,9 +7,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('CauHinh', function (Blueprint $table) {
@@ -20,7 +17,6 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // Nạp dữ liệu cấu hình ban đầu
         DB::table('CauHinh')->insert([
             [
                 'Khoa' => 'logo_url',
@@ -46,9 +42,6 @@ return new class extends Migration
         ]);
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('CauHinh');

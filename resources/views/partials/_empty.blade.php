@@ -1,4 +1,4 @@
-{{-- Trạng thái trống dùng chung. Tham số: $message, $linkUrl (tùy chọn), $linkText (tùy chọn), $compact (tùy chọn) --}}
+
 <div class="empty-state {{ ($compact ?? true) ? 'is-compact' : 'bg-court' }}">
     <svg class="empty-icon" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="32" cy="52" r="7" fill="currentColor" fill-opacity=".12"/>

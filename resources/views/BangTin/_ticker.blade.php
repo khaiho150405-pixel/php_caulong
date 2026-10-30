@@ -1,4 +1,4 @@
-{{-- Dải tin nhanh chạy ngang. Tham số: $ds (collection TranDau). Nội dung lặp hai lần để vòng lặp liền mạch. --}}
+
 @if ($ds->isNotEmpty())
     <div class="bt-ticker" role="region" aria-label="Tin nhanh kết quả trận đấu">
         <span class="bt-ticker-label"><i class="fa-solid fa-bolt"></i> Tin nhanh</span>

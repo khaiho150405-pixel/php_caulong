@@ -18,10 +18,15 @@
 <body class="@yield('body_class')">
     <header class="main-header">
         <div class="header-top">
-            <div class="logo">
-                <a href="{{ route('home') }}">
-                    <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo Cửa Hàng Cầu Lông" />
-                </a>
+            <div class="header-brand-wrap">
+                <button class="mobile-toggle-btn" id="mobileMenuToggle" type="button" aria-label="Mở menu" aria-controls="mobileNavDrawer" aria-expanded="false">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <div class="logo">
+                    <a href="{{ route('home') }}">
+                        <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo Cửa Hàng Cầu Lông" />
+                    </a>
+                </div>
             </div>
 
             <form action="{{ route('sanpham.timkiem') }}" method="get" class="search-form search-absolute">
@@ -147,7 +152,7 @@
                         </div>
 
                         <div class="mega-contents-wrapper">
-                            <!-- Vợt -->
+                            
                             <div class="mega-content active" data-loai="Vot">
                                 <div class="product-brands-grid">
                                     <div class="brand-column">
@@ -176,7 +181,7 @@
                                 </div>
                             </div>
 
-                            <!-- Giày -->
+                            
                             <div class="mega-content" data-loai="Giay">
                                 <div class="product-brands-grid">
                                     <div class="brand-column">
@@ -197,7 +202,7 @@
                                 </div>
                             </div>
 
-                            <!-- Áo quần -->
+                            
                             <div class="mega-content" data-loai="AoQuan">
                                 <div class="product-brands-grid">
                                     <div class="brand-column">
@@ -215,7 +220,7 @@
                                 </div>
                             </div>
 
-                            <!-- Phụ kiện -->
+                            
                             <div class="mega-content" data-loai="PhuKien">
                                 <div class="product-brands-grid">
                                     <div class="brand-column">
@@ -237,6 +242,156 @@
             </ul>
         </nav>
     </header>
+
+    
+    <div class="mobile-nav-backdrop" id="mobileNavBackdrop"></div>
+    <aside class="mobile-nav-drawer" id="mobileNavDrawer" aria-label="Menu di động">
+        <div class="mobile-nav-header">
+            <div class="d-flex align-items-center gap-2">
+                <img src="{{ \App\Models\CauHinh::getLogoUrl() }}" alt="Logo" class="mobile-nav-logo" />
+                <strong class="text-truncate" style="max-width: 180px;">Shop Cầu Lông</strong>
+            </div>
+            <button class="mobile-nav-close" id="mobileNavClose" type="button" aria-label="Đóng menu">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="mobile-nav-body">
+            <ul class="mobile-nav-list">
+                <li>
+                    <a href="{{ route('home') }}" class="mobile-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
+                        <i class="fa-solid fa-house"></i>
+                        <span>Trang chủ</span>
+                    </a>
+                </li>
+                <li class="mobile-nav-item-has-sub" id="mobileNavProductsItem">
+                    <div class="mobile-nav-link-row">
+                        <a href="{{ route('sanpham.index') }}" class="mobile-nav-link {{ request()->routeIs('sanpham.*') ? 'active' : '' }}">
+                            <i class="fa-solid fa-boxes-stacked"></i>
+                            <span>Sản phẩm</span>
+                        </a>
+                        <button type="button" class="mobile-nav-sub-toggle" id="mobileNavSubToggle" aria-label="Mở danh mục">
+                            <i class="fa-solid fa-chevron-down"></i>
+                        </button>
+                    </div>
+                    <div class="mobile-nav-submenu" id="mobileNavSubmenu">
+                        <a href="{{ route('sanpham.index', ['loai' => 'Vot']) }}">Vợt cầu lông</a>
+                        <a href="{{ route('sanpham.index', ['loai' => 'Giay']) }}">Giày cầu lông</a>
+                        <a href="{{ route('sanpham.index', ['loai' => 'AoQuan']) }}">Áo quần thể thao</a>
+                        <a href="{{ route('sanpham.index', ['loai' => 'PhuKien']) }}">Phụ kiện cầu lông</a>
+                    </div>
+                </li>
+                <li>
+                    <a href="{{ route('khuyenmai.index') }}" class="mobile-nav-link {{ request()->routeIs('khuyenmai.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-tags"></i>
+                        <span>Khuyến mãi</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('bangtin.index') }}" class="mobile-nav-link {{ request()->routeIs('bangtin.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-newspaper"></i>
+                        <span>Bảng tin</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('donhang.index') }}" class="mobile-nav-link {{ request()->routeIs('donhang.*') ? 'active' : '' }}">
+                        <i class="fa-solid fa-clipboard-list"></i>
+                        <span>Đơn hàng</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('home.contact') }}" class="mobile-nav-link {{ request()->routeIs('home.contact') ? 'active' : '' }}">
+                        <i class="fa-solid fa-phone"></i>
+                        <span>Liên hệ</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('home.viewcart') }}" class="mobile-nav-link {{ request()->routeIs('home.viewcart') ? 'active' : '' }}">
+                        <i class="fa-solid fa-cart-shopping"></i>
+                        <span>Giỏ hàng (<span class="cart-count-text">{{ session('GioHangCount', 0) }}</span>)</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="mobile-nav-account">
+                @guest
+                    <div class="d-flex flex-column gap-2">
+                        <a href="{{ route('taikhoan.dangnhap') }}" class="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fa-solid fa-user"></i>
+                            <span>Đăng nhập</span>
+                        </a>
+                        <a href="{{ route('taikhoan.dangky') }}" class="btn btn-outline-secondary w-100 py-2">
+                            <span>Đăng ký</span>
+                        </a>
+                    </div>
+                @else
+                    @php
+                        $user = Auth::user();
+                        $maQuyen = (int)($user->MaQuyen ?? 3);
+                        $hoTen = session('HoTen', $user->TenDangNhap);
+                    @endphp
+                    <div class="p-2 mb-2 rounded bg-light d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-circle-user fa-2x text-success"></i>
+                        <div class="overflow-hidden">
+                            <small class="text-muted d-block">Xin chào,</small>
+                            <strong class="d-block text-truncate">{{ $hoTen }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-1">
+                        @if ($maQuyen == 1)
+                            <a href="{{ route('quanlysanpham.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-boxes-stacked"></i> Quản lý Sản phẩm
+                            </a>
+                            <a href="{{ route('quanlytaikhoan.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-users"></i> Quản lý tài khoản
+                            </a>
+                            <a href="{{ route('quanlydonhang.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-file-invoice"></i> Quản lý Đơn hàng
+                            </a>
+                            <a href="{{ route('quanlykhuyenmai.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-tags"></i> Quản lý Khuyến mãi
+                            </a>
+                            <a href="{{ route('quanlysanpham.dashboard') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-chart-line"></i> Dashboard
+                            </a>
+                            <a href="{{ route('quanlythongbao.thongbao') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-bell"></i> Thông Báo Đánh Giá Thấp
+                            </a>
+                            <hr class="my-1" />
+                        @elseif ($maQuyen == 2)
+                            <a href="{{ route('quanlysanpham.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-boxes-stacked"></i> Quản lý Sản phẩm
+                            </a>
+                            <a href="{{ route('quanlydonhang.index') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-file-invoice"></i> Quản lý Đơn hàng
+                            </a>
+                            <a href="{{ route('quanlythongbao.thongbao') }}" class="mobile-nav-link is-admin py-2">
+                                <i class="fa-solid fa-bell"></i> Thông Báo Đánh Giá Thấp
+                            </a>
+                            <hr class="my-1" />
+                        @endif
+
+                        <a href="{{ route('taikhoan.thongtin') }}" class="mobile-nav-link py-2">
+                            <i class="fa-solid fa-user-circle"></i> Thông tin tài khoản
+                        </a>
+                        <a href="{{ route('taikhoan.doimatkhau') }}" class="mobile-nav-link py-2">
+                            <i class="fa-solid fa-key"></i> Đổi mật khẩu
+                        </a>
+                        <a href="{{ route('donhang.index') }}" class="mobile-nav-link py-2">
+                            <i class="fa-solid fa-clipboard-list"></i> Đơn hàng của tôi
+                        </a>
+                        <form action="{{ route('taikhoan.dangxuat') }}" method="POST" class="mt-2">
+                            @csrf
+                            <button type="submit" class="btn btn-outline-danger w-100 py-2 d-flex align-items-center justify-content-center gap-2">
+                                <i class="fa-solid fa-right-from-bracket"></i> Đăng xuất
+                            </button>
+                        </form>
+                    </div>
+                @endguest
+            </div>
+        </div>
+    </aside>
 
     @hasSection('full')
         <main class="full-main">
@@ -282,7 +437,7 @@
         </div>
     </footer>
 
-    <!-- Chatbot Button & Container -->
+    
     <button id="chat-toggle-btn" class="btn btn-primary rounded-circle shadow-lg"
             style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; width: 60px; height: 60px; border: none; font-size: 24px;">
         <i class="fa fa-comments"></i>
@@ -317,20 +472,18 @@
         </div>
     </div>
 
-    <!-- Scripts -->
+    
     <script src="{{ asset('js/jquery.min.js') }}"></script>
     <script src="{{ asset('js/bootstrap.bundle.min.js') }}"></script>
 
     <script>
         $(document).ready(function () {
-            // Setup CSRF token cho AJAX
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
-            // Chatbot toggle
             $("#chat-toggle-btn, #close-chat").click(function () {
                 $("#chat-container").toggle();
                 if ($("#chat-container").is(":visible")) {
@@ -401,7 +554,6 @@
                 if (e.which == 13) sendMessage();
             });
 
-            // Mega menu
             let hoverTimeout;
             let submenuHovered = false;
             let menuHovered = false;
@@ -450,7 +602,6 @@
                 }, HOVER_DELAY);
             });
 
-            // User dropdown
             $('.user-btn').click(function (e) {
                 e.stopPropagation();
                 $(this).siblings('.user-menu').toggleClass('show');
@@ -460,8 +611,56 @@
                 $('.user-menu').removeClass('show');
             });
 
+            const $mobileNavDrawer = $('#mobileNavDrawer');
+            const $mobileNavBackdrop = $('#mobileNavBackdrop');
+            const $mobileToggleBtn = $('#mobileMenuToggle');
+
+            function openMobileNav() {
+                $mobileNavDrawer.addClass('active');
+                $mobileNavBackdrop.addClass('active');
+                $('body').addClass('mobile-nav-open');
+                $mobileToggleBtn.attr('aria-expanded', 'true');
+            }
+
+            function closeMobileNav() {
+                $mobileNavDrawer.removeClass('active');
+                $mobileNavBackdrop.removeClass('active');
+                $('body').removeClass('mobile-nav-open');
+                $mobileToggleBtn.attr('aria-expanded', 'false');
+            }
+
+            $('#mobileMenuToggle').on('click', function (e) {
+                e.preventDefault();
+                openMobileNav();
+            });
+
+            $('#mobileNavClose, #mobileNavBackdrop').on('click', function () {
+                closeMobileNav();
+            });
+
+            $(document).on('keydown', function (e) {
+                if (e.key === 'Escape') {
+                    closeMobileNav();
+                }
+            });
+
+            $(window).on('resize', function () {
+                if ($(window).width() > 991 && $mobileNavDrawer.hasClass('active')) {
+                    closeMobileNav();
+                }
+            });
+
+            $('#mobileNavSubToggle').on('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                $('#mobileNavProductsItem').toggleClass('expanded');
+                const $icon = $(this).find('i');
+                $icon.toggleClass('fa-chevron-down fa-chevron-up');
+            });
+
             $.get('{{ route("giohang.getcartcount") }}').done(function (data) {
                 $('.cart-count').text(data);
+                $('.cart-count-text').text(data);
             });
         });
     </script>

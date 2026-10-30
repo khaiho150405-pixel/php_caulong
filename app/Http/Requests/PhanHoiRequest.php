@@ -4,9 +4,6 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-/**
- * Validation đánh giá sản phẩm (1–5 sao + nội dung).
- */
 class PhanHoiRequest extends FormRequest
 {
     public function authorize(): bool

@@ -21,7 +21,7 @@
         </div>
     </div>
 
-    <!-- Summary cards -->
+    
     <div class="row g-3 mb-4">
         <div class="col-sm-6 col-xl-3">
             <div class="stat-card is-green">
@@ -61,7 +61,7 @@
         </div>
     </div>
 
-    <!-- Charts row -->
+    
     <div class="row g-4 mb-4">
         <div class="col-lg-8">
             <div class="card border shadow-sm p-3">
@@ -78,7 +78,7 @@
         </div>
     </div>
 
-    <!-- Tables row -->
+    
     <div class="row g-4">
         <div class="col-xl-7">
             <div class="card border shadow-sm p-3">
@@ -152,7 +152,6 @@
     Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
     Chart.defaults.color = '#66756e';
 
-    // 1. Chart Doanh thu Tháng
     const ctxThang = document.getElementById('doanhThuThangChart').getContext('2d');
     const thangLabels = @json(collect($doanhThuThang)->pluck('Thang')->map(fn($m) => 'Tháng ' . $m));
     const thangData = @json(collect($doanhThuThang)->pluck('TongDoanhThu'));
@@ -192,7 +191,6 @@
         }
     });
 
-    // 2. Chart Doanh thu Quý
     const ctxQuy = document.getElementById('doanhThuQuyChart').getContext('2d');
     const quyLabels = @json(collect($doanhThuQuy)->map(fn($q) => 'Quý ' . $q->Quy));
     const quyData = @json(collect($doanhThuQuy)->pluck('TongDoanhThu'));
